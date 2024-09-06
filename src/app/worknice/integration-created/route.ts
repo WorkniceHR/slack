@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createZodFetcher } from "zod-fetch";
-import redis from "../../redis";
+import redis from "../../../redis";
 
 const fetchWithZod = createZodFetcher();
 
