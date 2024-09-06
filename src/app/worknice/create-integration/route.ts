@@ -7,6 +7,8 @@ const fetchWithZod = createZodFetcher();
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
   try {
+    console.log("Parsing request…");
+
     const data = z
       .object({
         apiToken: z.string(),
@@ -14,7 +16,11 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
       })
       .parse(await request.json());
 
+    console.log("Saving token…");
+
     await redis.set(`worknice_api_key:${data.integrationId}`, data.apiToken);
+
+    console.log("Initializing integration…");
 
     await fetchWithZod(
       z.object({
@@ -44,6 +50,8 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
       }
     );
 
+    console.log("Done.");
+
     return new NextResponse("ok", {
       status: 200,
     });
@@ -51,7 +59,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     const message = error instanceof Error ? error.message : `${error}`;
 
     return new NextResponse(message, {
-      status: 400,
+      status: 500,
     });
   }
 };
