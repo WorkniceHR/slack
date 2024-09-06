@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createZodFetcher } from "zod-fetch";
 import redis from "../../../redis";
 
 const fetchWithZod = createZodFetcher();
 
-export const POST = async (request: Request): Promise<NextResponse> => {
+export const POST = async (request: NextRequest): Promise<NextResponse> => {
   try {
     const data = z
       .object({
