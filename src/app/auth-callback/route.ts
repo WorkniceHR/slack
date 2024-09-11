@@ -144,7 +144,7 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
     console.log("Done.");
 
     return NextResponse.redirect(
-      `https://app.wornice.com/admin/integrations/${integrationId}`
+      `https://app.worknice.com/admin/apps/integrations/${integrationId}`
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : `${error}`;
