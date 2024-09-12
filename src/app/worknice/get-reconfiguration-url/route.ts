@@ -1,13 +1,31 @@
+import config from "@/config";
+import redis from "@/redis";
+import crypto from "crypto";
+import { withAxiom, type AxiomRequest } from "next-axiom";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
   try {
+    log.info("Parsing request…");
+
+    const data = requestSchema.parse(await request.json());
+
+    log.info("Generating authorization code…");
+
+    const authorizationCode = crypto.randomBytes(16).toString("hex");
+
+    await redis.setIntegrationId(authorizationCode, data.integrationId);
+
+    log.info("Complete.");
 
     return NextResponse.json(
       {
-        reconfigurationUrl: "https://slack.worknice.com/reconfig",
+        reconfigurationUrl: `https://slack.worknice.com/reconfig?${
+          config.sessionCodeParam
+        }=${authorizationCode}`,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : `${error}`;
@@ -18,5 +36,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
   }
 };
 
-
+const requestSchema = z.object({
+  integrationId: z.string(),
+});
 
