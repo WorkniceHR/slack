@@ -31,13 +31,14 @@ export const POST = withAxiom(async (request: AxiomRequest): Promise<NextRespons
   } catch (error) {
     const message = error instanceof Error ? error.message : `${error}`;
 
+    log.error(message);
+
     return new NextResponse(message, {
-      status: 500,
+      status: 400,
     });
   }
-};
+});
 
 const requestSchema = z.object({
   integrationId: z.string(),
 });
-
