@@ -1,10 +1,8 @@
-import config from "../../config";
-import redis from "../../redis";
-import { cookies } from "next/headers";
-
-type PageProps<Params extends string = string, SearchParams extends string = string> = {
-  params: Record<Params, string>;
-  searchParams: Record<SearchParams, string | string[] | undefined>;
+type SlackChannel = {
+  id: string;
+  name: string;
+  is_channel: boolean;
+  // You can add other fields based on the API response if needed
 };
 
 const ReconfigPage = async ({ searchParams }: PageProps) => {
@@ -32,14 +30,14 @@ const ReconfigPage = async ({ searchParams }: PageProps) => {
 
   console.log("Fetching list of Slack channels…");
 
-  const channels = await fetchSlackChannels(accessToken);
+  const channels: SlackChannel[] = await fetchSlackChannels(accessToken);
 
   return (
     <div>
       <h1>Slack Channels</h1>
       {channels.length > 0 ? (
         <ul>
-          {channels.map((channel) => (
+          {channels.map((channel: SlackChannel) => (
             <li key={channel.id}>{channel.name}</li>
           ))}
         </ul>
@@ -66,7 +64,7 @@ const getSessionCode = (
 };
 
 // Fetches channels from the Slack API using the access token
-const fetchSlackChannels = async (accessToken: string) => {
+const fetchSlackChannels = async (accessToken: string): Promise<SlackChannel[]> => {
   const response = await fetch("https://slack.com/api/conversations.list", {
     method: "GET",
     headers: {
