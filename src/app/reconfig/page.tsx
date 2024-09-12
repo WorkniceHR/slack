@@ -1,18 +1,17 @@
 import config from "../../config";
 import redis from "../../redis";
 import { cookies } from "next/headers";
+import { useState } from "react";
 
 type PageProps<Params extends string = string, SearchParams extends string = string> = {
   params: Record<Params, string>;
   searchParams: Record<SearchParams, string | string[] | undefined>;
 };
 
-// Define the type for Slack channels
 type SlackChannel = {
   id: string;
   name: string;
   is_channel: boolean;
-  // You can add more fields based on the Slack API response
 };
 
 const ReconfigPage = async ({ searchParams }: PageProps) => {
@@ -42,15 +41,42 @@ const ReconfigPage = async ({ searchParams }: PageProps) => {
 
   const channels: SlackChannel[] = await fetchSlackChannels(accessToken);
 
+  // Handle the form submission
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const selectedChannel = event.currentTarget.elements.namedItem("channel") as HTMLSelectElement;
+    const selectedChannelId = selectedChannel.value;
+
+    if (!selectedChannelId) {
+      throw Error("No channel selected.");
+    }
+
+    console.log(`Saving selected channel to Redis: ${selectedChannelId}`);
+
+    // Save the selected channel to Redis with the desired key
+    await redis.set(
+      `slack_channel:person_activated:${integrationId}`,
+      selectedChannelId
+    );
+
+    console.log("Channel saved successfully.");
+  };
+
   return (
     <div>
-      <h1>Slack Channels</h1>
+      <h1>Slack Alerts</h1>
       {channels.length > 0 ? (
-        <ul>
-          {channels.map((channel: SlackChannel) => (
-            <li key={channel.id}>{channel.name}</li>
-          ))}
-        </ul>
+        <form onSubmit={handleSubmit}>
+          <label htmlFor="channel">New Person Activated</label>
+          <select id="channel" name="channel">
+            {channels.map((channel: SlackChannel) => (
+              <option key={channel.id} value={channel.id}>
+                {channel.name}
+              </option>
+            ))}
+          </select>
+          <button type="submit">Save</button>
+        </form>
       ) : (
         <p>No channels found.</p>
       )}
@@ -73,7 +99,6 @@ const getSessionCode = (
   throw Error("Unable to retrieve session code.");
 };
 
-// Fetches channels from the Slack API using the access token
 const fetchSlackChannels = async (accessToken: string): Promise<SlackChannel[]> => {
   const response = await fetch("https://slack.com/api/conversations.list", {
     method: "GET",
