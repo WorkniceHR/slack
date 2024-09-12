@@ -11,5 +11,6 @@ const redis = {
     client.set(`session_code_integration_id:${sessionCode}`, value, {
       ex: config.sessionCodeExpiry,
     }),
+};
 
 export default redis;
