@@ -1,8 +1,18 @@
+import config from "../../config";
+import redis from "../../redis";
+import { cookies } from "next/headers";
+
+type PageProps<Params extends string = string, SearchParams extends string = string> = {
+  params: Record<Params, string>;
+  searchParams: Record<SearchParams, string | string[] | undefined>;
+};
+
+// Define the type for Slack channels
 type SlackChannel = {
   id: string;
   name: string;
   is_channel: boolean;
-  // You can add other fields based on the API response if needed
+  // You can add more fields based on the Slack API response
 };
 
 const ReconfigPage = async ({ searchParams }: PageProps) => {
