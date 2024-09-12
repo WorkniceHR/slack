@@ -1,24 +1,23 @@
 import config from "@/config";
 import redis from "@/redis";
 import crypto from "crypto";
-import { withAxiom, type AxiomRequest } from "next-axiom";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-export const POST = withAxiom(async (request: AxiomRequest): Promise<NextResponse> => {
-  const { log } = request;
+export const POST = async (request: NextRequest): Promise<NextResponse> => {
+  //const { log } = request;
   try {
-    log.info("Parsing request…");
+    // log.info("Parsing request…");
 
     const data = requestSchema.parse(await request.json());
 
-    log.info("Generating authorization code…");
+    //log.info("Generating authorization code…");
 
     const authorizationCode = crypto.randomBytes(16).toString("hex");
 
     await redis.setIntegrationId(authorizationCode, data.integrationId);
 
-    log.info("Complete.");
+    //log.info("Complete.");
 
     return NextResponse.json(
       {
@@ -31,7 +30,7 @@ export const POST = withAxiom(async (request: AxiomRequest): Promise<NextRespons
   } catch (error) {
     const message = error instanceof Error ? error.message : `${error}`;
 
-    log.error(message);
+    //log.error(message);
 
     return new NextResponse(message, {
       status: 400,
