@@ -1,8 +1,8 @@
-import config from "@/config";
-import redis from "@/redis";
 import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import config from "../../../config";
+import redis from "../../../redis";
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
   try {
