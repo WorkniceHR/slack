@@ -13,7 +13,6 @@ type SlackChannel = {
   id: string;
   name: string;
   is_channel: boolean;
-  // You can add more fields based on the Slack API response
 };
 
 const ReconfigPage = async ({ searchParams }: PageProps) => {
