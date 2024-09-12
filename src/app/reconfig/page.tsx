@@ -1,5 +1,5 @@
-import config from "@/config";
-import redis from "../../../redis";
+import config from "../../config";
+import redis from "../../redis";
 import { cookies } from "next/headers";
 
 type PageProps<Params extends string = string, SearchParams extends string = string> = {
