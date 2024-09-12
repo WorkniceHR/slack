@@ -1,7 +1,6 @@
 import config from "@/config";
 import redis from "@/redis";
 import crypto from "crypto";
-import { withAxiom, type AxiomRequest } from "next-axiom";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
