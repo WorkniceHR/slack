@@ -1,10 +1,11 @@
 import config from "@/config";
 import redis from "@/redis";
 import crypto from "crypto";
-import { NextRequest, NextResponse } from "next/server";
+import { withAxiom, type AxiomRequest } from "next-axiom";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 
-export const POST = async (request: NextRequest): Promise<NextResponse> => {
+export const POST = withAxiom(async (request: AxiomRequest): Promise<NextResponse> => {
   const { log } = request;
   try {
     log.info("Parsing request…");
