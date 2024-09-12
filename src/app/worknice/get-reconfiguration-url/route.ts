@@ -24,7 +24,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     const message = error instanceof Error ? error.message : `${error}`;
 
     return new NextResponse(message, {
-      status: 400,
+      status: 500,
     });
   }
 };
