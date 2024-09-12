@@ -1,38 +1,58 @@
-import config from "@/config";
-import redis from "@/services/redis";
-import { Logger } from "next-axiom";
+import config from "../../config";
+import redis from "../../redis";
 import { cookies } from "next/headers";
-import ConfigForm from "./ConfigForm"; // Import the Client Component
+import ConfigForm from "./ConfigForm"; // Importing the form component
 
 type PageProps<Params extends string = string, SearchParams extends string = string> = {
   params: Record<Params, string>;
   searchParams: Record<SearchParams, string | string[] | undefined>;
 };
 
+// Define the type for Slack channels
+type SlackChannel = {
+  id: string;
+  name: string;
+  is_channel: boolean;
+  // You can add more fields based on the Slack API response
+};
+
 const ReconfigPage = async ({ searchParams }: PageProps) => {
   const cookieStore = cookies();
-  const log = new Logger();
 
-  log.info("Retrieving session code…");
+  console.log("Retrieving session code…");
 
   const sessionCode = getSessionCode(cookieStore, searchParams);
 
-  log.info("Retrieving integration ID…");
+  console.log("Retrieving integration ID…");
 
-  const integrationId = await redis.getIntegrationId(sessionCode);
+  const integrationId = await redis.get<string>(`session_code_integration_id:${sessionCode}`);
 
   if (integrationId === null) {
     throw Error("Unable to retrieve integration ID.");
   }
 
-  log.info("Retrieving config info…");
+  console.log("Retrieving access token…");
 
-  const automaticMatching = await redis.getAutomaticMatching(integrationId);
+  const accessToken = await redis.get<string>(`slack_access_token:${integrationId}`);
 
-  await log.flush();
+  if (accessToken === null) {
+    throw Error("Unable to retrieve access token.");
+  }
 
-  // Render the client-side form with the fetched data
-  return <ConfigForm automaticMatching={automaticMatching} sessionCode={sessionCode} />;
+  console.log("Fetching list of Slack channels…");
+
+  const channels: SlackChannel[] = await fetchSlackChannels(accessToken);
+
+  return (
+    <div>
+      <h1>Slack Channels</h1>
+      {channels.length > 0 ? (
+        <ConfigForm channels={channels} integrationId={integrationId} />
+      ) : (
+        <p>No channels found.</p>
+      )}
+    </div>
+  );
 };
 
 const getSessionCode = (
@@ -48,6 +68,25 @@ const getSessionCode = (
   if (sessionCodeCookie !== undefined) return sessionCodeCookie.value;
 
   throw Error("Unable to retrieve session code.");
+};
+
+// Fetches channels from the Slack API using the access token
+const fetchSlackChannels = async (accessToken: string): Promise<SlackChannel[]> => {
+  const response = await fetch("https://slack.com/api/conversations.list", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  const data = await response.json();
+
+  if (!data.ok) {
+    throw new Error("Failed to fetch Slack channels.");
+  }
+
+  return data.channels || [];
 };
 
 export default ReconfigPage;
