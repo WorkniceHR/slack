@@ -22,9 +22,30 @@ const ReconfigPage = async ({ searchParams }: PageProps) => {
     throw Error("Unable to retrieve integration ID.");
   }
 
+  console.log("Retrieving access token…");
+
+  const accessToken = await redis.get<string>(`slack_access_token:${integrationId}`);
+
+  if (accessToken === null) {
+    throw Error("Unable to retrieve access token.");
+  }
+
+  console.log("Fetching list of Slack channels…");
+
+  const channels = await fetchSlackChannels(accessToken);
+
   return (
     <div>
-      <p>Nothing to configure.</p>
+      <h1>Slack Channels</h1>
+      {channels.length > 0 ? (
+        <ul>
+          {channels.map((channel) => (
+            <li key={channel.id}>{channel.name}</li>
+          ))}
+        </ul>
+      ) : (
+        <p>No channels found.</p>
+      )}
     </div>
   );
 };
@@ -42,6 +63,25 @@ const getSessionCode = (
   if (sessionCodeCookie !== undefined) return sessionCodeCookie.value;
 
   throw Error("Unable to retrieve session code.");
+};
+
+// Fetches channels from the Slack API using the access token
+const fetchSlackChannels = async (accessToken: string) => {
+  const response = await fetch("https://slack.com/api/conversations.list", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  const data = await response.json();
+
+  if (!data.ok) {
+    throw new Error("Failed to fetch Slack channels.");
+  }
+
+  return data.channels || [];
 };
 
 export default ReconfigPage;
