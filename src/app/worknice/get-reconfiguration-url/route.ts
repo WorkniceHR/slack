@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
+  const { log } = request;
   try {
     log.info("Parsing request…");
 
