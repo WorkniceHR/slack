@@ -7,8 +7,9 @@ const client = new Redis({
 });
 
 const redis = {
-  getIntegrationId: (sessionCode: string) =>
-    client.get<string>(`session_code_integration_id:${sessionCode}`),
-};
+  setIntegrationId: (sessionCode: string, value: string) =>
+    client.set(`session_code_integration_id:${sessionCode}`, value, {
+      ex: config.sessionCodeExpiry,
+    }),
 
 export default redis;
