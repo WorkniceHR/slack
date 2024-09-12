@@ -5,7 +5,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
 
     return NextResponse.json(
       {
-        authorizationUrl: "https://slack.worknice.com/reconfig",
+        reconfigurationUrl: "https://slack.worknice.com/reconfig",
       },
       { status: 200 }
     );
