@@ -10,7 +10,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
 
     const authorizationCode = crypto.randomBytes(16).toString("hex");
 
-    await redis.setIntegrationId(authorizationCode, data.integrationId);
+    await redis.set(`session_code_integration_id:${authorizationCode}`, data.integrationId);
 
     return NextResponse.json(
       {
