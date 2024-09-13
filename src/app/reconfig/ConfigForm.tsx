@@ -1,6 +1,6 @@
 "use client"; // Ensure this is a client-side component
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // Define Slack Channel type
 type SlackChannel = {
@@ -12,11 +12,22 @@ type Props = {
   channels: SlackChannel[];
   onSave: (integrationId: string, selectedChannel: string) => Promise<{ success: boolean; message: string }>;
   integrationId: string;
+  savedChannel: string; // Add a new prop for the saved channel ID
 };
 
-const ConfigForm = ({ channels, integrationId, onSave }: Props) => {
+const ConfigForm = ({ channels, integrationId, onSave, savedChannel }: Props) => {
   const [selectedChannel, setSelectedChannel] = useState("");
   const [status, setStatus] = useState<string>("");
+
+  // Find the saved channel name based on the savedChannel ID
+  const savedChannelName = channels.find(channel => channel.id === savedChannel)?.name;
+
+  // Automatically select the saved channel if it exists
+  useEffect(() => {
+    if (savedChannel) {
+      setSelectedChannel(savedChannel);
+    }
+  }, [savedChannel]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -39,6 +50,9 @@ const ConfigForm = ({ channels, integrationId, onSave }: Props) => {
 
   return (
     <form onSubmit={handleSubmit}>
+      {savedChannelName && (
+        <p>Currently selected channel: <strong>{savedChannelName}</strong></p>
+      )}
       <label htmlFor="channel">New Person Activated</label>
       <select
         id="channel"
