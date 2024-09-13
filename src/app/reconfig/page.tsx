@@ -42,6 +42,10 @@ const ReconfigPage = async ({ searchParams }: PageProps) => {
 
   const channels: SlackChannel[] = await fetchSlackChannels(accessToken);
 
+  console.log("Fetching saved channel…");
+
+  const savedChannel = await redis.get<string>(`slack_channel:person_activated:${integrationId}`);
+
   // Server-side function to save the selected channel to Redis
   async function onSave(integrationId: string, selectedChannel: string) {
     "use server"; // Mark this as a server-side action
@@ -66,6 +70,7 @@ const ReconfigPage = async ({ searchParams }: PageProps) => {
         <ConfigForm
           channels={channels}
           integrationId={integrationId}
+          savedChannel={savedChannel || ""} // Pass the saved channel
           onSave={onSave} // Pass the correct function, which is `onSave`
         />
       ) : (
