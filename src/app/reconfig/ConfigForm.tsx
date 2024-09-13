@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { saveSelectedChannel } from "./actions"; // Import the action
+import { saveSelectedChannel } from "./actions"; // Import server action
 
 type SlackChannel = {
   id: string;
@@ -15,8 +15,9 @@ type Props = {
 
 const ConfigForm = ({ channels, integrationId }: Props) => {
   const [selectedChannel, setSelectedChannel] = useState("");
-  const [status, setStatus] = useState<string>(""); // Ensure state expects a string
+  const [status, setStatus] = useState<string>("");
 
+  // Server action (calls saveSelectedChannel from the server-side)
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -26,11 +27,14 @@ const ConfigForm = ({ channels, integrationId }: Props) => {
     }
 
     try {
-      // Call the saveSelectedChannel action on form submission
+      // Call server action directly
       const result = await saveSelectedChannel(integrationId, selectedChannel);
 
-      // Ensure status is set to a string even if result.message or result.error is undefined
-      setStatus(result.success ? result.message ?? "Channel saved successfully!" : result.error ?? "Failed to save channel.");
+      if (result.success) {
+        setStatus(result.message || "Channel saved successfully!");
+      } else {
+        setStatus(result.error || "Failed to save channel.");
+      }
     } catch (error) {
       console.error("Failed to save channel:", error);
       setStatus("Failed to save channel.");
