@@ -15,7 +15,7 @@ type Props = {
 
 const ConfigForm = ({ channels, integrationId }: Props) => {
   const [selectedChannel, setSelectedChannel] = useState("");
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState<string>(""); // Ensure state expects a string
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -29,11 +29,8 @@ const ConfigForm = ({ channels, integrationId }: Props) => {
       // Call the saveSelectedChannel action on form submission
       const result = await saveSelectedChannel(integrationId, selectedChannel);
 
-      if (result.success) {
-        setStatus(result.message);
-      } else {
-        setStatus(result.error);
-      }
+      // Ensure status is set to a string even if result.message or result.error is undefined
+      setStatus(result.success ? result.message ?? "Channel saved successfully!" : result.error ?? "Failed to save channel.");
     } catch (error) {
       console.error("Failed to save channel:", error);
       setStatus("Failed to save channel.");
