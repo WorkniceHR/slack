@@ -1,6 +1,7 @@
-import redis from "../../redis"; 
+import redis from "../../redis"; // Your existing Redis configuration
 
-export const saveSelectedChannel = async (integrationId: string, selectedChannel: string) => {
+// Server action to save the selected Slack channel
+export async function saveSelectedChannel(integrationId: string, selectedChannel: string) {
   if (!integrationId || !selectedChannel) {
     throw new Error("Missing integrationId or selectedChannel");
   }
@@ -12,4 +13,4 @@ export const saveSelectedChannel = async (integrationId: string, selectedChannel
     console.error("Error saving channel to Redis:", error);
     return { success: false, error: "Failed to save channel" };
   }
-};
+}
