@@ -66,7 +66,7 @@ const ReconfigPage = async ({ searchParams }: PageProps) => {
         <ConfigForm
           channels={channels}
           integrationId={integrationId}
-          saveSelectedChannel={saveSelectedChannel} // Pass server-side action as prop
+          onSave={saveSelectedChannel} // Match the expected prop name in ConfigForm
         />
       ) : (
         <p>No channels found.</p>
