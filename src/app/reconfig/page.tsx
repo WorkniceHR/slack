@@ -43,11 +43,11 @@ const ReconfigPage = async ({ searchParams }: PageProps) => {
   const channels: SlackChannel[] = await fetchSlackChannels(accessToken);
 
   // Server-side function to save the selected channel to Redis
-  async function saveSelectedChannel(integrationId: string, selectedChannel: string) {
+  async function onSave(integrationId: string, selectedChannel: string) {
     "use server"; // Mark this as a server-side action
 
     if (!integrationId || !selectedChannel) {
-      throw new Error("Missing integrationId or selectedChannel");
+      return { success: false, message: "Missing integrationId or selectedChannel" };
     }
 
     try {
@@ -55,7 +55,7 @@ const ReconfigPage = async ({ searchParams }: PageProps) => {
       return { success: true, message: "Channel saved successfully" };
     } catch (error) {
       console.error("Error saving channel to Redis:", error);
-      return { success: false, error: "Failed to save channel" };
+      return { success: false, message: "Failed to save channel" }; // Return a consistent message field
     }
   }
 
