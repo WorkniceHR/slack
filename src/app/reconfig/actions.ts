@@ -1,7 +1,9 @@
-import redis from "../../redis"; // Your existing Redis configuration
+import redis from "../../redis"; // Import Redis
 
-// Server action to save the selected Slack channel
-export async function saveSelectedChannel(integrationId: string, selectedChannel: string) {
+// Ensure this function runs only on the server
+export const saveSelectedChannel = async (integrationId: string, selectedChannel: string) => {
+  "use server"; // Explicitly tell Next.js this is a server action
+
   if (!integrationId || !selectedChannel) {
     throw new Error("Missing integrationId or selectedChannel");
   }
@@ -13,4 +15,4 @@ export async function saveSelectedChannel(integrationId: string, selectedChannel
     console.error("Error saving channel to Redis:", error);
     return { success: false, error: "Failed to save channel" };
   }
-}
+};
