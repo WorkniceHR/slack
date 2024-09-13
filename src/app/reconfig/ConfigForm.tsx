@@ -19,6 +19,7 @@ const ConfigForm = ({
   channels,
   integrationId,
   personActivatedChannel,
+  personBirthdayChannel,
 }: Props) => {
   return (
 <form action={saveSelectedChannel}>
