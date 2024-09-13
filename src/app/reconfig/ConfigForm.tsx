@@ -20,23 +20,40 @@ const ConfigForm = ({
   personActivatedChannel,
 }: Props) => {
   return (
-    <form action={saveSelectedChannel}>
-      <input type="hidden" name="integrationId" value={integrationId} />
-      <label htmlFor="personActivatedChannel">New Person Activated</label>
-      <select
-        id="personActivatedChannel"
-        name="personActivatedChannel"
-        defaultValue={personActivatedChannel ?? ""}
-      >
-        <option value="">None (do not send an alert)</option>
-        {channels.map((channel) => (
-          <option key={channel.id} value={channel.id}>
-            {channel.name}
-          </option>
-        ))}
-      </select>
-      <button type="submit">Save</button>
-    </form>
+<form action={saveSelectedChannel}>
+  <input type="hidden" name="integrationId" value={integrationId} />
+  
+  <label htmlFor="personActivatedChannel">New Person Activated</label>
+  <select
+    id="personActivatedChannel"
+    name="personActivatedChannel"
+    defaultValue={personActivatedChannel ?? ""}
+  >
+    <option value="">None (do not send an alert)</option>
+    {channels.map((channel) => (
+      <option key={channel.id} value={channel.id}>
+        {channel.name}
+      </option>
+    ))}
+  </select>
+  
+  <label htmlFor="personBirthdayChannel">Person Birthday Channel</label>
+  <select
+    id="personBirthdayChannel"
+    name="personBirthdayChannel"
+    defaultValue={personBirthdayChannel ?? ""}
+  >
+    <option value="">None (do not send an alert)</option>
+    {channels.map((channel) => (
+      <option key={channel.id} value={channel.id}>
+        {channel.name}
+      </option>
+    ))}
+  </select>
+  
+  <button type="submit">Save</button>
+</form>
+
   );
 };
 
