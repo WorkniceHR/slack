@@ -49,10 +49,16 @@ const ReconfigPage = async ({ searchParams }: PageProps) => {
 
   const channels: SlackChannel[] = await fetchSlackChannels(accessToken);
 
-  console.log("Fetching saved channel…");
+  console.log("Fetching saved person activated channel…");
 
   const savedChannel = await redis.get<string>(
     `slack_channel:person_activated:${integrationId}`
+  );
+
+  console.log("Fetching saved person birthday channel…");
+
+  const savedBirthdayChannel = await redis.get<string>(
+    `slack_channel:person_birthday:${integrationId}`
   );
 
   return (
@@ -62,7 +68,8 @@ const ReconfigPage = async ({ searchParams }: PageProps) => {
         <ConfigForm
           channels={channels}
           integrationId={integrationId}
-          personActivatedChannel={savedChannel} // Pass the saved channel
+          personActivatedChannel={savedChannel}
+          personBirthdayChannel={savedBirthdayChannel} // Pass the birthday channel
         />
       ) : (
         <p>No channels found.</p>
