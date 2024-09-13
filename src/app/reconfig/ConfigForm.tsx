@@ -12,6 +12,7 @@ type Props = {
   channels: SlackChannel[];
   integrationId: string;
   personActivatedChannel: string | null;
+  personBirthdayChannel: string | null;
 };
 
 const ConfigForm = ({
