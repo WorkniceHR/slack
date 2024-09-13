@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import redis from "../../redis"; // Assuming this is the correct path
+import { saveSelectedChannel } from "./actions"; // Import the action
 
 type SlackChannel = {
   id: string;
@@ -15,6 +15,7 @@ type Props = {
 
 const ConfigForm = ({ channels, integrationId }: Props) => {
   const [selectedChannel, setSelectedChannel] = useState("");
+  const [status, setStatus] = useState("");
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -24,17 +25,18 @@ const ConfigForm = ({ channels, integrationId }: Props) => {
       return;
     }
 
-    console.log(`Saving selected channel to Redis: ${selectedChannel}`);
-
     try {
-      // Save the selected channel to Redis with the desired key format
-      await redis.set(`slack_channel:person_activated:${integrationId}`, selectedChannel);
+      // Call the saveSelectedChannel action on form submission
+      const result = await saveSelectedChannel(integrationId, selectedChannel);
 
-      console.log("Channel saved successfully.");
-      alert("Channel saved successfully!");
+      if (result.success) {
+        setStatus(result.message);
+      } else {
+        setStatus(result.error);
+      }
     } catch (error) {
-      console.error("Failed to save channel to Redis.", error);
-      alert("Failed to save channel.");
+      console.error("Failed to save channel:", error);
+      setStatus("Failed to save channel.");
     }
   };
 
@@ -55,6 +57,7 @@ const ConfigForm = ({ channels, integrationId }: Props) => {
         ))}
       </select>
       <button type="submit">Save</button>
+      {status && <p>{status}</p>}
     </form>
   );
 };
