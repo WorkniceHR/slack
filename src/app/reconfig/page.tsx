@@ -1,7 +1,7 @@
 import config from "../../config";
 import redis from "../../redis";
 import { cookies } from "next/headers";
-import ConfigForm from "./ConfigForm"; // Importing the form component
+import ConfigForm from "./ConfigForm"; // Import the form component
 
 type PageProps<Params extends string = string, SearchParams extends string = string> = {
   params: Record<Params, string>;
@@ -42,11 +42,32 @@ const ReconfigPage = async ({ searchParams }: PageProps) => {
 
   const channels: SlackChannel[] = await fetchSlackChannels(accessToken);
 
+  // Server-side function to save the selected channel to Redis
+  async function saveSelectedChannel(integrationId: string, selectedChannel: string) {
+    "use server"; // Mark this as a server-side action
+
+    if (!integrationId || !selectedChannel) {
+      throw new Error("Missing integrationId or selectedChannel");
+    }
+
+    try {
+      await redis.set(`slack_channel:person_activated:${integrationId}`, selectedChannel);
+      return { success: true, message: "Channel saved successfully" };
+    } catch (error) {
+      console.error("Error saving channel to Redis:", error);
+      return { success: false, error: "Failed to save channel" };
+    }
+  }
+
   return (
     <div>
       <h1>Slack Channels</h1>
       {channels.length > 0 ? (
-        <ConfigForm channels={channels} integrationId={integrationId} />
+        <ConfigForm
+          channels={channels}
+          integrationId={integrationId}
+          saveSelectedChannel={saveSelectedChannel} // Pass server-side action as prop
+        />
       ) : (
         <p>No channels found.</p>
       )}
