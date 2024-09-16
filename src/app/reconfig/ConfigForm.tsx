@@ -12,14 +12,14 @@ type Props = {
   channels: SlackChannel[];
   integrationId: string;
   personActivatedChannel: string | null;
-  personBirthdayChannel: string | null;
+  calendarUpdateChannel: string | null;
 };
 
 const ConfigForm = ({
   channels,
   integrationId,
   personActivatedChannel,
-  personBirthdayChannel,
+  calendarUpdateChannel,
 }: Props) => {
   return (
 <form action={saveSelectedChannel}>
@@ -38,12 +38,12 @@ const ConfigForm = ({
       </option>
     ))}
   </select>
-  
-  <label htmlFor="personBirthdayChannel">Person Birthday Channel</label>
+  <div></div>
+  <label htmlFor="calendarUpdateChannel">Calendar Update Channel</label>
   <select
-    id="personBirthdayChannel"
-    name="personBirthdayChannel"
-    defaultValue={personBirthdayChannel ?? ""}
+    id="calendarUpdateChannel"
+    name="calendarUpdateChannel"
+    defaultValue={calendarUpdateChannel ?? ""}
   >
     <option value="">None (do not send an alert)</option>
     {channels.map((channel) => (
@@ -52,7 +52,7 @@ const ConfigForm = ({
       </option>
     ))}
   </select>
-  
+  <div></div>
   <button type="submit">Save</button>
 </form>
 

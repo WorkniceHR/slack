@@ -6,16 +6,16 @@ import redis from "../../redis";
 export const saveSelectedChannel = async (formData: FormData) => {
   const integrationId = formData.get("integrationId");
   const personActivatedChannel = formData.get("personActivatedChannel");
-  const personBirthdayChannel = formData.get("personBirthdayChannel"); // New addition
+  const calendarUpdateChannel = formData.get("calendarUpdateChannel");
 
   await redis.set(
     `slack_channel:person_activated:${integrationId}`,
     personActivatedChannel
   );
 
-  await redis.set( // New addition to handle the birthday channel
-    `slack_channel:person_birthday:${integrationId}`,
-    personBirthdayChannel
+  await redis.set(
+    `slack_channel:calendar_update:${integrationId}`,
+    calendarUpdateChannel
   );
 
   revalidatePath("/reconfig");
