@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import config from "../../config";
-import redis from "../../redis";
+import config from "../../../config";
+import redis from "../../../redis";
 
 export const GET = async (request: NextRequest): Promise<NextResponse> => {
   const ids = await getWorkniceIntegrationIds();
