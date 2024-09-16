@@ -24,7 +24,7 @@ interface CustomerData {
 
 async function getWorkniceIntegrationIds(): Promise<string[]> {
   const keys = await redis.keys("worknice_api_key:*");
-  return keys.map(key => key.split(":")[1]);
+  return keys.map(key => key.split(":")[1]).filter((id): id is string => id !== undefined);
 }
 
 /*
