@@ -1,7 +1,5 @@
 "use client"; // Ensure this is a client-side component (runs on both the server and client)
 
-// test
-
 import { saveSelectedChannel } from "./actions";
 
 // Define Slack Channel type
