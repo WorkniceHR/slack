@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import config from "../../config";
+import redis from "../../redis";
 
 export const GET = async (request: NextRequest): Promise<NextResponse> => {
+  const ids = await getWorkniceIntegrationIds();
   // Returning some data for testing purposes only.
   return NextResponse.json({
     test: "hello world",
+    ids: ids,
   });
 };
 
 /*
-
-import redis from "../../redis";
 import { z } from 'zod';
 
 interface CustomerData {
@@ -18,12 +20,14 @@ interface CustomerData {
   slackToken: string | null;
   workniceApiKey: string | null;
 }
+*/
 
 async function getWorkniceIntegrationIds(): Promise<string[]> {
   const keys = await redis.keys("worknice_api_key:*");
   return keys.map(key => key.split(":")[1]);
 }
 
+/*
 async function getCustomerData(): Promise<CustomerData[]> {
   const integrationIds = await getWorkniceIntegrationIds();
   const dataPromises = integrationIds.map(async (id) => {
