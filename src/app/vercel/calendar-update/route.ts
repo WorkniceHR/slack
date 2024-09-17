@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import config from "../../../config";
 import redis from "../../../redis";
-//import { z } from 'zod';
 
 export const GET = async (request: NextRequest): Promise<NextResponse> => {
   const ids = await getWorkniceIntegrationIds();
 
   // We're only doing this so we can add the values to the response. This isn't
-  // actaully needed to post a message to the Slack channel.
+  // actually needed to post a message to the Slack channel.
   const channels: Array<string> = [];
 
   // Looping through all the ID's like this is probably going to be an easier
@@ -16,8 +15,10 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
     const channel = await redis.get(`slack_channel:calendar_update:${id}`);
 
     // We're only doing this so we can add the values to the response. This isn't
-    // actaully needed to post a message to the Slack channel.
-    channels.push(channel);
+    // actually needed to post a message to the Slack channel.
+    if (typeof channel === 'string') {
+      channels.push(channel);
+    }
   }
 
   // Returning some data for testing purposes only.
@@ -28,13 +29,14 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
   });
 };
 
-
 async function getWorkniceIntegrationIds(): Promise<string[]> {
   const keys = await redis.keys("worknice_api_key:*");
   return keys.map(key => key.split(":")[1]).filter((id): id is string => id !== undefined);
 }
 
 /*
+import { z } from 'zod';
+
 interface CustomerData {
   integrationId: string;
   channel: string | null;
