@@ -5,23 +5,24 @@ import redis from "../../../redis";
 export const GET = async (request: NextRequest): Promise<NextResponse> => {
   const ids = await getWorkniceIntegrationIds();
 
-  // We're only doing this so we can add the values to the response. This isn't
-  // actually needed to post a message to the Slack channel.
   const channels: Array<string> = [];
 
-  // Looping through all the ID's like this is probably going to be an easier
-  // pattern to implement than the `dataPromises` you've currently got.
+  // Looping through all the integrations
   for (const id of ids) {
     const channel = await redis.get(`slack_channel:calendar_update:${id}`);
 
-    // We're only doing this so we can add the values to the response. This isn't
-    // actually needed to post a message to the Slack channel.
-    if (typeof channel === 'string') {
-      channels.push(channel);
+    if (typeof channel !== 'string') {
+      console.log(`No Slack channel found for integration ${id}. Skipping.`);
+      continue;
     }
+
+    channels.push(channel);
+    console.log(`Processing Slack channel for integration ${id}: ${channel}`);
+
+    // Add your logic here to work with the channel
+    // For example, sending messages or retrieving data
   }
 
-  // Returning some data for testing purposes only.
   return NextResponse.json({
     test: "hello world",
     ids: ids,
