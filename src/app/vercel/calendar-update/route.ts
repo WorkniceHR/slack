@@ -1,26 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
 import config from "../../../config";
 import redis from "../../../redis";
+//import { z } from 'zod';
 
 export const GET = async (request: NextRequest): Promise<NextResponse> => {
   const ids = await getWorkniceIntegrationIds();
+
+  // We're only doing this so we can add the values to the response. This isn't
+  // actaully needed to post a message to the Slack channel.
+  const channels: Array<string> = [];
+
+  // Looping through all the ID's like this is probably going to be an easier
+  // pattern to implement than the `dataPromises` you've currently got.
+  for (const id of ids) {
+    const channel = await redis.get(`slack_channel:calendar_update:${id}`);
+
+    // We're only doing this so we can add the values to the response. This isn't
+    // actaully needed to post a message to the Slack channel.
+    channels.push(channel);
+  }
+
   // Returning some data for testing purposes only.
   return NextResponse.json({
     test: "hello world",
     ids: ids,
+    channels: channels,
   });
 };
 
-/*
-import { z } from 'zod';
-
-interface CustomerData {
-  integrationId: string;
-  channel: string | null;
-  slackToken: string | null;
-  workniceApiKey: string | null;
-}
-*/
 
 async function getWorkniceIntegrationIds(): Promise<string[]> {
   const keys = await redis.keys("worknice_api_key:*");
@@ -28,6 +35,13 @@ async function getWorkniceIntegrationIds(): Promise<string[]> {
 }
 
 /*
+interface CustomerData {
+  integrationId: string;
+  channel: string | null;
+  slackToken: string | null;
+  workniceApiKey: string | null;
+}
+
 async function getCustomerData(): Promise<CustomerData[]> {
   const integrationIds = await getWorkniceIntegrationIds();
   const dataPromises = integrationIds.map(async (id) => {
