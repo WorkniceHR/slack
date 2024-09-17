@@ -6,20 +6,26 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
   const ids = await getWorkniceIntegrationIds();
 
   const channels: Array<string> = [];
+  const tokens: Array<string> = [];
 
-  // Looping through all the integrations
   for (const id of ids) {
     const channel = await redis.get(`slack_channel:calendar_update:${id}`);
-
     if (typeof channel !== 'string') {
       console.log(`No Slack channel found for integration ${id}. Skipping.`);
       continue;
     }
 
-    channels.push(channel);
-    console.log(`Processing Slack channel for integration ${id}: ${channel}`);
+    const slackToken = await redis.get(`slack_access_token:${id}`);
+    if (typeof slackToken !== 'string') {
+      console.log(`No Slack token found for integration ${id}. Skipping.`);
+      continue;
+    }
 
-    // Add your logic here to work with the channel
+    channels.push(channel);
+    tokens.push(slackToken);
+    console.log(`Processing integration ${id}: Channel - ${channel}, Token - ${slackToken}`);
+
+    // Add your logic here to work with the channel and token
     // For example, sending messages or retrieving data
   }
 
@@ -27,6 +33,7 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
     test: "hello world",
     ids: ids,
     channels: channels,
+    tokens: tokens,
   });
 };
 
