@@ -125,10 +125,11 @@ function formatEventMessage(events: CalendarEvent[]): string {
   const eventsByType: { [key: string]: string[] } = {};
 
   events.forEach(event => {
-    if (!eventsByType[event.eventType]) {
-      eventsByType[event.eventType] = [];
+    const eventType = event.eventType || 'Other'; // Fallback to 'Other' if eventType is undefined
+    if (!eventsByType[eventType]) {
+      eventsByType[eventType] = [];
     }
-    eventsByType[event.eventType].push(event.owner.displayName);
+    eventsByType[eventType].push(event.owner.displayName);
   });
 
   let message = "*Here's what's happening today:*\n\n";
