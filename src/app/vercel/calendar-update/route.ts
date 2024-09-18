@@ -138,7 +138,7 @@ function formatEventMessage(events: CalendarEvent[]): string {
     let emoji = '';
     let heading = '';
     switch (eventType) {
-      case 'LeaveRequests':
+      case 'LeaveRequest':
         emoji = ':desert_island:';
         heading = 'Away';
         break;
@@ -146,7 +146,7 @@ function formatEventMessage(events: CalendarEvent[]): string {
         emoji = ':birthday:';
         heading = 'Birthdays';
         break;
-      case 'AnniversaryEvents':
+      case 'AnniversaryEvent':
         emoji = ':tada:';
         heading = 'Anniversaries';
         break;
