@@ -98,6 +98,35 @@ async function sendSlackMessage(token: string, channel: string, message: string)
   }
 }
 
+function filterTodayEvents(events: any[]): any[] {
+  const sydneyTime = new Date().toLocaleString("en-US", { timeZone: "Australia/Sydney" });
+  const today = new Date(sydneyTime).toISOString().split('T')[0];
+
+  return events.filter(event => {
+    return event.startDate <= today && today <= event.endDate;
+  });
+}
+
+function formatEventMessage(events: any[]): string {
+  if (events.length === 0) {
+    return "No events today.";
+  }
+
+  return events.map(event => {
+    let message = `${event.eventType}: ${event.owner.displayName}`;
+    if (event.eventType === "AnniversaryEvent" && event.ordinalNumber) {
+      message += ` (${event.ordinalNumber}${getOrdinalSuffix(event.ordinalNumber)} anniversary)`;
+    }
+    return message;
+  }).join("\n");
+}
+
+function getOrdinalSuffix(n: number): string {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return s[(v - 20) % 10] || s[v] || s[0];
+}
+
 export const GET = async (request: NextRequest): Promise<NextResponse> => {
   const ids = await getWorkniceIntegrationIds();
 
@@ -131,11 +160,12 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
 
     try {
       const events = await getWorkniceCalendarEvents(workniceToken);
-      calendarEvents.push(events);
+      const todayEvents = filterTodayEvents(events);
+      calendarEvents.push(todayEvents);
       console.log(`Fetched calendar events for integration ${id}`);
 
-      // Send Slack message
-      await sendSlackMessage(slackToken, channel, "Hello world");
+      const message = formatEventMessage(todayEvents);
+      await sendSlackMessage(slackToken, channel, message);
       console.log(`Sent Slack message for integration ${id}`);
     } catch (error) {
       console.error(`Error processing integration ${id}:`, error);
