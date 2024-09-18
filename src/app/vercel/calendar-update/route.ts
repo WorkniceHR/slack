@@ -104,11 +104,13 @@ interface CalendarEvent {
 }
 
 function filterTodayEvents(events: CalendarEvent[]): CalendarEvent[] {
-  const sydneyTime = new Date().toLocaleString("en-US", { timeZone: "Australia/Sydney" });
-  //just using sample dates for today for testing
-  //const today = new Date(sydneyTime).toISOString().split('T')[0];
-  const today = new Date('2024-07-09T00:00:00+10:00').toLocaleString("en-US", { timeZone: "Australia/Sydney" }).split(',')[0].split('/').reverse().join('-');
+ 
+  // const sydneyTime = new Date().toLocaleString("en-US", { timeZone: "Australia/Sydney" });
+    //just using sample dates for today for testing
+ const sydneyTime = new Date('2024-07-09').toLocaleString("en-US", { timeZone: "Australia/Sydney" });
 
+  const today = new Date(sydneyTime).toISOString().split('T')[0];
+  
   return events.filter(event => {
     if (!today) return false;
     return event.startDate <= today && today <= event.endDate;
