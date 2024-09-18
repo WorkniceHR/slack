@@ -122,7 +122,38 @@ function formatEventMessage(events: CalendarEvent[]): string {
     return "No events today.";
   }
 
-  return events.map(event => `${event.eventType}: ${event.owner.displayName}`).join("\n");
+  const eventsByType: { [key: string]: string[] } = {};
+
+  events.forEach(event => {
+    if (!eventsByType[event.eventType]) {
+      eventsByType[event.eventType] = [];
+    }
+    eventsByType[event.eventType].push(event.owner.displayName);
+  });
+
+  let message = "*Here's what's happening today:*\n\n";
+
+  for (const [eventType, names] of Object.entries(eventsByType)) {
+    let emoji = '';
+    switch (eventType) {
+      case 'Away':
+        emoji = ':desert_island:';
+        break;
+      case 'Birthday':
+        emoji = ':birthday:';
+        break;
+      case 'Anniversary':
+        emoji = ':tada:';
+        break;
+      default:
+        emoji = ':calendar:';
+    }
+
+    message += `>${emoji} *${eventType}s (${names.length})*\n`;
+    message += `>${names.join(', ')}\n\n`;
+  }
+
+  return message.trim();
 }
 
 export const GET = async (request: NextRequest): Promise<NextResponse> => {
