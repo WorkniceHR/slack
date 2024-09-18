@@ -119,7 +119,7 @@ function filterTodayEvents(events: CalendarEvent[]): CalendarEvent[] {
 
 function formatEventMessage(events: CalendarEvent[]): string {
   if (events.length === 0) {
-    return "No events today.";
+    return "No calendar updates for today :sunny:";
   }
 
   const eventsByType: { [key: string]: string[] } = {};
