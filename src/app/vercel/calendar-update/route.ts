@@ -31,7 +31,6 @@ async function getWorkniceCalendarEvents(apiKey: string): Promise<any[]> {
               z.object({
                 id: z.string(),
                 eventType: z.string(),
-                ordinalNumber: z.number().optional(),
                 startDate: z.string(),
                 endDate: z.string(),
                 owner: z.object({
@@ -58,9 +57,6 @@ async function getWorkniceCalendarEvents(apiKey: string): Promise<any[]> {
                 sharedCalendarEvents {
                   id
                   eventType: __typename
-                  ... on AnniversaryEvent {
-                    ordinalNumber
-                  }
                   startDate
                   endDate
                   owner {
@@ -105,7 +101,6 @@ interface CalendarEvent {
   owner: {
     displayName: string;
   };
-  ordinalNumber?: number;
 }
 
 function filterTodayEvents(events: CalendarEvent[]): CalendarEvent[] {
@@ -123,19 +118,7 @@ function formatEventMessage(events: CalendarEvent[]): string {
     return "No events today.";
   }
 
-  return events.map(event => {
-    let message = `${event.eventType}: ${event.owner.displayName}`;
-    if (event.eventType === "AnniversaryEvent" && event.ordinalNumber) {
-      message += ` (${event.ordinalNumber}${getOrdinalSuffix(event.ordinalNumber)} anniversary)`;
-    }
-    return message;
-  }).join("\n");
-}
-
-function getOrdinalSuffix(n: number): string {
-  const s = ["th", "st", "nd", "rd"];
-  const v = n % 100;
-  return s[(v - 20) % 10] || s[v] || s[0] || "th";
+  return events.map(event => `${event.eventType}: ${event.owner.displayName}`).join("\n");
 }
 
 export const GET = async (request: NextRequest): Promise<NextResponse> => {
