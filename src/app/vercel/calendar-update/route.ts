@@ -125,7 +125,7 @@ function formatEventMessage(events: CalendarEvent[]): string {
   const eventsByType: { [key: string]: string[] } = {};
 
   events.forEach(event => {
-    const eventType = event.eventType || 'Other'; // Fallback to 'Other' if eventType is undefined
+    const eventType = event.eventType || 'Other';
     if (!eventsByType[eventType]) {
       eventsByType[eventType] = [];
     }
@@ -136,21 +136,26 @@ function formatEventMessage(events: CalendarEvent[]): string {
 
   for (const [eventType, names] of Object.entries(eventsByType)) {
     let emoji = '';
+    let heading = '';
     switch (eventType) {
-      case 'Away':
+      case 'LeaveRequests':
         emoji = ':desert_island:';
+        heading = 'Away';
         break;
-      case 'Birthday':
+      case 'BirthdayEvent':
         emoji = ':birthday:';
+        heading = 'Birthdays';
         break;
-      case 'Anniversary':
+      case 'AnniversaryEvents':
         emoji = ':tada:';
+        heading = 'Anniversaries';
         break;
       default:
         emoji = ':calendar:';
+        heading = eventType;
     }
 
-    message += `>${emoji} *${eventType}s (${names.length})*\n`;
+    message += `>${emoji} *${heading} (${names.length})*\n`;
     message += `>${names.join(', ')}\n\n`;
   }
 
