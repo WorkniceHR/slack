@@ -1,6 +1,82 @@
 import { NextRequest, NextResponse } from "next/server";
 import config from "../../../config";
 import redis from "../../../redis";
+import { z } from 'zod';
+
+async function getWorkniceIntegrationIds(): Promise<string[]> {
+  const keys = await redis.keys("worknice_api_key:*");
+  return keys.map(key => key.split(":")[1]).filter((id): id is string => id !== undefined);
+}
+
+async function fetchWithZod<T extends z.ZodType>(
+  schema: T,
+  url: string,
+  options: RequestInit
+): Promise<z.infer<T>> {
+  const response = await fetch(url, options);
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  const data = await response.json();
+  return schema.parse(data);
+}
+
+async function getWorkniceCalendarEvents(apiKey: string): Promise<any[]> {
+  const response = await fetchWithZod(
+    z.object({
+      data: z.object({
+        session: z.object({
+          org: z.object({
+            sharedCalendarEvents: z.array(
+              z.object({
+                id: z.string(),
+                eventType: z.string(),
+                ordinalNumber: z.number().optional(),
+                startDate: z.string(),
+                endDate: z.string(),
+                owner: z.object({
+                  displayName: z.string(),
+                }),
+              })
+            ),
+          }),
+        }),
+      }),
+    }),
+    "https://app.worknice.com/api/graphql",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "worknice-api-token": apiKey,
+      },
+      body: JSON.stringify({
+        query: `
+          query SharedCalendarEvents {
+            session {
+              org {
+                sharedCalendarEvents {
+                  id
+                  eventType: __typename
+                  ... on AnniversaryEvent {
+                    ordinalNumber
+                  }
+                  startDate
+                  endDate
+                  owner {
+                    displayName
+                  }
+                }
+              }
+            }
+          }
+        `,
+      }),
+    }
+  );
+
+  return response.data.session.org.sharedCalendarEvents;
+}
 
 export const GET = async (request: NextRequest): Promise<NextResponse> => {
   const ids = await getWorkniceIntegrationIds();
@@ -8,6 +84,7 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
   const channels: Array<string> = [];
   const slackTokens: Array<string> = [];
   const workniceTokens: Array<string> = [];
+  const calendarEvents: Array<any> = [];
 
   for (const id of ids) {
     const channel = await redis.get(`slack_channel:calendar_update:${id}`);
@@ -31,10 +108,14 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
     channels.push(channel);
     slackTokens.push(slackToken);
     workniceTokens.push(workniceToken);
-    console.log(`Processing integration ${id}: Channel - ${channel}, Slack Token - ${slackToken}, Worknice Token - ${workniceToken}`);
 
-    // Add your logic here to work with the channel, Slack token, and Worknice token
-    // For example, sending messages or retrieving data
+    try {
+      const events = await getWorkniceCalendarEvents(workniceToken);
+      calendarEvents.push(events);
+      console.log(`Fetched calendar events for integration ${id}`);
+    } catch (error) {
+      console.error(`Error fetching calendar events for integration ${id}:`, error);
+    }
   }
 
   return NextResponse.json({
@@ -43,16 +124,12 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
     channels: channels,
     slackTokens: slackTokens,
     workniceTokens: workniceTokens,
+    calendarEvents: calendarEvents,
   });
 };
 
-async function getWorkniceIntegrationIds(): Promise<string[]> {
-  const keys = await redis.keys("worknice_api_key:*");
-  return keys.map(key => key.split(":")[1]).filter((id): id is string => id !== undefined);
-}
-
 /*
-import { z } from 'zod';
+
 
 interface CustomerData {
   integrationId: string;
