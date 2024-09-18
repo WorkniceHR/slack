@@ -98,16 +98,27 @@ async function sendSlackMessage(token: string, channel: string, message: string)
   }
 }
 
-function filterTodayEvents(events: any[]): any[] {
+interface CalendarEvent {
+  startDate: string;
+  endDate: string;
+  eventType: string;
+  owner: {
+    displayName: string;
+  };
+  ordinalNumber?: number;
+}
+
+function filterTodayEvents(events: CalendarEvent[]): CalendarEvent[] {
   const sydneyTime = new Date().toLocaleString("en-US", { timeZone: "Australia/Sydney" });
   const today = new Date(sydneyTime).toISOString().split('T')[0];
 
   return events.filter(event => {
+    if (!today) return false;
     return event.startDate <= today && today <= event.endDate;
   });
 }
 
-function formatEventMessage(events: any[]): string {
+function formatEventMessage(events: CalendarEvent[]): string {
   if (events.length === 0) {
     return "No events today.";
   }
@@ -133,7 +144,7 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
   const channels: Array<string> = [];
   const slackTokens: Array<string> = [];
   const workniceTokens: Array<string> = [];
-  const calendarEvents: Array<any> = [];
+  const calendarEvents: Array<CalendarEvent[]> = [];
 
   for (const id of ids) {
     const channel = await redis.get(`slack_channel:calendar_update:${id}`);
