@@ -107,7 +107,7 @@ function filterTodayEvents(events: CalendarEvent[]): CalendarEvent[] {
  
   // const sydneyTime = new Date().toLocaleString("en-US", { timeZone: "Australia/Sydney" });
     //just using sample dates for today for testing
- const sydneyTime = new Date('2024-06-05').toLocaleString("en-US", { timeZone: "Australia/Sydney" });
+ const sydneyTime = new Date('2024-01-05').toLocaleString("en-US", { timeZone: "Australia/Sydney" });
 
   const today = new Date(sydneyTime).toISOString().split('T')[0];
   
