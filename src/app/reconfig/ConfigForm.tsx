@@ -23,12 +23,14 @@ const ConfigForm = ({
 }: Props) => {
   return (
     <form action={saveSelectedChannel} className="Card">
+      <h2>Notifications</h2>
       <input type="hidden" name="integrationId" value={integrationId} />
       <div>
         <label htmlFor="personActivatedChannel">New Person Activated</label>
         <select
           id="personActivatedChannel"
           name="personActivatedChannel"
+          className="wn-input"
           defaultValue={personActivatedChannel ?? ""}
         >
           <option value="">None (do not send an alert)</option>
@@ -44,6 +46,7 @@ const ConfigForm = ({
         <select
           id="calendarUpdateChannel"
           name="calendarUpdateChannel"
+          className="wn-input"
           defaultValue={calendarUpdateChannel ?? ""}
         >
           <option value="">None (do not send an alert)</option>
@@ -55,7 +58,7 @@ const ConfigForm = ({
         </select>
       </div>
       <div>
-        <button type="submit">Save</button>
+        <button type="submit" className="wn-button wn-button--primary">Save</button>
       </div>
     </form>
   );

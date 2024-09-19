@@ -63,7 +63,9 @@ const ReconfigPage = async ({ searchParams }: PageProps) => {
 
   return (
     <div className="Container">
-      <h1 style="font:var(--font-h1)">Slack Channels</h1>
+      <a href="https://worknice.com" className="BackButton">{'< Slack Integration'}</a>
+      <h1>Slack Notifications</h1>
+      <p>Choose the Slack channels where you'd like to receive the following notifications:</p>
       {channels.length > 0 ? (
         <ConfigForm
           channels={channels}
