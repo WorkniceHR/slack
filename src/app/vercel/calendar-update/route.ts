@@ -119,44 +119,49 @@ function formatEventMessage(events: CalendarEvent[]): string {
     return "No calendar updates for today :sunny:";
   }
 
-  const eventsByType: { [key: string]: string[] } = {};
+  let message = `*Here's what's happening today:*\n\n`;
 
-  events.forEach((event) => {
-    const eventType = event.eventType || "Other";
-    if (!eventsByType[eventType]) {
-      eventsByType[eventType] = [];
-    }
-    eventsByType[eventType].push(event.owner.displayName);
-  });
+  message += formatEventMessageSet(
+    events,
+    "AnniversaryEvent",
+    ":tada:",
+    "Anniversaries"
+  );
 
-  let message = "*Here's what's happening today:*\n\n";
+  message += formatEventMessageSet(
+    events,
+    "BirthdayEvent",
+    ":birthday:",
+    "Birthdays"
+  );
 
-  for (const [eventType, names] of Object.entries(eventsByType)) {
-    let emoji = "";
-    let heading = "";
-    switch (eventType) {
-      case "LeaveRequest":
-        emoji = ":desert_island:";
-        heading = "Away";
-        break;
-      case "BirthdayEvent":
-        emoji = ":birthday:";
-        heading = "Birthdays";
-        break;
-      case "AnniversaryEvent":
-        emoji = ":tada:";
-        heading = "Anniversaries";
-        break;
-      default:
-        emoji = ":calendar:";
-        heading = eventType;
-    }
-
-    message += `>${emoji} * ${heading} (${names.length})*\n`;
-    message += `>${names.join(", ")}\n\n`;
-  }
+  message += formatEventMessageSet(
+    events,
+    "LeaveRequest",
+    ":desert_island:",
+    "Away"
+  );
 
   return message.trim();
+}
+
+function formatEventMessageSet(
+  events: CalendarEvent[],
+  eventType: CalendarEvent["eventType"],
+  emoji: string,
+  heading: string
+): string {
+  const filteredEvents = events.filter(
+    (event) => event.eventType === eventType
+  );
+
+  if (filteredEvents.length > 0) {
+    return `>${emoji} *${heading} (${filteredEvents.length})*\n${filteredEvents
+      .map((event) => event.owner.displayName)
+      .join(", ")}\n\n`;
+  }
+
+  return "";
 }
 
 export const GET = async (request: NextRequest): Promise<NextResponse> => {
