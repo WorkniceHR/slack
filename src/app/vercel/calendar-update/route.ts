@@ -102,15 +102,15 @@ type CalendarEvent = z.infer<
 function filterTodayEvents(events: CalendarEvent[]): CalendarEvent[] {
   // const sydneyTime = new Date().toLocaleString("en-US", { timeZone: "Australia/Sydney" });
   //just using sample dates for today for testing
-  const sydneyTime = new Date("2024-07-14").toLocaleString("en-US", {
-    timeZone: "Australia/Sydney",
-  });
-
-  const today = new Date(sydneyTime).toISOString().split("T")[0];
+  const today = new Date(Date.parse("2024-07-14T12:00:00+10:00"));
 
   return events.filter((event) => {
-    if (!today) return false;
-    return event.startDate <= today && today <= event.endDate;
+    const eventDate = new Date(Date.parse(event.startDate));
+    return (
+      eventDate.getFullYear() === today.getFullYear() &&
+      eventDate.getMonth() === today.getMonth() &&
+      eventDate.getDate() === today.getDate()
+    );
   });
 }
 
