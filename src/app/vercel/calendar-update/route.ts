@@ -12,27 +12,29 @@ async function getWorkniceIntegrationIds(): Promise<string[]> {
 
 const fetchWithZod = createZodFetcher();
 
-async function getWorkniceCalendarEvents(apiKey: string): Promise<any[]> {
-  const response = await fetchWithZod(
-    z.object({
-      data: z.object({
-        session: z.object({
-          org: z.object({
-            sharedCalendarEvents: z.array(
-              z.object({
-                id: z.string(),
-                eventType: z.string(),
-                startDate: z.string(),
-                endDate: z.string(),
-                owner: z.object({
-                  displayName: z.string(),
-                }),
-              })
-            ),
-          }),
-        }),
+const workniceCalendarEventsSchema = z.object({
+  data: z.object({
+    session: z.object({
+      org: z.object({
+        sharedCalendarEvents: z.array(
+          z.object({
+            id: z.string(),
+            eventType: z.string(),
+            startDate: z.string(),
+            endDate: z.string(),
+            owner: z.object({
+              displayName: z.string(),
+            }),
+          })
+        ),
       }),
     }),
+  }),
+});
+
+async function getWorkniceCalendarEvents(apiKey: string): Promise<any[]> {
+  const response = await fetchWithZod(
+    workniceCalendarEventsSchema,
     "https://app.worknice.com/api/graphql",
     {
       method: "POST",
