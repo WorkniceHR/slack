@@ -1,7 +1,7 @@
 {
     "crons": [
       {
-        "path": "/api/vercel/calendar-update",
+        "path": "/vercel/calendar-update",
         "schedule": "*/5 * * * *"
       }
     ]
