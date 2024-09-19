@@ -91,14 +91,9 @@ async function sendSlackMessage(
   }
 }
 
-interface CalendarEvent {
-  startDate: string;
-  endDate: string;
-  eventType: string;
-  owner: {
-    displayName: string;
-  };
-}
+type CalendarEvent = z.infer<
+  typeof workniceCalendarEventsSchema
+>["data"]["session"]["org"]["sharedCalendarEvents"][number];
 
 function filterTodayEvents(events: CalendarEvent[]): CalendarEvent[] {
   // const sydneyTime = new Date().toLocaleString("en-US", { timeZone: "Australia/Sydney" });
