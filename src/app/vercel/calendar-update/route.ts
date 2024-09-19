@@ -19,7 +19,11 @@ const workniceCalendarEventsSchema = z.object({
         sharedCalendarEvents: z.array(
           z.object({
             id: z.string(),
-            eventType: z.string(),
+            eventType: z.union([
+              z.literal("AnniversaryEvent"),
+              z.literal("BirthdayEvent"),
+              z.literal("LeaveRequest"),
+            ]),
             startDate: z.string(),
             endDate: z.string(),
             owner: z.object({
