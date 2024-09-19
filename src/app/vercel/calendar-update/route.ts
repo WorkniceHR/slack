@@ -165,37 +165,37 @@ function formatEventMessageSet(
 }
 
 export const GET = async (request: NextRequest): Promise<NextResponse> => {
-  const ids = await getWorkniceIntegrationIds();
+  try {
+    const ids = await getWorkniceIntegrationIds();
 
-  const channels: Array<string> = [];
-  const slackTokens: Array<string> = [];
-  const workniceTokens: Array<string> = [];
-  const calendarEvents: Array<CalendarEvent[]> = [];
+    const channels: Array<string> = [];
+    const slackTokens: Array<string> = [];
+    const workniceTokens: Array<string> = [];
+    const calendarEvents: Array<CalendarEvent[]> = [];
 
-  for (const id of ids) {
-    const channel = await redis.get(`slack_channel:calendar_update:${id}`);
-    if (typeof channel !== "string") {
-      console.log(`No Slack channel found for integration ${id}. Skipping.`);
-      continue;
-    }
+    for (const id of ids) {
+      const channel = await redis.get(`slack_channel:calendar_update:${id}`);
+      if (typeof channel !== "string") {
+        console.log(`No Slack channel found for integration ${id}. Skipping.`);
+        continue;
+      }
 
-    const slackToken = await redis.get(`slack_access_token:${id}`);
-    if (typeof slackToken !== "string") {
-      console.log(`No Slack token found for integration ${id}. Skipping.`);
-      continue;
-    }
+      const slackToken = await redis.get(`slack_access_token:${id}`);
+      if (typeof slackToken !== "string") {
+        console.log(`No Slack token found for integration ${id}. Skipping.`);
+        continue;
+      }
 
-    const workniceToken = await redis.get(`worknice_api_key:${id}`);
-    if (typeof workniceToken !== "string") {
-      console.log(`No Worknice token found for integration ${id}. Skipping.`);
-      continue;
-    }
+      const workniceToken = await redis.get(`worknice_api_key:${id}`);
+      if (typeof workniceToken !== "string") {
+        console.log(`No Worknice token found for integration ${id}. Skipping.`);
+        continue;
+      }
 
-    channels.push(channel);
-    slackTokens.push(slackToken);
-    workniceTokens.push(workniceToken);
+      channels.push(channel);
+      slackTokens.push(slackToken);
+      workniceTokens.push(workniceToken);
 
-    try {
       const events = await getWorkniceCalendarEvents(workniceToken);
       const todayEvents = filterTodayEvents(events);
       calendarEvents.push(todayEvents);
@@ -204,17 +204,21 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
       const message = formatEventMessage(todayEvents);
       await sendSlackMessage(slackToken, channel, message);
       console.log(`Sent Slack message for integration ${id}`);
-    } catch (error) {
-      console.error(`Error processing integration ${id}:`, error);
     }
-  }
 
-  return NextResponse.json({
-    test: "hello world",
-    ids: ids,
-    channels: channels,
-    slackTokens: slackTokens,
-    workniceTokens: workniceTokens,
-    calendarEvents: calendarEvents,
-  });
+    return NextResponse.json({
+      test: "hello world",
+      ids: ids,
+      channels: channels,
+      slackTokens: slackTokens,
+      workniceTokens: workniceTokens,
+      calendarEvents: calendarEvents,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : `${error}`;
+
+    return new NextResponse(message, {
+      status: 500,
+    });
+  }
 };
