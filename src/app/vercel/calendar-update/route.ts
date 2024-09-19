@@ -100,9 +100,9 @@ type CalendarEvent = z.infer<
 >["data"]["session"]["org"]["sharedCalendarEvents"][number];
 
 function filterTodayEvents(events: CalendarEvent[]): CalendarEvent[] {
-  // const sydneyTime = new Date().toLocaleString("en-US", { timeZone: "Australia/Sydney" });
-  //just using sample dates for today for testing
-  const today = new Date(Date.parse("2024-07-14T12:00:00+10:00"));
+  //below is if you need to test with sample dates
+  //const today = new Date(Date.parse("2024-07-14T12:00:00+10:00"));
+  const today = new Date();
 
   return events.filter((event) => {
     const eventDate = new Date(Date.parse(event.startDate));
