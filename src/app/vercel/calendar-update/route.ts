@@ -21,7 +21,11 @@ async function fetchWithZod<T extends z.ZodType>(
   return schema.parse(data);
 }
 
-async function getWorkniceCalendarEvents(apiKey: string): Promise<any[]> {
+async function getWorkniceCalendarEvents(apiKey: string | null): Promise<any[]> {
+  if (!apiKey) {
+    return [];
+  }
+
   const response = await fetchWithZod(
     z.object({
       data: z.object({
@@ -104,7 +108,6 @@ interface CalendarEvent {
 }
 
 function filterTodayEvents(events: CalendarEvent[]): CalendarEvent[] {
-    // const sydneyTime = new Date().toLocaleString("en-US", { timeZone: "Australia/Sydney" });
   const sydneyTime = new Date('2024-09-06').toLocaleString("en-US", { timeZone: "Australia/Sydney" });
   const today = new Date(sydneyTime).toISOString().split('T')[0];
   
@@ -170,11 +173,9 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
     let allEvents: CalendarEvent[] = [];
 
     for (const id of integrationIds) {
-      const apiKey = await redis.get(`worknice_api_key:${id}`);
-      if (apiKey) {
-        const events = await getWorkniceCalendarEvents(apiKey);
-        allEvents = allEvents.concat(events);
-      }
+      const apiKey = await redis.get(`worknice_api_key:${id}`) || '';
+      const events = await getWorkniceCalendarEvents(apiKey);
+      allEvents = allEvents.concat(events);
     }
 
     const todayEvents = filterTodayEvents(allEvents);
