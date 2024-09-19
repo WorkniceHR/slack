@@ -62,7 +62,7 @@ const ReconfigPage = async ({ searchParams }: PageProps) => {
   );
 
   return (
-    <div>
+    <div className="Container">
       <h1>Slack Channels</h1>
       {channels.length > 0 ? (
         <ConfigForm
