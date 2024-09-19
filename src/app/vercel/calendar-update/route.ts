@@ -34,29 +34,29 @@ async function getWorkniceCalendarEvents(apiKey: string): Promise<any[]> {
                 startDate: z.string(),
                 endDate: z.string(),
                 owner: z.object({
-                  displayName: z.string()
-                })
+                  displayName: z.string(),
+                }),
               })
-            )
-          })
-        })
-      })
+            ),
+          }),
+        }),
+      }),
     }),
-    'https://api.worknice.com/graphql',
+    "https://app.worknice.com/api/graphql",
     {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        "Content-Type": "application/json",
+        "worknice-api-token": apiKey,
       },
       body: JSON.stringify({
         query: `
-          query {
+          query SharedCalendarEvents {
             session {
               org {
                 sharedCalendarEvents {
                   id
-                  eventType
+                  eventType: __typename
                   startDate
                   endDate
                   owner {
@@ -66,8 +66,8 @@ async function getWorkniceCalendarEvents(apiKey: string): Promise<any[]> {
               }
             }
           }
-        `
-      })
+        `,
+      }),
     }
   );
 
@@ -104,10 +104,15 @@ interface CalendarEvent {
 }
 
 function filterTodayEvents(events: CalendarEvent[]): CalendarEvent[] {
-  const sydneyTime = new Date().toLocaleString("en-US", { timeZone: "Australia/Sydney" });
+ 
+  // const sydneyTime = new Date().toLocaleString("en-US", { timeZone: "Australia/Sydney" });
+    //just using sample dates for today for testing
+ const sydneyTime = new Date('2024-09-06').toLocaleString("en-US", { timeZone: "Australia/Sydney" });
+
   const today = new Date(sydneyTime).toISOString().split('T')[0];
   
   return events.filter(event => {
+    if (!today) return false;
     return event.startDate <= today && today <= event.endDate;
   });
 }
@@ -158,31 +163,56 @@ function formatEventMessage(events: CalendarEvent[]): string {
 }
 
 export const GET = async (request: NextRequest): Promise<NextResponse> => {
-  // Check for the CRON_SECRET
-  if (request.headers.get('Authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const ids = await getWorkniceIntegrationIds();
 
-  try {
-    const integrationIds = await getWorkniceIntegrationIds();
-    let allEvents: CalendarEvent[] = [];
+  const channels: Array<string> = [];
+  const slackTokens: Array<string> = [];
+  const workniceTokens: Array<string> = [];
+  const calendarEvents: Array<CalendarEvent[]> = [];
 
-    for (const id of integrationIds) {
-      const apiKey = await redis.get(`worknice_api_key:${id}`);
-      if (apiKey) {
-        const events = await getWorkniceCalendarEvents(apiKey);
-        allEvents = allEvents.concat(events);
-      }
+  for (const id of ids) {
+    const channel = await redis.get(`slack_channel:calendar_update:${id}`);
+    if (typeof channel !== 'string') {
+      console.log(`No Slack channel found for integration ${id}. Skipping.`);
+      continue;
     }
 
-    const todayEvents = filterTodayEvents(allEvents);
-    const message = formatEventMessage(todayEvents);
+    const slackToken = await redis.get(`slack_access_token:${id}`);
+    if (typeof slackToken !== 'string') {
+      console.log(`No Slack token found for integration ${id}. Skipping.`);
+      continue;
+    }
 
-    await sendSlackMessage(config.slackToken, config.slackChannel, message);
+    const workniceToken = await redis.get(`worknice_api_key:${id}`);
+    if (typeof workniceToken !== 'string') {
+      console.log(`No Worknice token found for integration ${id}. Skipping.`);
+      continue;
+    }
 
-    return NextResponse.json({ message: 'Calendar update sent to Slack successfully' });
-  } catch (error) {
-    console.error('Error in calendar update:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    channels.push(channel);
+    slackTokens.push(slackToken);
+    workniceTokens.push(workniceToken);
+
+    try {
+      const events = await getWorkniceCalendarEvents(workniceToken);
+      const todayEvents = filterTodayEvents(events);
+      calendarEvents.push(todayEvents);
+      console.log(`Fetched calendar events for integration ${id}`);
+
+      const message = formatEventMessage(todayEvents);
+      await sendSlackMessage(slackToken, channel, message);
+      console.log(`Sent Slack message for integration ${id}`);
+    } catch (error) {
+      console.error(`Error processing integration ${id}:`, error);
+    }
   }
+
+  return NextResponse.json({
+    test: "hello world",
+    ids: ids,
+    channels: channels,
+    slackTokens: slackTokens,
+    workniceTokens: workniceTokens,
+    calendarEvents: calendarEvents,
+  });
 };
