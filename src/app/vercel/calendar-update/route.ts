@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { createZodFetcher } from "zod-fetch";
 import redis from "../../../redis";
 
 async function getWorkniceIntegrationIds(): Promise<string[]> {
@@ -9,18 +10,7 @@ async function getWorkniceIntegrationIds(): Promise<string[]> {
     .filter((id): id is string => id !== undefined);
 }
 
-async function fetchWithZod<T extends z.ZodType>(
-  schema: T,
-  url: string,
-  options: RequestInit
-): Promise<z.infer<T>> {
-  const response = await fetch(url, options);
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-  const data = await response.json();
-  return schema.parse(data);
-}
+const fetchWithZod = createZodFetcher();
 
 async function getWorkniceCalendarEvents(apiKey: string): Promise<any[]> {
   const response = await fetchWithZod(
