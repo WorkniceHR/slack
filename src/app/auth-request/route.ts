@@ -38,7 +38,7 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
     return NextResponse.redirect(
       `https://slack.com/oauth/v2/authorize?scope=${config.slack.scopes.join(
         ","
-      )}&client_id=${config.slack.clientId}`
+      )}&client_id=${config.slack.clientId}&redirect_uri=${encodeURIComponent(config.slack.redirectUri)}`
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : `${error}`;

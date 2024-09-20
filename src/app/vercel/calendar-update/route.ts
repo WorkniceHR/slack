@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createZodFetcher } from "zod-fetch";
 import redis from "../../../redis";
+import config from "@/config";
 
 async function getWorkniceIntegrationIds(): Promise<string[]> {
   const keys = await redis.keys("worknice_api_key:*");
@@ -39,7 +40,7 @@ const workniceCalendarEventsSchema = z.object({
 async function getWorkniceCalendarEvents(apiKey: string): Promise<any[]> {
   const response = await fetchWithZod(
     workniceCalendarEventsSchema,
-    "https://app.worknice.com/api/graphql",
+    `${config.worknice.baseUrl}/api/graphql`,
     {
       method: "POST",
       headers: {

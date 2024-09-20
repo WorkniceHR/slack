@@ -1,3 +1,4 @@
+import config from "@/config";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createZodFetcher } from "zod-fetch";
@@ -30,7 +31,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
           }),
         }),
       }),
-      "http://app.worknice.com/api/graphql",
+      `${config.worknice.baseUrl}/api/graphql`,
       {
         method: "POST",
         headers: {

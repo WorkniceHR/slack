@@ -20,9 +20,9 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
 
     return NextResponse.json(
       {
-        reconfigurationUrl: `https://slack.worknice.com/reconfig?${
-          config.sessionCodeParam
-        }=${authorizationCode}`,
+        reconfigurationUrl: `${config.protocol}://${request.headers.get(
+          "host"
+        )}/reconfig?${config.sessionCodeParam}=${authorizationCode}`,
       },
       { status: 200 }
     );

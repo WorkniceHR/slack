@@ -118,7 +118,7 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
           }),
         }),
       }),
-      "http://app.worknice.com/api/graphql",
+      `${config.worknice.baseUrl}/api/graphql`,
       {
         method: "POST",
         headers: {
@@ -144,7 +144,7 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
     console.log("Done.");
 
     return NextResponse.redirect(
-      `https://app.worknice.com/admin/apps/integrations/${integrationId}`
+      `${config.worknice.baseUrl}/admin/apps/integrations/${integrationId}`
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : `${error}`;

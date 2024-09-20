@@ -23,12 +23,18 @@ const config = {
   slack: {
     clientId: process.env.SLACK_CLIENT_ID,
     clientSecret: process.env.SLACK_CLIENT_SECRET,
+    redirectUri:
+      process.env.SLACK_REDIRECT_URI ??
+      "https://slack.worknice.com/auth-callback",
     scopes: [
       "channels:read",
       "chat:write.customize",
       "chat:write.public",
       "chat:write",
     ],
+  },
+  worknice: {
+    baseUrl: process.env.WORKNICE_BASE_URL ?? "https://app.worknice.com",
   },
 } as const;
 
