@@ -25,7 +25,7 @@ const RootLayout = ({
           .Container {
             display: grid;
             justify-content: center;
-            grid-template-columns: minmax(auto, 800px);
+            grid-template-columns: minmax(auto, 600px);
           }
                   
           h1 {
@@ -47,7 +47,7 @@ const RootLayout = ({
             padding: 10px 20px 20px 20px;
             width: 100%;
             max-width: 100%;
-            margin: 20px auto; 
+            margin: 40px auto; 
             border: 1px solid #E0E0E0;
         }
     

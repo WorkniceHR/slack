@@ -18,5 +18,5 @@ export const saveSelectedChannel = async (formData: FormData) => {
     calendarUpdateChannel
   );
 
-  revalidatePath("/reconfig");
+  revalidatePath("https://app.worknice.com/admin/apps");
 };
