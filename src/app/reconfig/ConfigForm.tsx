@@ -23,7 +23,7 @@ const ConfigForm = ({
 }: Props) => {
   return (
     <form action={saveSelectedChannel} className="Card">
-      <table>
+      <table style={{ width: '100%', tableLayout: 'fixed' }}>
         <tr><th colSpan={2}><h1>Reconfigure Integration</h1></th></tr>
         <tr><td colSpan={2}><span style={{ fontWeight: 'bold' }}>Notifications</span>
           <p>Choose the Slack channels where you would like to receive the following notifications:</p>  
@@ -49,8 +49,6 @@ const ConfigForm = ({
         </tr>
         <tr>
           <td><label htmlFor="calendarUpdateChannel">Calendar Update Channel</label></td>
-        </tr>
-        <tr>
           <td>
           <select
           id="calendarUpdateChannel"

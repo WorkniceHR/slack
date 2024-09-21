@@ -45,10 +45,9 @@ const RootLayout = ({
             background: #FFFFFF;
             border-radius: 8px;
             padding: 10px 20px 20px 20px;
-            margin: 40px 20px;
             width: 100%;
-            max-width: 800px;
-            margin: 0 auto; 
+            max-width: 100%;
+            margin: 20px auto; 
             border: 1px solid #E0E0E0;
         }
     
