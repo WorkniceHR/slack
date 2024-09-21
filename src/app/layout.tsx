@@ -83,6 +83,7 @@ const RootLayout = ({
             background-color: #90116E;
         }
         .back-button {
+          width: auto;
           display: inline-flex;
           align-items: center;
           background-color: #FCFCFE; /* Accent color */
@@ -93,6 +94,9 @@ const RootLayout = ({
           border-radius: 8px;
           cursor: pointer;
           transition: background-color 0.3s ease;
+          position: absolute;
+          top: 20px;
+          left: 20px;
           }
           
         
@@ -106,9 +110,6 @@ const RootLayout = ({
           margin-right: 6px;
           background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='15 18 9 12 15 6'%3E%3C/polyline%3E%3C/svg%3E") no-repeat left 0px center;
           background-size: 22px 22px;
-          position: absolute;
-          top: 20px;
-          left: 20px;
         }
         `}
       </style>
