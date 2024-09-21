@@ -24,8 +24,8 @@ const ConfigForm = ({
   return (
     <form action={saveSelectedChannel} className="Card">
       <table>
-        <tr><th colSpan="2"><h1>Reconfigure Integration</h1></th></tr>
-        <tr><td colSpan="2"><span style={{ fontWeight: 'bold' }}>Notifications</span>
+        <tr><th colSpan={2}><h1>Reconfigure Integration</h1></th></tr>
+        <tr><td colSpan={2}><span style={{ fontWeight: 'bold' }}>Notifications</span>
           <p>Choose the Slack channels where you would like to receive the following notifications:</p>  
         </td></tr>
         <input type="hidden" name="integrationId" value={integrationId} />
@@ -67,7 +67,7 @@ const ConfigForm = ({
         </select>
           </td>
         </tr>
-        <tr><td colSpan="2">
+        <tr><td colSpan={2}>
         <button type="submit" className="wn-button--primary">Save</button>
           </td>
           </tr>
