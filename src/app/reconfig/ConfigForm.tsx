@@ -26,7 +26,7 @@ const ConfigForm = ({
       <table>
         <tr><th colspan="2"><h1>Reconfigure Integration</h1></th></tr>
         <tr><td colspan="2"><span style="font-weight: bold;">Notifications</span>
-          <p>Choose the Slack channels where you'd like to receive the following notifications:</p>  
+          <p>Choose the Slack channels where you would like to receive the following notifications:</p>  
         </td></tr>
         <input type="hidden" name="integrationId" value={integrationId} />
         <tr>
