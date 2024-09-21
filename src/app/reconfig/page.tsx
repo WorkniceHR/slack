@@ -62,9 +62,10 @@ const ReconfigPage = async ({ searchParams }: PageProps) => {
   );
 
   return (
-
     <div className="Container">
-      <div className="Toolbar"><a href="your-back-link" className="BackButton">{'< Back'}</a></div>
+  <br>
+  <button class="back-button" onclick="goBack()">
+  <svg class="back-icon"></svg>{'Slack Integration'}</button>
       {channels.length > 0 ? (
         <ConfigForm
           channels={channels}
