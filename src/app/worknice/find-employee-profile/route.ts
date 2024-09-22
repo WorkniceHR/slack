@@ -11,17 +11,17 @@ const requestSchema = z.object({
     team_id: z.string(),
 });
 
-async function getIntegrationId(team_id) {
-  console.log("Retrieving integration ID for team ID:", team_id);
-
-  const integrationId = await redis.get(`slack_team_id:${team_id}`);
-
-  if (integrationId === null) {
-    throw Error("Unable to retrieve integration ID.");
+async function getIntegrationId(team_id: string) {
+    console.log("Retrieving integration ID for team ID:", team_id);
+  
+    const integrationId = await redis.get(`slack_team_id:${team_id}`);
+  
+    if (integrationId === null) {
+      throw Error("Unable to retrieve integration ID.");
+    }
+  
+    return integrationId;
   }
-
-  return integrationId;
-}
 
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
@@ -31,7 +31,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
 
         // Validate and parse the incoming request
         const data = requestSchema.parse(body);
-        
+
         // Retrieve the integration ID based on the team_id 
         const integrationId = await getIntegrationId(data.team_id);
 
