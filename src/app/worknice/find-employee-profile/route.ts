@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { parse } from "querystring";
 
-// Define schema for request validation
+// Updated schema with new fields
 const requestSchema = z.object({
     user_id: z.string(),
+    text: z.string(),
+    team_id: z.string(),
 });
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
@@ -17,7 +19,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
 
         return NextResponse.json({
             response_type: "in_channel", 
-            text: `Hello, the user ID is: ${data.user_id}`,
+            text: `Received command: ${data.text}, from user ID: ${data.user_id}, in team ID: ${data.team_id}`,
         }, { status: 200 });
 
     } catch (error) {
