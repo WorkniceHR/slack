@@ -4,7 +4,7 @@ import { parse } from "querystring";
 
 // Define schema for request validation
 const requestSchema = z.object({
-    enterprise_id: z.string(),
+    user_id: z.string(),
 });
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
@@ -17,7 +17,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
 
         return NextResponse.json({
             response_type: "in_channel", 
-            text: `Hello, the enterprise ID is: ${data.enterprise_id}`,
+            text: `Hello, the user ID is: ${data.user_id}`,
         }, { status: 200 });
 
     } catch (error) {
