@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { parse } from "querystring";
+import config from "../../../config";
+import redis from "../../../redis";
 
 // Updated schema with new fields
 const requestSchema = z.object({
@@ -9,6 +11,19 @@ const requestSchema = z.object({
     team_id: z.string(),
 });
 
+async function getIntegrationId(team_id) {
+  console.log("Retrieving integration ID for team ID:", team_id);
+
+  const integrationId = await redis.get(`slack_team_id:${team_id}`);
+
+  if (integrationId === null) {
+    throw Error("Unable to retrieve integration ID.");
+  }
+
+  return integrationId;
+}
+
+
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
     try {
         // Parse the x-www-form-urlencoded data
@@ -16,10 +31,13 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
 
         // Validate and parse the incoming request
         const data = requestSchema.parse(body);
+        
+        // Retrieve the integration ID based on the team_id 
+        const integrationId = await getIntegrationId(data.team_id);
 
         return NextResponse.json({
             response_type: "in_channel", 
-            text: `Received command: ${data.text}, from user ID: ${data.user_id}, in team ID: ${data.team_id}`,
+            text: `Received command: ${data.text}, from user ID: ${data.user_id}, in team ID: ${data.team_id}, Worknice Integration ID is: ${integrationId}`,
         }, { status: 200 });
 
     } catch (error) {
