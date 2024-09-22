@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { parse } from "querystring";
-import config from "../../../config";
 import redis from "../../../redis";
 
 // Updated schema with new fields
@@ -13,15 +12,16 @@ const requestSchema = z.object({
 
 async function getIntegrationId(team_id: string) {
     console.log("Retrieving integration ID for team ID:", team_id);
-  
-    const integrationId = await redis.get(`slack_team_id:${team_id}`);
-  
+
+    const integrationId = await redis.get(`session_code_integration_id:${team_id}`);
+
     if (integrationId === null) {
-      throw Error("Unable to retrieve integration ID.");
+        throw Error("Unable to retrieve integration ID.");
     }
-  
+
     return integrationId;
-  }
+}
+
 
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {

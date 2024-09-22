@@ -84,7 +84,7 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
       );
     }
 
-    if (response.team_id) {
+    if (response?.team_id) {
       await redis.set(`slack_team_id:${integrationId}`, response.team_id);
     }
 
