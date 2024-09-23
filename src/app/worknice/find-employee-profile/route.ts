@@ -131,7 +131,6 @@ async function getWorknicePeopleDirectory(apiKey: string): Promise<any[]> {
 }
 
 
-
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
     try {
         // Parse the x-www-form-urlencoded data
@@ -146,36 +145,43 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
             { status: 200 }
         );
 
-        // Retrieve the integration ID based on the team_id 
-        const integrationId = await getIntegrationId(data.team_id);
+        // Send the immediate response first before running background logic
+        request.waitUntil((async () => {
+            try {
+                // Retrieve the integration ID based on the team_id 
+                const integrationId = await getIntegrationId(data.team_id);
 
-        // Retrieve Worknice API key from Redis
-        console.log("Retrieving Worknice API key…");
-        const workniceApiKey = await redis.get<string>(`worknice_api_key:${integrationId}`);
+                // Retrieve Worknice API key from Redis
+                console.log("Retrieving Worknice API key…");
+                const workniceApiKey = await redis.get<string>(`worknice_api_key:${integrationId}`);
 
-        if (workniceApiKey === null) {
-            throw new Error("Worknice API key not found.");
-        }
+                if (workniceApiKey === null) {
+                    throw new Error("Worknice API key not found.");
+                }
 
-        // Retrieve the people directory using the Worknice API Key
-       const peopledirectory = await getWorknicePeopleDirectory(workniceApiKey);
+                // Retrieve the people directory using the Worknice API Key
+                const peopledirectory = await getWorknicePeopleDirectory(workniceApiKey);
 
-        // Filter the people directory results to the person whose display name matches the 'text' from the incoming Slack message
-        // const filteredPeople = peopledirectory.filter(person => person.displayName === data.text);
+                // Filter the people directory results to the person whose display name matches the 'text' from the incoming Slack message
+                const filteredPeople = peopledirectory.filter(person => person.displayName === data.text);
 
-        // Make a delayed response by sending a POST request to the response_url
-        const delayedResponse = fetch(data.response_url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ text: `Delayed response ${peopledirectory}` }),
-        });
+                // Make a delayed response by sending a POST request to the response_url
+                const delayedResponse = fetch(data.response_url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ text: `Delayed response for user: ${data.text}` }),
+                });
 
-        // Wait for the delayed response to complete
-        await delayedResponse;
+                // Wait for the delayed response to complete
+                await delayedResponse;
 
-        // Return the immediate response
+            } catch (error) {
+                console.error("Error processing the delayed logic: ", error);
+            }
+        })());
+
         return immediateResponse;
     } catch (error) {
         const message = error instanceof Error ? error.message : `${error}`;
