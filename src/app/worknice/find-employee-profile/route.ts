@@ -146,15 +146,6 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
             { status: 200 }
         );
 
-        // Make a delayed response by sending a POST request to the response_url
-        const delayedResponse = fetch(data.response_url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ text: `Delayed response` }),
-        });
-
         // Retrieve the integration ID based on the team_id 
         const integrationId = await getIntegrationId(data.team_id);
 
@@ -167,10 +158,19 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         }
 
         // Retrieve the people directory using the Worknice API Key
-        //const peopledirectory = await getWorknicePeopleDirectory(workniceApiKey);
+       const peopledirectory = await getWorknicePeopleDirectory(workniceApiKey);
 
         // Filter the people directory results to the person whose display name matches the 'text' from the incoming Slack message
         // const filteredPeople = peopledirectory.filter(person => person.displayName === data.text);
+
+        // Make a delayed response by sending a POST request to the response_url
+        const delayedResponse = fetch(data.response_url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ text: `Delayed response ${peopledirectory}` }),
+        });
 
         // Wait for the delayed response to complete
         await delayedResponse;
