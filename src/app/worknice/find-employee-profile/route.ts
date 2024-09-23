@@ -10,6 +10,7 @@ const requestSchema = z.object({
     user_id: z.string(),
     text: z.string(),
     team_id: z.string(),
+    response_url: z.string(),
 });
 
 async function getIntegrationId(team_id: string) {
