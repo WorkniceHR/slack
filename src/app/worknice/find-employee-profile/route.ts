@@ -133,14 +133,17 @@ async function getWorknicePeopleDirectory(apiKey: string): Promise<any[]> {
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
     try {
-        // Increase the timeout for the operation
-        request.setTimeout(5000); // Set the timeout value in milliseconds (e.g., 5000 for 5 seconds)
-
         // Parse the x-www-form-urlencoded data
         const body = parse(await request.text());
 
         // Validate and parse the incoming request
         const data = requestSchema.parse(body);
+
+        // Return an immediate response to acknowledge the command
+        const immediateResponse = NextResponse.json(
+            { text: "Searching up employee directory..." },
+            { status: 200 }
+        );
 
         // Retrieve the integration ID based on the team_id 
         const integrationId = await getIntegrationId(data.team_id);
@@ -159,11 +162,17 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         // Filter the people directory results to the person whose display name matches the 'text' from the incoming Slack message
         const filteredPeople = peopledirectory.filter(person => person.displayName === data.text);
 
-        return NextResponse.json({
-            response_type: "in_channel", 
-            text: `Received command: ${data.text}, from user ID: ${data.user_id}, in team ID: ${data.team_id}, Worknice Integration ID is: ${integrationId}, Worknice API Key is ${workniceApiKey}, Person is ${filteredPeople}`,
-        }, { status: 200 });
+        // Make a delayed response by sending a POST request to the response_url
+        const delayedResponse = await fetch(data.response_url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ text: `Employee profile found: ${filteredPeople}` }),
+        });
 
+        // Return the immediate response
+        return immediateResponse;
     } catch (error) {
         const message = error instanceof Error ? error.message : `${error}`;
         return new NextResponse(message, { status: 500 });
