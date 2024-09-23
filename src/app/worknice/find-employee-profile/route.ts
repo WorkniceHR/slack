@@ -134,18 +134,6 @@ async function getWorknicePeopleDirectory(apiKey: string): Promise<any[]> {
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
     try {
-        // Parse the x-www-form-urlencoded data
-        const body = parse(await request.text());
-
-        // Validate and parse the incoming request
-        const data = requestSchema.parse(body);
-
-        // Return an immediate response to acknowledge the command
-        const immediateResponse = NextResponse.json(
-            { text: "Searching up employee directory..." },
-            { status: 200 }
-        );
-
         // Retrieve the integration ID based on the team_id 
         const integrationId = await getIntegrationId(data.team_id);
 
@@ -172,8 +160,11 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
             body: JSON.stringify({ text: `Employee profile found: ${filteredPeople}` }),
         });
 
-        // Return the immediate response
-        return immediateResponse;
+        // Return an immediate response to acknowledge the command
+        return NextResponse.json(
+            { text: "Searching the employee directory..." },
+            { status: 200 }
+        );
     } catch (error) {
         const message = error instanceof Error ? error.message : `${error}`;
         return new NextResponse(message, { status: 500 });
