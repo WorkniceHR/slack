@@ -146,7 +146,11 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         console.log("Retrieving Worknice API key…");
         const workniceApiKey = await redis.get<string>(`worknice_api_key:${integrationId}`);
 
-        // Retrieve the peopledirectory ID based on the team_id 
+        if (workniceApiKey === null) {
+            throw new Error("Worknice API key not found.");
+        }
+
+        // Retrieve the people directory using the Worknice API Key
         const peopledirectory = await getWorknicePeopleDirectory(workniceApiKey);
 
         return NextResponse.json({
