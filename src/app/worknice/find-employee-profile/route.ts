@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { createZodFetcher } from "zod-fetch";
 import { parse } from "querystring";
 import redis from "../../../redis";
+import config from "@/config";
 
 // Updated schema with new fields
 const requestSchema = z.object({
@@ -9,7 +11,6 @@ const requestSchema = z.object({
     text: z.string(),
     team_id: z.string(),
 });
-
 
 async function getIntegrationId(team_id: string) {
     console.log("Retrieving integration ID for team ID:", team_id);
@@ -31,6 +32,103 @@ async function getIntegrationId(team_id: string) {
 
     throw Error("Unable to retrieve integration ID for the given team ID.");
 }
+const fetchWithZod = createZodFetcher();
+
+const worknicePeopleDirectorySchema = z.object({
+    data: z.object({
+        session: z.object({
+            org: z.object({
+                people: z.array(
+                    z.object({
+                        id: z.string(),
+                        displayName: z.string(),
+                        status: z.literal("ACTIVE"), // Adjust if other statuses are needed
+                        role: z.string(),
+                        employeeCode: z.string().optional(),
+                        profileImage: z.object({
+                            url: z.string(),
+                        }).optional(),
+                        profileBio: z.string().optional(),
+                        profileEmail: z.string(),
+                        startDate: z.string(),
+                        currentJob: z.object({
+                            position: z.object({
+                                title: z.string(),
+                                manager: z.object({
+                                    currentJob: z.object({
+                                        person: z.object({
+                                            displayName: z.string(),
+                                        }),
+                                    }),
+                                }).optional(),
+                            }),
+                        }),
+                        profilePronouns: z.string().optional(),
+                        profileBirthday: z.object({
+                            day: z.number(),
+                            month: z.number(),
+                        }).optional(),
+                    })
+                ),
+            }),
+        }),
+    }),
+});
+
+async function getWorknicePeopleDirectory(apiKey: string): Promise<any[]> {
+    const response = await fetchWithZod(
+        worknicePeopleDirectorySchema,
+        `${config.worknice.baseUrl}/api/graphql`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "worknice-api-token": apiKey,
+            },
+            body: JSON.stringify({
+                query: `
+          query PeopleDirectory {
+            session {
+              org {
+                people(
+                  includeArchived: false
+                  status: [ACTIVE]
+                ) {
+                  id
+                  displayName
+                  status
+                  role
+                  employeeCode
+                  profileImage { url }
+                  profileBio
+                  profileEmail
+                  startDate
+                  currentJob {
+                    position {
+                      title
+                      manager {
+                        currentJob {
+                          person {
+                            displayName
+                          }
+                        }
+                      }
+                    }
+                  }
+                  profilePronouns
+                  profileBirthday { day month }
+                }
+              }
+            }
+          }
+        `,
+            }),
+        }
+    );
+
+    return response.data.session.org.people;
+}
+
 
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
@@ -48,9 +146,12 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         console.log("Retrieving Worknice API key…");
         const workniceApiKey = await redis.get<string>(`worknice_api_key:${integrationId}`);
 
+        // Retrieve the peopledirectory ID based on the team_id 
+        const peopledirectory = await getWorknicePeopleDirectory(workniceApiKey);
+
         return NextResponse.json({
             response_type: "in_channel", 
-            text: `Received command: ${data.text}, from user ID: ${data.user_id}, in team ID: ${data.team_id}, Worknice Integration ID is: ${integrationId}, Worknice API Key is ${workniceApiKey}`,
+            text: `Received command: ${data.text}, from user ID: ${data.user_id}, in team ID: ${data.team_id}, Worknice Integration ID is: ${integrationId}, Worknice API Key is ${workniceApiKey}, People Directory is ${peopledirectory}`,
         }, { status: 200 });
 
     } catch (error) {
