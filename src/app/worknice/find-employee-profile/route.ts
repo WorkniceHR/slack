@@ -133,6 +133,9 @@ async function getWorknicePeopleDirectory(apiKey: string): Promise<any[]> {
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
     try {
+        // Increase the timeout for the operation
+        request.setTimeout(5000); // Set the timeout value in milliseconds (e.g., 5000 for 5 seconds)
+
         // Parse the x-www-form-urlencoded data
         const body = parse(await request.text());
 
