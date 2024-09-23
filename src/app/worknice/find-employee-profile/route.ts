@@ -44,9 +44,13 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         // Retrieve the integration ID based on the team_id 
         const integrationId = await getIntegrationId(data.team_id);
 
+        // Retrieve Worknice API key from Redis
+        console.log("Retrieving Worknice API key…");
+        const workniceApiKey = await redis.get<string>(`worknice_api_key:${integrationId}`);
+
         return NextResponse.json({
             response_type: "in_channel", 
-            text: `Received command: ${data.text}, from user ID: ${data.user_id}, in team ID: ${data.team_id}, Worknice Integration ID is: ${integrationId}`,
+            text: `Received command: ${data.text}, from user ID: ${data.user_id}, in team ID: ${data.team_id}, Worknice Integration ID is: ${integrationId}, Worknice API Key is ${workniceApiKey}`,
         }, { status: 200 });
 
     } catch (error) {
