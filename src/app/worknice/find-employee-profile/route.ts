@@ -13,13 +13,22 @@ const requestSchema = z.object({
 async function getIntegrationId(team_id: string) {
     console.log("Retrieving integration ID for team ID:", team_id);
 
-    const integrationId = await redis.get(`session_code_integration_id:${team_id}`);
+    // Get all keys matching the pattern slack_team_id:*
+    const keys = await redis.keys('slack_team_id:*');
 
-    if (integrationId === null) {
-        throw Error("Unable to retrieve integration ID.");
+    // Iterate through the keys and find the one that matches the team_id
+    for (const key of keys) {
+        const storedTeamId = await redis.get(key);
+
+        // If the team_id matches, extract the integrationId from the key
+        if (storedTeamId === team_id) {
+            const integrationId = key.split(':')[1];  // Extract integrationId from key
+            console.log(`Found integration ID: ${integrationId}`);
+            return integrationId;
+        }
     }
 
-    return integrationId;
+    throw Error("Unable to retrieve integration ID for the given team ID.");
 }
 
 
