@@ -5,8 +5,8 @@ import { parse } from "querystring";
 import redis from "../../../redis";
 import config from "@/config";
 
-// Updated schema with new fields
-const requestSchema = z.object({
+// Request schema for incoming request
+const slackRequestSchema = z.object({
     user_id: z.string(),
     text: z.string(),
     team_id: z.string(),
@@ -134,6 +134,18 @@ async function getWorknicePeopleDirectory(apiKey: string): Promise<any[]> {
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
     try {
+        // Parse the x-www-form-urlencoded data
+        const body = parse(await request.text());
+
+        // Validate and parse the incoming request
+        const data = slackRequestSchema.parse(body);
+
+        // Return an immediate response to acknowledge the command
+        const immediateResponse = NextResponse.json(
+            { text: "Searching the employee directory..." },
+            { status: 200 }
+        );
+
         // Retrieve the integration ID based on the team_id 
         const integrationId = await getIntegrationId(data.team_id);
 
@@ -146,10 +158,10 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         }
 
         // Retrieve the people directory using the Worknice API Key
-        const peopledirectory = await getWorknicePeopleDirectory(workniceApiKey);
+        //const peopledirectory = await getWorknicePeopleDirectory(workniceApiKey);
 
         // Filter the people directory results to the person whose display name matches the 'text' from the incoming Slack message
-        const filteredPeople = peopledirectory.filter(person => person.displayName === data.text);
+       // const filteredPeople = peopledirectory.filter(person => person.displayName === data.text);
 
         // Make a delayed response by sending a POST request to the response_url
         const delayedResponse = await fetch(data.response_url, {
@@ -157,14 +169,12 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ text: `Employee profile found: ${filteredPeople}` }),
+            //body: JSON.stringify({ text: `Employee profile found: ${filteredPeople}` }),
+            body: JSON.stringify({ text: `Delayed response` }),
         });
 
-        // Return an immediate response to acknowledge the command
-        return NextResponse.json(
-            { text: "Searching the employee directory..." },
-            { status: 200 }
-        );
+        // Return the immediate response
+        return immediateResponse;
     } catch (error) {
         const message = error instanceof Error ? error.message : `${error}`;
         return new NextResponse(message, { status: 500 });
