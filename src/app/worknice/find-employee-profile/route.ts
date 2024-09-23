@@ -146,7 +146,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         );
 
         // Send the immediate response first before running background logic
-        request.waitUntil((async () => {
+        (async () => {
             try {
                 // Retrieve the integration ID based on the team_id 
                 const integrationId = await getIntegrationId(data.team_id);
@@ -180,7 +180,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
             } catch (error) {
                 console.error("Error processing the delayed logic: ", error);
             }
-        })());
+        })();
 
         return immediateResponse;
     } catch (error) {
