@@ -153,9 +153,12 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         // Retrieve the people directory using the Worknice API Key
         const peopledirectory = await getWorknicePeopleDirectory(workniceApiKey);
 
+        // Filter the people directory results to the person whose display name matches the 'text' from the incoming Slack message
+        const filteredPeople = peopledirectory.filter(person => person.displayName === data.text);
+
         return NextResponse.json({
             response_type: "in_channel", 
-            text: `Received command: ${data.text}, from user ID: ${data.user_id}, in team ID: ${data.team_id}, Worknice Integration ID is: ${integrationId}, Worknice API Key is ${workniceApiKey}, People Directory is ${peopledirectory}`,
+            text: `Received command: ${data.text}, from user ID: ${data.user_id}, in team ID: ${data.team_id}, Worknice Integration ID is: ${integrationId}, Worknice API Key is ${workniceApiKey}, Person is ${filteredPeople}`,
         }, { status: 200 });
 
     } catch (error) {
