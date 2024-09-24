@@ -145,25 +145,29 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
             { status: 200 }
         );
 
-        // Send the immediate response first before running background logic
-        (async () => {
+        // Send the immediate response first
+        setTimeout(async () => {
             try {
                 // Retrieve the integration ID based on the team_id 
                 const integrationId = await getIntegrationId(data.team_id);
 
                 // Retrieve Worknice API key from Redis
-                console.log("Retrieving Worknice API key…");
                 const workniceApiKey = await redis.get<string>(`worknice_api_key:${integrationId}`);
 
-                if (workniceApiKey === null) {
+                if (!workniceApiKey) {
                     throw new Error("Worknice API key not found.");
                 }
 
                 // Retrieve the people directory using the Worknice API Key
-                const peopledirectory = await getWorknicePeopleDirectory(workniceApiKey);
+                const peopleDirectory = await getWorknicePeopleDirectory(workniceApiKey);
 
                 // Filter the people directory results to the person whose display name matches the 'text' from the incoming Slack message
-                const filteredPeople = peopledirectory.filter(person => person.displayName === data.text);
+                const filteredPeople = peopleDirectory.filter(person => person.displayName === data.text);
+
+                // Prepare the delayed response message
+                const responseText = filteredPeople.length > 0
+                    ? `Found ${filteredPeople.length} match(es) for user: ${data.text}`
+                    : `No matches found for user: ${data.text}`;
 
                 // Make a delayed response by sending a POST request to the response_url
                 const delayedResponse = await fetch(data.response_url, {
@@ -171,22 +175,19 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ text: `Delayed response for user: ${data.text}` }),
+                    body: JSON.stringify({ text: responseText }),
                 });
 
                 // Check if the delayed response was successful
-                if (delayedResponse.ok) {
-                    console.log("Delayed response sent successfully.");
-                } else {
-                    console.error("Failed to send delayed response.");
+                if (!delayedResponse.ok) {
+                    throw new Error("Failed to send delayed response.");
                 }
+                console.log("Delayed response sent successfully.");
 
             } catch (error) {
-                console.error("Error processing the delayed logic: ", error);
+                console.error("Error in delayed logic: ", error);
             }
-        })().catch(error => {
-            console.error("Error in async function: ", error);
-        });
+        }, 0);
 
         return immediateResponse;
     } catch (error) {
