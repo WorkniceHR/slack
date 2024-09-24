@@ -28,11 +28,13 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
             body: JSON.stringify(immediateResponse),
         });
 
-        // Trigger the background job by calling the separate route
-        await fetch(`https://slack.worknice.com/worknice/find-employee-profile/get-details`, {
+        // Trigger the background job by calling the separate route asynchronously
+        fetch(`https://slack.worknice.com/worknice/find-employee-profile/get-details`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
+        }).catch((error) => {
+            console.error("Error triggering the background job:", error);
         });
 
         return immediateResponse;
