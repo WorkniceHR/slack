@@ -153,7 +153,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
 // Background task function
 async function runBackgroundTask(data: any) {
     try {
-        const integrationId = await getIntegrationId(data.team_id);
+        /*const integrationId = await getIntegrationId(data.team_id);
         const workniceApiKey = await redis.get<string>(`worknice_api_key:${integrationId}`);
 
         if (!workniceApiKey) {
@@ -167,8 +167,10 @@ async function runBackgroundTask(data: any) {
         const responseText = filteredPeople.length > 0
             ? `Found ${filteredPeople.length} match(es) for user: ${data.text}`
             : `No matches found for user: ${data.text}`;
-
+*/
         // Send delayed response to Slack
+        const responseText = "delayed response";
+        
         await sendDelayedResponse(data.response_url, responseText);
     } catch (error) {
         console.error("Error in background task:", error);
