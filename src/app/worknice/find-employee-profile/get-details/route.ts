@@ -74,7 +74,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         const peopleDirectory = await getWorknicePeopleDirectory(workniceApiKey);
         //const filteredPeople = peopleDirectory.filter(person => person.displayName === data.text);
         
-        const responseText = "hello there";
+        const responseText = `I found this many people: ${peopleDirectory.length}`;
         //const responseText = filteredPeople.length > 0
        //     ? `Found ${filteredPeople.length} match(es) for user: ${data.text}`
         //    : `No matches found for user: ${data.text}`;
