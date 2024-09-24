@@ -19,17 +19,17 @@ const worknicePeopleDirectorySchema = z.object({
             org: z.object({
                 people: z.array(
                     z.object({
-                        id: z.string(),
-                        displayName: z.string(),
-                        status: z.literal("ACTIVE"),
-                        role: z.string(),
-                        employeeCode: z.string().optional(),
+                        id: z.string(), 
+                        displayName: z.string(), 
+                        status: z.literal("ACTIVE").nullable(), 
+                        role: z.string().nullable(), 
+                        employeeCode: z.string().nullable(), 
                         profileImage: z.object({
                             url: z.string(),
-                        }).optional(),
-                        profileBio: z.string().optional(),
-                        profileEmail: z.string(),
-                        startDate: z.string(),
+                        }).nullable(), 
+                        profileBio: z.string().nullable(), 
+                        profileEmail: z.string().nullable(), // profileEmail can be null
+                        startDate: z.string().nullable(), // startDate can be null
                         currentJob: z.object({
                             position: z.object({
                                 title: z.string(),
@@ -39,20 +39,21 @@ const worknicePeopleDirectorySchema = z.object({
                                             displayName: z.string(),
                                         }),
                                     }),
-                                }).optional(),
+                                }).nullable(), // manager can be null
                             }),
-                        }),
-                        profilePronouns: z.string().optional(),
+                        }).nullable(), 
+                        profilePronouns: z.string().nullable(),
                         profileBirthday: z.object({
                             day: z.number(),
                             month: z.number(),
-                        }).optional(),
+                        }).nullable(),
                     })
                 ),
             }),
         }),
     }),
 });
+
 
 const fetchWithZod = createZodFetcher();
 
