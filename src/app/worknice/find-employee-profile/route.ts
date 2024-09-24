@@ -134,20 +134,19 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         const body = parse(await request.text());
         const data = slackRequestSchema.parse(body);
 
-        // Return immediate response to client first
         const immediateResponse = NextResponse.json(
             { text: "Searching the employee directory..." },
             { status: 200 }
         );
 
-        // Run background task
         runBackgroundTask(data).catch((error) =>
             console.error("Error in background task:", error)
         );
 
         return immediateResponse;
-    } catch (error) {
-        return new NextResponse(error.message, { status: 500 });
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        return new NextResponse(message, { status: 500 });
     }
 };
 
