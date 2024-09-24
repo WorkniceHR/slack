@@ -91,7 +91,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
 async function getIntegrationId(team_id: string): Promise<string> {
     const keys = await redis.keys('slack_team_id:*');
     for (const key of keys) {
-        const storedTeamId = await redis.get(key);
+        const storedTeamId = await redis.get(key) as string; // Add type assertion here
         if (storedTeamId === team_id) {
             return key.split(':')[1];
         }
