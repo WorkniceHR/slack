@@ -74,10 +74,16 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         const peopleDirectory = await getWorknicePeopleDirectory(workniceApiKey);
         const filteredPeople = peopleDirectory.filter(person => person.displayName === data.text);
         
-        //const responseText = `I found this many people: ${filteredPeople.length}`;
-        const responseText = filteredPeople.length > 0
-            ? `Found ${filteredPeople[0].displayName}`
-            : `Sorry no matches for ${data.text}`;
+        let responseText = "";
+        if (filteredPeople.length > 0) {
+            const person = filteredPeople[0];
+            responseText = `Found ${person.displayName}\n`;
+            responseText += `Title: ${person.currentJob?.position.title}\n`;
+            responseText += `Email: ${person.profileEmail}\n`;
+            responseText += `Phone: ${person.profilePhone}\n`;
+        } else {
+            responseText = `Sorry, no matches for ${data.text}`;
+        }
 
         // Send delayed response to Slack
         await sendDelayedResponse(data.response_url, responseText);
