@@ -105,6 +105,7 @@ async function getIntegrationId(team_id: string) {
             return integrationId;
         }
     }
+}
 
 async function getWorknicePeopleDirectory(apiKey: string): Promise<any[]> {
     const response = await fetchWithZod(
