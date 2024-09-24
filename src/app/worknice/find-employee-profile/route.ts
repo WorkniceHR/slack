@@ -166,7 +166,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
                 const filteredPeople = peopledirectory.filter(person => person.displayName === data.text);
 
                 // Make a delayed response by sending a POST request to the response_url
-                const delayedResponse = fetch(data.response_url, {
+                const delayedResponse = await fetch(data.response_url, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -174,13 +174,19 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
                     body: JSON.stringify({ text: `Delayed response for user: ${data.text}` }),
                 });
 
-                // Wait for the delayed response to complete
-                await delayedResponse;
+                // Check if the delayed response was successful
+                if (delayedResponse.ok) {
+                    console.log("Delayed response sent successfully.");
+                } else {
+                    console.error("Failed to send delayed response.");
+                }
 
             } catch (error) {
                 console.error("Error processing the delayed logic: ", error);
             }
-        })();
+        })().catch(error => {
+            console.error("Error in async function: ", error);
+        });
 
         return immediateResponse;
     } catch (error) {
