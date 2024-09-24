@@ -21,6 +21,13 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
             { status: 200 }
         );
 
+        // Send the immediate response to the user
+        await fetch(data.response_url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(immediateResponse),
+        });
+
         // Trigger the background job by calling the separate route
         await fetch(`https://slack.worknice.com/worknice/find-employee-profile/get-details`, {
             method: "POST",
