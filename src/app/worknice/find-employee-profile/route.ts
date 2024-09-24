@@ -16,16 +16,13 @@ const slackRequestSchema = z.object({
 async function getIntegrationId(team_id: string) {
     console.log("Retrieving integration ID for team ID:", team_id);
 
-    // Get all keys matching the pattern slack_team_id:*
     const keys = await redis.keys('slack_team_id:*');
 
-    // Iterate through the keys and find the one that matches the team_id
     for (const key of keys) {
         const storedTeamId = await redis.get(key);
 
-        // If the team_id matches, extract the integrationId from the key
         if (storedTeamId === team_id) {
-            const integrationId = key.split(':')[1];  // Extract integrationId from key
+            const integrationId = key.split(':')[1];
             console.log(`Found integration ID: ${integrationId}`);
             return integrationId;
         }
@@ -33,6 +30,7 @@ async function getIntegrationId(team_id: string) {
 
     throw Error("Unable to retrieve integration ID for the given team ID.");
 }
+
 const fetchWithZod = createZodFetcher();
 
 const worknicePeopleDirectorySchema = z.object({
@@ -43,7 +41,7 @@ const worknicePeopleDirectorySchema = z.object({
                     z.object({
                         id: z.string(),
                         displayName: z.string(),
-                        status: z.literal("ACTIVE"), // Adjust if other statuses are needed
+                        status: z.literal("ACTIVE"),
                         role: z.string(),
                         employeeCode: z.string().optional(),
                         profileImage: z.object({
@@ -76,6 +74,7 @@ const worknicePeopleDirectorySchema = z.object({
     }),
 });
 
+// Background fetcher using zod-fetch
 async function getWorknicePeopleDirectory(apiKey: string): Promise<any[]> {
     const response = await fetchWithZod(
         worknicePeopleDirectorySchema,
@@ -130,66 +129,65 @@ async function getWorknicePeopleDirectory(apiKey: string): Promise<any[]> {
     return response.data.session.org.people;
 }
 
-
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
     try {
-        // Parse the x-www-form-urlencoded data
         const body = parse(await request.text());
 
-        // Validate and parse the incoming request
         const data = slackRequestSchema.parse(body);
 
-        // Return an immediate response to acknowledge the command
         const immediateResponse = NextResponse.json(
             { text: "Searching the employee directory..." },
             { status: 200 }
         );
 
-        // Send the immediate response first
-        setTimeout(async () => {
+        // Send the immediate response and then execute the background task
+        (async () => {
             try {
-                // Retrieve the integration ID based on the team_id 
                 const integrationId = await getIntegrationId(data.team_id);
 
-                // Retrieve Worknice API key from Redis
                 const workniceApiKey = await redis.get<string>(`worknice_api_key:${integrationId}`);
 
                 if (!workniceApiKey) {
                     throw new Error("Worknice API key not found.");
                 }
 
-                // Retrieve the people directory using the Worknice API Key
+                // Fetch the directory using zod-fetch
                 const peopleDirectory = await getWorknicePeopleDirectory(workniceApiKey);
 
-                // Filter the people directory results to the person whose display name matches the 'text' from the incoming Slack message
                 const filteredPeople = peopleDirectory.filter(person => person.displayName === data.text);
 
-                // Prepare the delayed response message
                 const responseText = filteredPeople.length > 0
                     ? `Found ${filteredPeople.length} match(es) for user: ${data.text}`
                     : `No matches found for user: ${data.text}`;
 
-                // Make a delayed response by sending a POST request to the response_url
-                const delayedResponse = await fetch(data.response_url, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ text: responseText }),
-                });
+                // Send the delayed response to Slack
+                const delayedResponse = await fetchWithZod(
+                    z.object({ ok: z.boolean() }), // Define schema for the Slack response validation
+                    data.response_url,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ text: responseText }),
+                    }
+                );
 
-                // Check if the delayed response was successful
                 if (!delayedResponse.ok) {
                     throw new Error("Failed to send delayed response.");
                 }
-                console.log("Delayed response sent successfully.");
 
+                console.log("Delayed response sent successfully.");
             } catch (error) {
-                console.error("Error in delayed logic: ", error);
+                console.error("Error in background function: ", error);
             }
-        }, 0);
+        })().catch((error) => console.error("Error in async background task:", error));
+
+        // Set the background response header for Vercel
+        immediateResponse.headers.set('x-vercel-id', '1'); // Marking it as a background task
 
         return immediateResponse;
+
     } catch (error) {
         const message = error instanceof Error ? error.message : `${error}`;
         return new NextResponse(message, { status: 500 });
