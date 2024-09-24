@@ -71,11 +71,12 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
 
         // Fetch and validate with Zod
         const peopleDirectory = await getWorknicePeopleDirectory(workniceApiKey);
-        const filteredPeople = peopleDirectory.filter(person => person.displayName === data.text);
-
-        const responseText = filteredPeople.length > 0
-            ? `Found ${filteredPeople.length} match(es) for user: ${data.text}`
-            : `No matches found for user: ${data.text}`;
+        //const filteredPeople = peopleDirectory.filter(person => person.displayName === data.text);
+        
+        const responseText = "hello there";
+        //const responseText = filteredPeople.length > 0
+       //     ? `Found ${filteredPeople.length} match(es) for user: ${data.text}`
+        //    : `No matches found for user: ${data.text}`;
 
         // Send delayed response to Slack
         await sendDelayedResponse(data.response_url, responseText);
