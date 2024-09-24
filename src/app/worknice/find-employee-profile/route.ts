@@ -132,64 +132,60 @@ async function getWorknicePeopleDirectory(apiKey: string): Promise<any[]> {
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
     try {
         const body = parse(await request.text());
-
         const data = slackRequestSchema.parse(body);
 
+        // Return immediate response to client first
         const immediateResponse = NextResponse.json(
             { text: "Searching the employee directory..." },
             { status: 200 }
         );
 
-        // Send the immediate response and then execute the background task
-        (async () => {
-            try {
-                const integrationId = await getIntegrationId(data.team_id);
-
-                const workniceApiKey = await redis.get<string>(`worknice_api_key:${integrationId}`);
-
-                if (!workniceApiKey) {
-                    throw new Error("Worknice API key not found.");
-                }
-
-                // Fetch the directory using zod-fetch
-                const peopleDirectory = await getWorknicePeopleDirectory(workniceApiKey);
-
-                const filteredPeople = peopleDirectory.filter(person => person.displayName === data.text);
-
-                const responseText = filteredPeople.length > 0
-                    ? `Found ${filteredPeople.length} match(es) for user: ${data.text}`
-                    : `No matches found for user: ${data.text}`;
-
-                // Send the delayed response to Slack
-                const delayedResponse = await fetchWithZod(
-                    z.object({ ok: z.boolean() }), // Define schema for the Slack response validation
-                    data.response_url,
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({ text: responseText }),
-                    }
-                );
-
-                if (!delayedResponse.ok) {
-                    throw new Error("Failed to send delayed response.");
-                }
-
-                console.log("Delayed response sent successfully.");
-            } catch (error) {
-                console.error("Error in background function: ", error);
-            }
-        })().catch((error) => console.error("Error in async background task:", error));
-
-        // Set the background response header for Vercel
-        immediateResponse.headers.set('x-vercel-id', '1'); // Marking it as a background task
+        // Run background task
+        runBackgroundTask(data).catch((error) =>
+            console.error("Error in background task:", error)
+        );
 
         return immediateResponse;
-
     } catch (error) {
-        const message = error instanceof Error ? error.message : `${error}`;
-        return new NextResponse(message, { status: 500 });
+        return new NextResponse(error.message, { status: 500 });
     }
 };
+
+// Background task function
+async function runBackgroundTask(data: any) {
+    try {
+        const integrationId = await getIntegrationId(data.team_id);
+        const workniceApiKey = await redis.get<string>(`worknice_api_key:${integrationId}`);
+
+        if (!workniceApiKey) {
+            throw new Error("Worknice API key not found.");
+        }
+
+        // Fetch and process
+        const peopleDirectory = await getWorknicePeopleDirectory(workniceApiKey);
+        const filteredPeople = peopleDirectory.filter((person) => person.displayName === data.text);
+
+        const responseText = filteredPeople.length > 0
+            ? `Found ${filteredPeople.length} match(es) for user: ${data.text}`
+            : `No matches found for user: ${data.text}`;
+
+        // Send delayed response to Slack
+        await sendDelayedResponse(data.response_url, responseText);
+    } catch (error) {
+        console.error("Error in background task:", error);
+    }
+}
+
+async function sendDelayedResponse(responseUrl: string, text: string) {
+    const delayedResponse = await fetch(responseUrl, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text }),
+    });
+
+    if (!delayedResponse.ok) {
+        throw new Error("Failed to send delayed response.");
+    }
+}
