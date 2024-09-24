@@ -153,24 +153,26 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
 // Background task function
 async function runBackgroundTask(data: any) {
     try {
-        /*const integrationId = await getIntegrationId(data.team_id);
+        const integrationId = await getIntegrationId(data.team_id);
         const workniceApiKey = await redis.get<string>(`worknice_api_key:${integrationId}`);
 
         if (!workniceApiKey) {
             throw new Error("Worknice API key not found.");
         }
-
+        
         // Fetch and process
         const peopleDirectory = await getWorknicePeopleDirectory(workniceApiKey);
-        const filteredPeople = peopleDirectory.filter((person) => person.displayName === data.text);
+        console.log("People Directory:", peopleDirectory);
+        //const filteredPeople = peopleDirectory.filter((person) => person.displayName === data.text);
+        //console.log("Filtered People Directory:", peopleDirectory);
 
-        const responseText = filteredPeople.length > 0
-            ? `Found ${filteredPeople.length} match(es) for user: ${data.text}`
-            : `No matches found for user: ${data.text}`;
-*/
-        // Send delayed response to Slack
+
+        //const responseText = filteredPeople.length > 0
+        //    ? `Found ${filteredPeople.length} match(es) for user: ${data.text}`
+        //    : `No matches found for user: ${data.text}`;
+
         const responseText = "delayed response";
-        
+        // Send delayed response to Slack
         await sendDelayedResponse(data.response_url, responseText);
     } catch (error) {
         console.error("Error in background task:", error);
