@@ -155,14 +155,24 @@ async function runBackgroundTask(data: any) {
     try {
         const integrationId = await getIntegrationId(data.team_id);
         const workniceApiKey = await redis.get<string>(`worknice_api_key:${integrationId}`);
+        console.log("Got Worknice API Key");
 
         if (!workniceApiKey) {
             throw new Error("Worknice API key not found.");
         }
         
         // Fetch and process
-        const peopleDirectory = await getWorknicePeopleDirectory(workniceApiKey);
-        console.log("People Directory:", peopleDirectory);
+        try {
+            const peopleDirectory = await getWorknicePeopleDirectory(workniceApiKey);
+            console.log("People Directory:", peopleDirectory);
+            // Rest of your code...
+        } catch (error) {
+            console.error("Error occurred while fetching people directory:", error);
+        }
+        
+        
+        //const peopleDirectory = await getWorknicePeopleDirectory(workniceApiKey);
+        //console.log("People Directory:", peopleDirectory);
         //const filteredPeople = peopleDirectory.filter((person) => person.displayName === data.text);
         //console.log("Filtered People Directory:", peopleDirectory);
 
