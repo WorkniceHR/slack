@@ -76,8 +76,8 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         
         //const responseText = `I found this many people: ${filteredPeople.length}`;
         const responseText = filteredPeople.length > 0
-            ? `Found ${filteredPeople.length} match(es) for user: ${data.text}`
-            : `No matches found for user: ${data.text}`;
+            ? `Found ${filteredPeople[0].displayName}`
+            : `Sorry no matches for ${data.text}`;
 
         // Send delayed response to Slack
         await sendDelayedResponse(data.response_url, responseText);
