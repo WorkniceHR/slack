@@ -120,7 +120,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         let responseText = "";
         if (filteredPeople.length > 0) {
             const person = filteredPeople[0];
-            responseText = `> [${person.displayName}](https://app.worknice.com/people/${person.id})\n`;
+            responseText = `> *<https://app.worknice.com/people/${person.id}|${person.displayName}>*\n`;
             responseText += `>*Position:* ${person.currentJob?.position.title ? person.currentJob?.position.title : "-"}\n`;
             responseText += `>*Manager:* ${person.currentJob?.position.manager?.currentJob?.person.displayName ? person.currentJob?.position.manager?.currentJob?.person.displayName : "-"}\n`;
             responseText += `>*Location:* ${person.location.name ? person.location.name : "-"}\n`;
