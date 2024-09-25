@@ -47,6 +47,9 @@ const worknicePeopleDirectorySchema = z.object({
                             day: z.number(),
                             month: z.number(),
                         }).nullable(),
+                        location: z.object({
+                            name: z.string().nullable(),
+                        }).nullable(),
                     })
                 ),
             }),
@@ -77,10 +80,15 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         let responseText = "";
         if (filteredPeople.length > 0) {
             const person = filteredPeople[0];
-            responseText = `Found ${person.displayName}\n`;
-            responseText += `Title: ${person.currentJob?.position.title}\n`;
-            responseText += `Email: ${person.profileEmail}\n`;
-            responseText += `Phone: ${person.profilePhone ? person.profilePhone : "-"}\n`;
+            responseText = `>* ${person.displayName}\n*`;
+            responseText += `>*Position:* ${person.currentJob?.position.title ? person.currentJob?.position.title : "-"}\n`;
+            responseText += `>*Manager:* ${person.currentJob?.position.manager?.currentJob?.person.displayName ? person.currentJob?.position.manager?.currentJob?.person.displayName : "-"}\n`;
+            responseText += `>*Location:* ${person.location.name ? person.location.name : "-"}\n`;
+            responseText += `>*Bio:* ${person.profileBio ? person.profileBio : "-"}\n`;
+            responseText += `>*Pronouns:* ${person.profilePronouns ? person.profilePronouns : "-"}\n`;
+            responseText += `>*Phone:* ${person.profilePhone ? person.profilePhone : "-"}\n`;
+            responseText += `>*Email:* ${person.profileEmail ? person.profileEmail : "-"}\n`;
+            responseText += `>*Birthday:* ${person.profileBirthday ? person.profileBirthday.month + "/" + person.profileBirthday.day : "-"}\n`;
         } else {
             responseText = `Sorry, no matches for ${data.text}`;
         }
@@ -154,6 +162,7 @@ async function getWorknicePeopleDirectory(apiKey: string): Promise<any[]> {
                                 }
                                 profilePronouns
                                 profileBirthday { day month }
+                                location {name}
                             }
                         }
                     }
