@@ -85,12 +85,12 @@ function getDaySuffix(day: number): string {
 }
 
 // Function to get the month name
-function getMonthName(month: number): string {
+function getMonthName(month: number | undefined): string {
     const monthNames = [
         "January", "February", "March", "April", "May", "June", "July",
         "August", "September", "October", "November", "December"
     ];
-    return monthNames[month - 1];
+    return monthNames[(month as number) - 1];
 }
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
