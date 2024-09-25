@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Temporal } from "temporal-polyfill";
 import { z } from "zod";
 import { createZodFetcher } from "zod-fetch";
 import redis from "../../../redis";
@@ -101,18 +102,10 @@ type CalendarEvent = z.infer<
 >["data"]["session"]["org"]["sharedCalendarEvents"][number];
 
 function filterTodayEvents(events: CalendarEvent[]): CalendarEvent[] {
-  //below is if you need to test with sample dates
-  const today = new Date(Date.parse("2024-09-26T12:00:00+10:00"));
-  //const today = new Date();
-
-  return events.filter((event) => {
-    const eventDate = new Date(Date.parse(event.startDate));
-    return (
-      eventDate.getFullYear() === today.getFullYear() &&
-      eventDate.getMonth() === today.getMonth() &&
-      eventDate.getDate() === today.getDate()
-    );
-  });
+  const today = Temporal.Now.plainDateISO("Australia/Sydney");
+  return events.filter((event) =>
+    Temporal.PlainDate.from(event.startDate).equals(today)
+  );
 }
 
 function formatEventMessage(events: CalendarEvent[]): string {
