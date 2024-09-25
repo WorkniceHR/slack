@@ -211,7 +211,6 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
 
     return NextResponse.json({
       test: "hello world",
-      today: today
       integrationIds: integrationIds,
       channels: channels,
       slackTokens: slackTokens,
