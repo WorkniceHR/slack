@@ -90,7 +90,10 @@ function getMonthName(month: number | undefined): string {
         "January", "February", "March", "April", "May", "June", "July",
         "August", "September", "October", "November", "December"
     ];
-    return monthNames[(month ?? 0) - 1];
+    if (month !== undefined) {
+        return monthNames[month - 1];
+    }
+    return "";
 }
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
