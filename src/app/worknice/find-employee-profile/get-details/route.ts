@@ -93,7 +93,7 @@ function getMonthName(month: number | undefined): string {
 
     // Ensure month is defined and within the valid range
     if (month !== undefined && month >= 1 && month <= 12) {
-        return monthNames[month - 1];
+        return monthNames[month - 1]!;
     }
 
     return "";
