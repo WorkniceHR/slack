@@ -102,20 +102,18 @@ type CalendarEvent = z.infer<
 
 function filterTodayEvents(events: CalendarEvent[]): CalendarEvent[] {
   //below is if you need to test with sample dates
-  //const today = new Date(Date.parse("2024-07-14T12:00:00+10:00"));
-  const today = new Date();
-  const todayUTC = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
+  const today = new Date(Date.parse("2024-09-26T12:00:00+10:00"));
+  //const today = new Date();
 
   return events.filter((event) => {
     const eventDate = new Date(Date.parse(event.startDate));
-    const eventDateUTC = new Date(Date.UTC(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate()));
-
-    return eventDateUTC.getTime() === todayUTC.getTime();
+    return (
+      eventDate.getFullYear() === today.getFullYear() &&
+      eventDate.getMonth() === today.getMonth() &&
+      eventDate.getDate() === today.getDate()
+    );
   });
 }
-
-
-
 
 function formatEventMessage(events: CalendarEvent[]): string {
   if (events.length === 0) {
