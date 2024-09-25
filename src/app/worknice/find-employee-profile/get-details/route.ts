@@ -80,7 +80,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
             responseText = `Found ${person.displayName}\n`;
             responseText += `Title: ${person.currentJob?.position.title}\n`;
             responseText += `Email: ${person.profileEmail}\n`;
-            responseText += `Phone: ${person.profilePhone}\n`;
+            responseText += `Phone: ${person.profilePhone ? person.profilePhone : "-"}\n`;
         } else {
             responseText = `Sorry, no matches for ${data.text}`;
         }
