@@ -60,6 +60,39 @@ const worknicePeopleDirectorySchema = z.object({
 
 const fetchWithZod = createZodFetcher();
 
+// Function to format the birthday
+function getFormattedBirthday(birthday: { month: number, day: number }): string {
+    const daySuffix = getDaySuffix(birthday.day);
+    const monthName = getMonthName(birthday.month);
+    return `${birthday.day}${daySuffix} ${monthName}`;
+}
+
+// Function to get the suffix for the day
+function getDaySuffix(day: number): string {
+    if (day >= 11 && day <= 13) {
+        return "th";
+    }
+    switch (day % 10) {
+        case 1:
+            return "st";
+        case 2:
+            return "nd";
+        case 3:
+            return "rd";
+        default:
+            return "th";
+    }
+}
+
+// Function to get the month name
+function getMonthName(month: number): string {
+    const monthNames = [
+        "January", "February", "March", "April", "May", "June", "July",
+        "August", "September", "October", "November", "December"
+    ];
+    return monthNames[month - 1];
+}
+
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
     try {
         const data = await request.json();
@@ -80,7 +113,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         let responseText = "";
         if (filteredPeople.length > 0) {
             const person = filteredPeople[0];
-            responseText = `>* ${person.displayName}\n*`;
+            responseText = `>* [${person.displayName}](https://app.worknice.com/people/${person.id}) *\n`;
             responseText += `>*Position:* ${person.currentJob?.position.title ? person.currentJob?.position.title : "-"}\n`;
             responseText += `>*Manager:* ${person.currentJob?.position.manager?.currentJob?.person.displayName ? person.currentJob?.position.manager?.currentJob?.person.displayName : "-"}\n`;
             responseText += `>*Location:* ${person.location.name ? person.location.name : "-"}\n`;
@@ -88,7 +121,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
             responseText += `>*Pronouns:* ${person.profilePronouns ? person.profilePronouns : "-"}\n`;
             responseText += `>*Phone:* ${person.profilePhone ? person.profilePhone : "-"}\n`;
             responseText += `>*Email:* ${person.profileEmail ? person.profileEmail : "-"}\n`;
-            responseText += `>*Birthday:* ${person.profileBirthday ? person.profileBirthday.month + "/" + person.profileBirthday.day : "-"}\n`;
+            responseText += `>*Birthday:* ${person.profileBirthday ? getFormattedBirthday(person.profileBirthday) : "-"}\n`;
         } else {
             responseText = `Sorry, no matches for ${data.text}`;
         }
