@@ -104,16 +104,18 @@ function filterTodayEvents(events: CalendarEvent[]): CalendarEvent[] {
   //below is if you need to test with sample dates
   //const today = new Date(Date.parse("2024-07-14T12:00:00+10:00"));
   const today = new Date();
+  const todayUTC = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
 
   return events.filter((event) => {
     const eventDate = new Date(Date.parse(event.startDate));
-    return (
-      eventDate.getFullYear() === today.getFullYear() &&
-      eventDate.getMonth() === today.getMonth() &&
-      eventDate.getDate() === today.getDate()
-    );
+    const eventDateUTC = new Date(Date.UTC(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate()));
+
+    return eventDateUTC.getTime() === todayUTC.getTime();
   });
 }
+
+
+
 
 function formatEventMessage(events: CalendarEvent[]): string {
   if (events.length === 0) {
@@ -167,29 +169,29 @@ function formatEventMessageSet(
 
 export const GET = async (request: NextRequest): Promise<NextResponse> => {
   try {
-    const ids = await getWorkniceIntegrationIds();
+    const integrationIds = await getWorkniceIntegrationIds();
 
     const channels: Array<string> = [];
     const slackTokens: Array<string> = [];
     const workniceTokens: Array<string> = [];
     const calendarEvents: Array<CalendarEvent[]> = [];
 
-    for (const id of ids) {
-      const channel = await redis.get(`slack_channel:calendar_update:${id}`);
+    for (const integrationId of integrationIds) {
+      const channel = await redis.get(`slack_channel:calendar_update:${integrationId}`);
       if (typeof channel !== "string") {
-        console.log(`No Slack channel found for integration ${id}. Skipping.`);
+        console.log(`No Slack channel found for integration ${integrationId}. Skipping.`);
         continue;
       }
 
-      const slackToken = await redis.get(`slack_access_token:${id}`);
+      const slackToken = await redis.get(`slack_access_token:${integrationId}`);
       if (typeof slackToken !== "string") {
-        console.log(`No Slack token found for integration ${id}. Skipping.`);
+        console.log(`No Slack token found for integration ${integrationId}. Skipping.`);
         continue;
       }
 
-      const workniceToken = await redis.get(`worknice_api_key:${id}`);
+      const workniceToken = await redis.get(`worknice_api_key:${integrationId}`);
       if (typeof workniceToken !== "string") {
-        console.log(`No Worknice token found for integration ${id}. Skipping.`);
+        console.log(`No Worknice token found for integration ${integrationId}. Skipping.`);
         continue;
       }
 
@@ -200,16 +202,17 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
       const events = await getWorkniceCalendarEvents(workniceToken);
       const todayEvents = filterTodayEvents(events);
       calendarEvents.push(todayEvents);
-      console.log(`Fetched calendar events for integration ${id}`);
+      console.log(`Fetched calendar events for integration ${integrationId}`);
 
       const message = formatEventMessage(todayEvents);
       await sendSlackMessage(slackToken, channel, message);
-      console.log(`Sent Slack message for integration ${id}`);
+      console.log(`Sent Slack message for integration ${integrationId}`);
     }
 
     return NextResponse.json({
       test: "hello world",
-      ids: ids,
+      today: today
+      integrationIds: integrationIds,
       channels: channels,
       slackTokens: slackTokens,
       workniceTokens: workniceTokens,
