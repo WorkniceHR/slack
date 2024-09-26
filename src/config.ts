@@ -31,6 +31,8 @@ const config = {
       "chat:write.customize",
       "chat:write.public",
       "chat:write",
+      "users:read",
+      "users:read.email",
     ],
   },
   worknice: {
