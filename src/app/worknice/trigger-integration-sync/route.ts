@@ -123,9 +123,7 @@ async function completeIntegrationSync(integrationId: string, apiToken: string):
     console.error("Error completing integration sync:", error);
     throw error;
   }
-}
-
-export default completeIntegrationSync;
+};
 
 
 
