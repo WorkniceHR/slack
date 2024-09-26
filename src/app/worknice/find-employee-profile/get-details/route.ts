@@ -186,7 +186,7 @@ function getFilteredPerson(peopleDirectory: any[], searchText: string) {
 
         // Check if every token is found in either name parts, job title, or location
         return tokens.every(token =>
-            nameParts.some(part => part.includes(token)) ||
+            nameParts.some((part: string) => part.includes(token)) ||
             jobTitle.includes(token) ||
             location.includes(token)
         );
