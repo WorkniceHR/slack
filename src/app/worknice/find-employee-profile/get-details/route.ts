@@ -178,7 +178,16 @@ async function getWorknicePeopleDirectory(apiKey: string): Promise<any[]> {
 function getFilteredPerson(peopleDirectory: any[], searchText: string) {
     const tokens = searchText.toLowerCase().split(' '); // Split search text into tokens
 
-    // Find the first person that matches all tokens
+    // Try to find an exact match first (full name match)
+    const exactMatch = peopleDirectory.find(person =>
+        person.displayName.toLowerCase() === searchText.toLowerCase()
+    );
+
+    if (exactMatch) {
+        return [exactMatch]; // Return the exact match if found
+    }
+
+    // If no exact match, find the top match based on partial tokens
     return peopleDirectory.find(person => {
         const nameParts = person.displayName.toLowerCase().split(' ');
         const jobTitle = person.currentJob?.position.title?.toLowerCase() || '';
