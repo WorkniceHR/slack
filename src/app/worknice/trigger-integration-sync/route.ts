@@ -69,8 +69,8 @@ const fetchSlackUsers = async (
     throw new Error("Failed to fetch Slack users.");
   }
 
-  // Filter out deleted and bot users
-  const filteredUsers = data.members.filter((user: any) => !user.deleted && !user.is_bot);
+  // Filter out deleted, bot, and USLACKBOT users
+  const filteredUsers = data.members.filter((user: any) => !user.deleted && !user.is_bot && user.id !== 'USLACKBOT');
 
   // Map through filtered users and return userId, displayName, and email
   return filteredUsers.map((user: any) => ({
