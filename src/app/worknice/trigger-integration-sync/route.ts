@@ -43,6 +43,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
 
   } catch (error) {
     const message = error instanceof Error ? error.message : `${error}`;
+    console.error(error);
     return new NextResponse(message, { status: 500 });
   }
 };
