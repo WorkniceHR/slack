@@ -33,6 +33,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     console.log("Retrieving Slack users");
     const slackUsers = await fetchSlackUsers(slackAccessToken);
     console.log(`Found ${slackUsers.length} Slack users`);
+    console.log(slackUsers);
 
 
     return NextResponse.json({
