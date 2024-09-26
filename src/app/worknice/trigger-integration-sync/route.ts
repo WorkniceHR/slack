@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 //import config from "../../../config";
-//import redis from "../../../redis";
+import redis from "../../../redis";
 
 // Define schema for request validation
 const requestSchema = z.object({
@@ -13,8 +13,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     // Validate and parse the incoming request
     const data = requestSchema.parse(await request.json());
 
-    /*
-    // Retrieve Slack access token from Redis
+    //Retrieve Slack access token from Redis
     console.log("Retrieving Slack access token…");
     const slackAccessToken = await redis.get<string>(`slack_access_token:${data.integrationId}`);
 
@@ -30,12 +29,11 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
       return NextResponse.json({ error: "Unable to retrieve Worknice API key" }, { status: 404 });
     }
 
-    */
-    // Return both tokens in the response
+
     return NextResponse.json({
       test: "hello",
-      //slackAccessToken,
-      //workniceApiKey,
+      slackAccessToken,
+      workniceApiKey,
     }, { status: 200 });
 
   } catch (error) {
