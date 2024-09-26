@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-//import config from "../../../config";
+import { createZodFetcher } from "zod-fetch";
+import config from "../../../config";
 import redis from "../../../redis";
 
 // Define schema for request validation
 const requestSchema = z.object({
   integrationId: z.string(),
 });
+
+const fetchWithZod = createZodFetcher();
+
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
   try {
@@ -33,8 +37,9 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     console.log("Retrieving Slack users");
     const slackUsers = await fetchSlackUsers(slackAccessToken);
     console.log(`Found ${slackUsers.length} Slack users`);
-    console.log(slackUsers);
 
+    // Complete the integration sync
+    await completeIntegrationSync(data.integrationId, workniceApiKey);
 
     return NextResponse.json({
       test: "hello",
@@ -79,4 +84,50 @@ const fetchSlackUsers = async (
     email: user.profile.email || '',
   }));
 };
+
+//Complete the integration sync
+async function completeIntegrationSync(integrationId: string, apiToken: string): Promise<void> {
+  try {
+    console.log("Completing integration sync...");
+
+    await fetchWithZod(
+      z.object({
+        data: z.object({
+          completeIntegrationSync: z.object({
+            id: z.string(),
+          }),
+        }),
+      }),
+      `${config.worknice.baseUrl}/api/graphql`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "worknice-api-token": apiToken,
+        },
+        body: JSON.stringify({
+          query: `
+            mutation CompleteIntegrationSync($integrationId: ID!) {
+              completeIntegrationSync(integrationId: $integrationId) {
+                id
+              }
+            }
+          `,
+          variables: { integrationId },
+        }),
+      }
+    );
+
+    console.log("Integration sync completed.");
+  } catch (error) {
+    console.error("Error completing integration sync:", error);
+    throw error;
+  }
+}
+
+export default completeIntegrationSync;
+
+
+
+
 
