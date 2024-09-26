@@ -181,7 +181,7 @@ const fetchPersonConnections = async (integrationId: string, apiToken: string) =
       }
     );
 
-    if (!response.data.listPersonConnections) {
+    if (!Array.isArray(response.data.listPersonConnections)) {
       throw new Error("Failed to fetch person connections from Worknice.");
     }
 
