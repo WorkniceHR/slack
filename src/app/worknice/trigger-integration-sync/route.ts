@@ -149,7 +149,7 @@ const fetchPersonConnections = async (integrationId: string, apiToken: string) =
               }).optional(),
               status: z.string(),
             })
-          ),
+          ).optional(), // Allow the array to be optional
         }),
       }),
       `${config.worknice.baseUrl}/api/graphql`,
