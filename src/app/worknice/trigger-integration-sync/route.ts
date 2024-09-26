@@ -38,6 +38,9 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     const slackUsers = await fetchSlackUsers(slackAccessToken);
     console.log(`Found ${slackUsers.length} Slack users`);
 
+    // Test fetching person connections
+    await fetchPersonConnections(data.integrationId, workniceApiKey);
+
     // Complete the integration sync
     await completeIntegrationSync(data.integrationId, workniceApiKey);
 
@@ -125,6 +128,70 @@ async function completeIntegrationSync(integrationId: string, apiToken: string):
   }
 };
 
+// Fetch existing person connections from Worknice API
+const fetchPersonConnections = async (integrationId: string, apiToken: string) => {
+  try {
+    console.log("Fetching existing person connections from Worknice...");
+
+    const response = await fetchWithZod(
+      z.object({
+        data: z.object({
+          listPersonConnections: z.array(
+            z.object({
+              id: z.string(),
+              person: z.object({
+                id: z.string().optional(),
+              }).optional(),
+              remote: z.object({
+                id: z.string(),
+                name: z.string(),
+                email: z.string().optional(),
+              }).optional(),
+              status: z.string(),
+            })
+          ),
+        }),
+      }),
+      `${config.worknice.baseUrl}/api/graphql`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "worknice-api-token": apiToken,
+        },
+        body: JSON.stringify({
+          query: `
+            query GetPersonConnections($integrationId: ID!) {
+              listPersonConnections(integrationId: $integrationId) {
+                id
+                person {
+                  id
+                }
+                remote {
+                  id
+                  name
+                  email
+                }
+                status
+              }
+            }
+          `,
+          variables: { integrationId },
+        }),
+      }
+    );
+
+    if (!response.data.listPersonConnections) {
+      throw new Error("Failed to fetch person connections from Worknice.");
+    }
+
+    console.log(`Fetched ${response.data.listPersonConnections.length} person connections.`);
+    return response.data.listPersonConnections;
+  } catch (error) {
+    console.error("Error fetching person connections:", error);
+    throw error;
+  }
+};
 
 
 
