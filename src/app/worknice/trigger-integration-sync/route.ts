@@ -29,6 +29,11 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
       return NextResponse.json({ error: "Unable to retrieve Worknice API key" }, { status: 404 });
     }
 
+    //fetch Slack users
+    console.log("Retrieving Slack users");
+    const slackUsers = await fetchSlackUsers(slackAccessToken);
+    console.log(`Found ${slackUsers.length} Slack users`);
+
 
     return NextResponse.json({
       test: "hello",
@@ -41,3 +46,32 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     return new NextResponse(message, { status: 500 });
   }
 };
+
+
+
+// Fetches users from the Slack API using the access token
+const fetchSlackUsers = async (
+  accessToken: string
+): Promise<{ userId: string; displayName: string; email: string }[]> => {
+  const response = await fetch("https://slack.com/api/users.list", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  const data = await response.json();
+
+  if (!data.ok) {
+    throw new Error("Failed to fetch Slack users.");
+  }
+
+  // Map through users and return userId, displayName, and email
+  return data.members.map((user: any) => ({
+    userId: user.id,
+    displayName: user.profile.real_name || user.name,
+    email: user.profile.email || '',
+  }));
+};
+
