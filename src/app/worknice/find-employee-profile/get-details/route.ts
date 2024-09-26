@@ -60,46 +60,6 @@ const worknicePeopleDirectorySchema = z.object({
 
 const fetchWithZod = createZodFetcher();
 
-// Function to format the birthday
-function getFormattedBirthday(birthday: { month: number, day: number }): string {
-    const daySuffix = getDaySuffix(birthday.day);
-    const monthName = getMonthName(birthday.month);
-    return `${birthday.day}${daySuffix} ${monthName}`;
-}
-
-// Function to get the suffix for the day
-function getDaySuffix(day: number): string {
-    if (day >= 11 && day <= 13) {
-        return "th";
-    }
-    switch (day % 10) {
-        case 1:
-            return "st";
-        case 2:
-            return "nd";
-        case 3:
-            return "rd";
-        default:
-            return "th";
-    }
-}
-
-// Function to get the month name
-function getMonthName(month: number | undefined): string {
-    const monthNames = [
-        "January", "February", "March", "April", "May", "June", "July",
-        "August", "September", "October", "November", "December"
-    ];
-
-    // Ensure month is defined and within the valid range
-    if (month !== undefined && month >= 1 && month <= 12) {
-        return monthNames[month - 1]!;
-    }
-
-    return "";
-}
-
-
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
     try {
         const data = await request.json();
@@ -115,7 +75,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
 
         // Fetch and validate with Zod
         const peopleDirectory = await getWorknicePeopleDirectory(workniceApiKey);
-        const filteredPeople = peopleDirectory.filter(person => person.displayName === data.text);
+        const filteredPeople = getFilteredPerson(peopleDirectory, data.text);
         
         let responseText = "";
         if (filteredPeople.length > 0) {
@@ -212,6 +172,65 @@ async function getWorknicePeopleDirectory(apiKey: string): Promise<any[]> {
         }
     );
     return response.data.session.org.people;
+}
+
+
+function getFilteredPerson(peopleDirectory: any[], searchText: string) {
+    const tokens = searchText.toLowerCase().split(' '); // Split search text into tokens
+
+    // Find the first person that matches all tokens
+    return peopleDirectory.find(person => {
+        const nameParts = person.displayName.toLowerCase().split(' ');
+        const jobTitle = person.currentJob?.position.title?.toLowerCase() || '';
+        const location = person.location?.name?.toLowerCase() || '';
+
+        // Check if every token is found in either name parts, job title, or location
+        return tokens.every(token =>
+            nameParts.some(part => part.includes(token)) ||
+            jobTitle.includes(token) ||
+            location.includes(token)
+        );
+    });
+}
+
+
+// Function to format the birthday
+function getFormattedBirthday(birthday: { month: number, day: number }): string {
+    const daySuffix = getDaySuffix(birthday.day);
+    const monthName = getMonthName(birthday.month);
+    return `${birthday.day}${daySuffix} ${monthName}`;
+}
+
+// Function to get the suffix for the day
+function getDaySuffix(day: number): string {
+    if (day >= 11 && day <= 13) {
+        return "th";
+    }
+    switch (day % 10) {
+        case 1:
+            return "st";
+        case 2:
+            return "nd";
+        case 3:
+            return "rd";
+        default:
+            return "th";
+    }
+}
+
+// Function to get the month name
+function getMonthName(month: number | undefined): string {
+    const monthNames = [
+        "January", "February", "March", "April", "May", "June", "July",
+        "August", "September", "October", "November", "December"
+    ];
+
+    // Ensure month is defined and within the valid range
+    if (month !== undefined && month >= 1 && month <= 12) {
+        return monthNames[month - 1]!;
+    }
+
+    return "";
 }
 
 async function sendDelayedResponse(responseUrl: string, text: string) {
