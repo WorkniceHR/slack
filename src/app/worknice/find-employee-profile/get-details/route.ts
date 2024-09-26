@@ -187,19 +187,26 @@ function getFilteredPerson(peopleDirectory: any[], searchText: string) {
         return [exactMatch]; // Return the exact match if found
     }
 
-    // If no exact match, find the top match based on partial tokens
-    return peopleDirectory.find(person => {
+    // If no exact match, filter for partial matches
+    const partialMatches = peopleDirectory.filter(person => {
         const nameParts = person.displayName.toLowerCase().split(' ');
         const jobTitle = person.currentJob?.position.title?.toLowerCase() || '';
         const location = person.location?.name?.toLowerCase() || '';
 
         // Check if every token is found in either name parts, job title, or location
         return tokens.every(token =>
-            nameParts.some((part: string) => part.includes(token)) ||
-            jobTitle.includes(token) ||
-            location.includes(token)
+            nameParts.some((part: string) => part.includes(token)) || // Match on name
+            jobTitle.includes(token) || // Match on job title
+            location.includes(token) // Match on location
         );
     });
+
+    // Return the top partial match if found, otherwise return an empty array
+    if (partialMatches.length > 0) {
+        return [partialMatches[0]]; // Return the first partial match
+    } else {
+        return []; // No matches found
+    }
 }
 
 
