@@ -70,10 +70,7 @@ const syncSlackUsersToWorknice = async (
     // Fetch existing Worknice person connections
     const personConnections = await fetchPersonConnections(integrationId, apiToken);
 
-    if (personConnections === null) {
-      console.log("Failed to fetch person connections from Worknice.");
-      return;
-    }
+    console.log(personConnections);
 
     for (const slackUser of slackUsers) {
       const existingConnection = personConnections.find(
@@ -266,7 +263,6 @@ const fetchPersonConnections = async (integrationId: string, apiToken: string) =
               remote: z.object({
                 id: z.string(),
                 name: z.string(),
-                email: z.string().optional(),
               }).optional(),
               status: z.string(),
             })
@@ -291,7 +287,6 @@ const fetchPersonConnections = async (integrationId: string, apiToken: string) =
                 remote {
                   id
                   name
-                  email
                 }
                 status
               }
