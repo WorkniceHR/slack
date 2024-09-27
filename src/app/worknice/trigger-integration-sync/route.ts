@@ -70,6 +70,11 @@ const syncSlackUsersToWorknice = async (
     // Fetch existing Worknice person connections
     const personConnections = await fetchPersonConnections(integrationId, apiToken);
 
+    if (personConnections === null) {
+      console.log("Failed to fetch person connections from Worknice.");
+      return;
+    }
+
     for (const slackUser of slackUsers) {
       const existingConnection = personConnections.find(
         (connection) => connection.remote?.email === slackUser.email
