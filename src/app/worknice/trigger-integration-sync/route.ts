@@ -72,9 +72,26 @@ const syncSlackUsersToWorknice = async (
 
     for (const slackUser of slackUsers) {
       
+      // Check if the user already exists in Worknice
       const existingConnection = personConnections.find(
         (connection) => connection.remote?.id === slackUser.userId
       );
+
+      /* Check if the person connection is LOCAL_ONLY and invite to Slack
+      // Sample only - since this is only possible on enterprise plans on Slack
+      const localOnlyConnection = personConnections.find(
+        (connection) => connection.status === "LOCAL_ONLY" && connection.person?.id
+      );
+
+      if (localOnlyConnection) {
+        // Invite the person to Slack since they are LOCAL_ONLY
+        await inviteToSlack(slackUser.email, slackUser.displayName, slackAccessToken);
+
+        console.log(`Invited ${slackUser.displayName} (${slackUser.email}) to Slack.`);
+        continue; // Move to the next user
+      }
+
+      */
 
       // Since we are not syncing any people data connected connections can be marked as MERGED
       if (existingConnection && existingConnection.status === "CONNECTED") {
@@ -378,8 +395,6 @@ const updatePersonConnection = async (
 
   return result.data.updatePersonConnection;
 };
-
-
 
 
 //Complete the integration sync
