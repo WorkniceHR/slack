@@ -306,7 +306,7 @@ const fetchPersonConnections = async (integrationId: string, apiToken: string) =
     console.log('GraphQL Response:', response);
 
     // Check if the response contains a valid array
-    const connections = response.data?.listPersonConnections || [];
+    const connections = response.data?.integration?.connections || [];
 
     if (!Array.isArray(connections)) {
       throw new Error("Failed to fetch person connections from Worknice.");
