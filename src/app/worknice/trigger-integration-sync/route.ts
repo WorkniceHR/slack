@@ -149,7 +149,7 @@ const fetchPersonConnections = async (integrationId: string, apiToken: string) =
               }).optional(),
               status: z.string(),
             })
-          ).optional(), // Allow the array to be optional
+          ).optional(),  // Handle optional or missing listPersonConnections
         }),
       }),
       `${config.worknice.baseUrl}/api/graphql`,
@@ -181,18 +181,18 @@ const fetchPersonConnections = async (integrationId: string, apiToken: string) =
       }
     );
 
-    if (!Array.isArray(response.data.listPersonConnections)) {
+    // Check if the response contains a valid array
+    const connections = response.data.listPersonConnections || [];
+
+    if (!Array.isArray(connections)) {
       throw new Error("Failed to fetch person connections from Worknice.");
     }
 
-    console.log(`Fetched ${response.data.listPersonConnections.length} person connections.`);
-    return response.data.listPersonConnections;
+    console.log(`Fetched ${connections.length} person connections.`);
+    return connections;
+
   } catch (error) {
     console.error("Error fetching person connections:", error);
     throw error;
   }
 };
-
-
-
-
