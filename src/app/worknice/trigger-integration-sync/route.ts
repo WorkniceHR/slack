@@ -11,7 +11,6 @@ const requestSchema = z.object({
 
 const fetchWithZod = createZodFetcher();
 
-
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
   try {
     // Validate and parse the incoming request
@@ -38,8 +37,8 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     const slackUsers = await fetchSlackUsers(slackAccessToken);
     console.log(`Found ${slackUsers.length} Slack users`);
 
-    // Test fetching person connections
-    await fetchPersonConnections(data.integrationId, workniceApiKey);
+    // Sync Slack users to Worknice
+    await syncSlackUsersToWorknice(slackUsers, data.integrationId, workniceApiKey);
 
     // Complete the integration sync
     await completeIntegrationSync(data.integrationId, workniceApiKey);
@@ -57,6 +56,44 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
   }
 };
 
+
+
+
+
+// Sync Slack users to Worknice
+const syncSlackUsersToWorknice = async (
+  slackUsers: { userId: string; displayName: string; email: string }[],
+  integrationId: string,
+  apiToken: string
+) => {
+  try {
+    // Fetch existing Worknice person connections
+    const personConnections = await fetchPersonConnections(integrationId, apiToken);
+
+    for (const slackUser of slackUsers) {
+      const existingConnection = personConnections.find(
+        (connection) => connection.remote?.email === slackUser.email
+      );
+
+      if (!existingConnection) {
+        // Add Slack user as REMOTE_ONLY if no existing connection
+        await createPersonConnection(apiToken, integrationId, {
+          remote: {
+            id: slackUser.userId,
+            name: slackUser.displayName,
+          },
+          status: "REMOTE_ONLY",
+        });
+
+        console.log(`Added ${slackUser.displayName} (${slackUser.email}) as REMOTE_ONLY.`);
+      } else {
+        console.log(`Skipping ${slackUser.displayName}, already connected.`);
+      }
+    }
+  } catch (error) {
+    console.error("Error syncing Slack users to Worknice:", error);
+  }
+};
 
 
 // Fetches users from the Slack API using the access token
@@ -88,44 +125,123 @@ const fetchSlackUsers = async (
   }));
 };
 
-//Complete the integration sync
-async function completeIntegrationSync(integrationId: string, apiToken: string): Promise<void> {
-  try {
-    console.log("Completing integration sync...");
 
-    await fetchWithZod(
-      z.object({
-        data: z.object({
-          completeIntegrationSync: z.object({
-            id: z.string(),
-          }),
-        }),
-      }),
-      `${config.worknice.baseUrl}/api/graphql`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "worknice-api-token": apiToken,
-        },
-        body: JSON.stringify({
-          query: `
-            mutation CompleteIntegrationSync($integrationId: ID!) {
-              completeIntegrationSync(integrationId: $integrationId) {
+
+// Define the personConnectionSchema to validate the GraphQL response
+const personConnectionSchema = z.object({
+  __typename: z.literal("PersonConnection"),
+  createdAt: z.string(),
+  id: z.string(),
+  person: z
+    .object({
+      displayName: z.string(),
+      id: z.string(),
+    })
+    .nullable(),
+  remote: z
+    .object({
+      name: z.string(),
+      id: z.string(),
+      url: z.string().nullable(),
+    })
+    .nullable(),
+  status: z.enum(["CONNECTED", "LOCAL_ONLY", "MERGED", "REMOTE_ONLY"]),
+  updatedAt: z.string(),
+});
+
+// Define the createPersonConnectionSchema to validate the GraphQL response
+const createPersonConnectionSchema = z.object({
+  data: z.object({
+    createPersonConnection: personConnectionSchema,
+  }),
+});
+
+// Define the createPersonConnection function to create a person connection in Worknice
+const createPersonConnection = async (
+  apiToken: string,
+  integrationId: string,
+  input:
+    | {
+      personId: string;
+      remote: {
+        id: string;
+        name: string;
+      };
+      status: "CONNECTED";
+    }
+    | {
+      personId: string;
+      status: "LOCAL_ONLY";
+    }
+    | {
+      personId: string;
+      remote: {
+        id: string;
+        name: string;
+      };
+      status: "MERGED";
+    }
+    | {
+      remote: {
+        id: string;
+        name: string;
+      };
+      status: "REMOTE_ONLY";
+    },
+) => {
+  const result = await fetchWithZod(
+    createPersonConnectionSchema,
+    `${config.worknice.baseUrl}/api/graphql`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "worknice-api-token": apiToken,
+      },
+      body: JSON.stringify({
+        query: `
+          mutation CreatePersonConnection($integrationId: ID!, $remote: ConnectionRemoteInput, $personId: ID, $status: ConnectionStatus!) {
+            createPersonConnection(integrationId: $integrationId, remote: $remote, personId: $personId, status: $status) {
+              __typename
+              createdAt
+              id
+              person {
+                displayName
                 id
               }
+              remote {
+                name
+                id
+                url
+              }
+              status
+              updatedAt
             }
-          `,
-          variables: { integrationId },
-        }),
-      }
-    );
+          }
+        `,
+        variables: input.status === "CONNECTED" || input.status === "MERGED"
+          ? {
+            integrationId,
+            personId: input.personId,
+            remote: input.remote,
+            status: input.status,
+          }
+          : input.status === "LOCAL_ONLY"
+            ? {
+              integrationId,
+              personId: input.personId,
+              status: input.status,
+            }
+            : {
+              integrationId,
+              remote: input.remote,
+              status: input.status,
+            },
+      }),
+    },
+  );
 
-    console.log("Integration sync completed.");
-  } catch (error) {
-    console.error("Error completing integration sync:", error);
-    throw error;
-  }
+  return result.data.createPersonConnection;
 };
 
 // Fetch existing person connections from Worknice API
@@ -193,6 +309,46 @@ const fetchPersonConnections = async (integrationId: string, apiToken: string) =
 
   } catch (error) {
     console.error("Error fetching person connections:", error);
+    throw error;
+  }
+};
+
+//Complete the integration sync
+async function completeIntegrationSync(integrationId: string, apiToken: string): Promise<void> {
+  try {
+    console.log("Completing integration sync...");
+
+    await fetchWithZod(
+      z.object({
+        data: z.object({
+          completeIntegrationSync: z.object({
+            id: z.string(),
+          }),
+        }),
+      }),
+      `${config.worknice.baseUrl}/api/graphql`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "worknice-api-token": apiToken,
+        },
+        body: JSON.stringify({
+          query: `
+            mutation CompleteIntegrationSync($integrationId: ID!) {
+              completeIntegrationSync(integrationId: $integrationId) {
+                id
+              }
+            }
+          `,
+          variables: { integrationId },
+        }),
+      }
+    );
+
+    console.log("Integration sync completed.");
+  } catch (error) {
+    console.error("Error completing integration sync:", error);
     throw error;
   }
 };
