@@ -76,6 +76,19 @@ const syncSlackUsersToWorknice = async (
         (connection) => connection.remote?.id === slackUser.userId
       );
 
+      // Since we are not syncing any people data connected connections can be marked as MERGED
+      if (existingConnection && existingConnection.status === "CONNECTED") {
+        // Update the connection status to MERGED using the correct mutation
+        await updatePersonConnection(apiToken, {
+          connectionId: existingConnection.id,
+          remoteId: slackUser.userId,
+          remoteName: slackUser.displayName,
+        });
+
+        console.log(`Updated connection for ${slackUser.displayName} to MERGED.`);
+        continue; // Move to the next user
+      }
+
       if (!existingConnection) {
         // Add Slack user as REMOTE_ONLY if no existing connection
         await createPersonConnection(apiToken, integrationId, {
@@ -302,9 +315,6 @@ const fetchPersonConnections = async (integrationId: string, apiToken: string) =
       }
     );
 
-    // Log the response for debugging
-    console.log('GraphQL Response:', response);
-
     // Check if the response contains a valid array
     const connections = response.data?.integration?.connections || [];
 
@@ -320,6 +330,57 @@ const fetchPersonConnections = async (integrationId: string, apiToken: string) =
     throw error;
   }
 };
+
+//Update person connection as MERGED
+const updatePersonConnection = async (
+  apiToken: string,
+  input: {
+    connectionId: string;
+    remoteId: string;
+    remoteName: string;
+  }
+) => {
+  const result = await fetchWithZod(
+    z.object({
+      data: z.object({
+        updatePersonConnection: z.object({
+          id: z.string(),
+        }),
+      }),
+    }),
+    `${config.worknice.baseUrl}/api/graphql`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "worknice-api-token": apiToken,
+      },
+      body: JSON.stringify({
+        query: `
+          mutation updatePersonConnection($connectionId: ID!, $remoteId: String!, $remoteName: String!) {
+            updatePersonConnection(
+              connectionId: $connectionId
+              status: MERGED
+              remote: {id: $remoteId, name: $remoteName}
+            ) {
+              id
+            }
+          }
+        `,
+        variables: {
+          connectionId: input.connectionId,
+          remoteId: input.remoteId,
+          remoteName: input.remoteName,
+        },
+      }),
+    }
+  );
+
+  return result.data.updatePersonConnection;
+};
+
+
+
 
 //Complete the integration sync
 async function completeIntegrationSync(integrationId: string, apiToken: string): Promise<void> {
