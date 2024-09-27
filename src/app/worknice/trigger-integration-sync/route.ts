@@ -70,8 +70,6 @@ const syncSlackUsersToWorknice = async (
     // Fetch existing Worknice person connections
     const personConnections = await fetchPersonConnections(integrationId, apiToken);
 
-    console.log(personConnections);
-
     for (const slackUser of slackUsers) {
       
       const existingConnection = personConnections.find(
@@ -267,8 +265,8 @@ const fetchPersonConnections = async (integrationId: string, apiToken: string) =
               }).optional(),
               status: z.string(),
             })
-          ).optional(),  // Handle optional or missing listPersonConnections
-        }),
+          ).optional(),
+        }).nullable(),
       }),
       `${config.worknice.baseUrl}/api/graphql`,
       {
