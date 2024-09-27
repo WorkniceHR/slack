@@ -73,8 +73,9 @@ const syncSlackUsersToWorknice = async (
     console.log(personConnections);
 
     for (const slackUser of slackUsers) {
+      
       const existingConnection = personConnections.find(
-        (connection) => connection.remote?.email === slackUser.email
+        (connection) => connection.remote?.id === slackUser.userId
       );
 
       if (!existingConnection) {
