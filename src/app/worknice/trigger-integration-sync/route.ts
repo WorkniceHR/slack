@@ -296,6 +296,9 @@ const fetchPersonConnections = async (integrationId: string, apiToken: string) =
       }
     );
 
+    // Log the response for debugging
+    console.log('GraphQL Response:', response);
+    
     // Check if the response contains a valid array
     const connections = response.data.listPersonConnections || [];
 
