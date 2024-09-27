@@ -253,20 +253,22 @@ const fetchPersonConnections = async (integrationId: string, apiToken: string) =
     const response = await fetchWithZod(
       z.object({
         data: z.object({
-          listPersonConnections: z.array(
-            z.object({
-              id: z.string(),
-              person: z.object({
-                id: z.string().optional(),
-              }).optional(),
-              remote: z.object({
+          integration: z.object({
+            connections: z.array(
+              z.object({
                 id: z.string(),
-                name: z.string(),
-              }).optional(),
-              status: z.string(),
-            })
-          ).optional(),
-        }).nullable(),
+                person: z.object({
+                  id: z.string().optional(),
+                }).nullable(),  // Handle nullable person field
+                remote: z.object({
+                  id: z.string(),
+                  name: z.string(),
+                }),
+                status: z.enum(["CONNECTED", "LOCAL_ONLY", "MERGED", "REMOTE_ONLY"]),
+              })
+            ).optional(),  // Handle missing or null connections
+          }).nullable(), // Handle nullable integration
+        }),
       }),
       `${config.worknice.baseUrl}/api/graphql`,
       {
@@ -278,16 +280,20 @@ const fetchPersonConnections = async (integrationId: string, apiToken: string) =
         body: JSON.stringify({
           query: `
             query GetPersonConnections($integrationId: ID!) {
-              listPersonConnections(integrationId: $integrationId) {
-                id
-                person {
+              integration(id: $integrationId) {
+                connections {
                   id
+                  ... on PersonConnection {
+                    person {
+                      id
+                    }
+                    remote {
+                      id
+                      name
+                    }
+                    status
+                  }
                 }
-                remote {
-                  id
-                  name
-                }
-                status
               }
             }
           `,
