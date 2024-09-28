@@ -197,8 +197,8 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
       const todayEvents = filterTodayEvents(events);
       calendarEvents.push(todayEvents);
       console.log(`Fetched calendar events for integration ${integrationId}`);
-      console.log(`All Worknice Events ${events}`);
-      console.log(`Filtered Worknice Events ${todayEvents}`);
+      console.log(`All Worknice Events ${JSON.stringify(events)}`);
+      console.log(`Filtered Worknice Events ${JSON.stringify(todayEvents)}`);
 
       const message = formatEventMessage(todayEvents);
       await sendSlackMessage(slackToken, channel, message);
@@ -211,6 +211,7 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
       channels: channels,
       slackTokens: slackTokens,
       workniceTokens: workniceTokens,
+      events: events,
       calendarEvents: calendarEvents,
     });
   } catch (error) {
