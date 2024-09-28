@@ -104,10 +104,17 @@ type CalendarEvent = z.infer<
 function filterTodayEvents(events: CalendarEvent[]): CalendarEvent[] {
   const today = Temporal.Now.plainDateISO("Australia/Sydney");
   console.log(`Today is ${today}`);
-  return events.filter((event) =>
-    Temporal.PlainDate.from(event.startDate).equals(today)
-  );
+
+  return events.filter((event) => {
+    const startDate = Temporal.PlainDate.from(event.startDate);
+    const endDate = Temporal.PlainDate.from(event.endDate);
+
+    // Check if today is within the event date range (inclusive)
+    return (startDate.equals(today) || endDate.equals(today) ||
+      (startDate <= today && endDate >= today));
+  });
 }
+
 
 
 
