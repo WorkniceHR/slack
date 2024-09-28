@@ -65,7 +65,7 @@ const ReconfigPage = async ({ searchParams }: PageProps) => {
   return (
     <div className="Container">
   <br />
-      <Link href={`/admin/apps/integrations/${integrationId}`} passHref>
+      <Link href={`https://app.worknice.com/admin/apps/integrations/${integrationId}`} passHref>
         <button className="back-button"><svg className="back-icon"></svg>{'Slack Integration'}</button>
       </Link>
       {channels.length > 0 ? (
