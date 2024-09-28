@@ -112,21 +112,20 @@ function filterTodayEvents(events: CalendarEvent[]): CalendarEvent[] {
 
       console.log(`Event startDate: ${startDate}, endDate: ${endDate}`);
 
-      // Use Temporal.PlainDate.compare for date comparison
-      const isToday =
+      // Check if today falls between startDate and endDate (inclusive)
+      const isTodayInRange =
         Temporal.PlainDate.compare(startDate, today) <= 0 &&
         Temporal.PlainDate.compare(endDate, today) >= 0;
 
-      console.log(`Event ${event.id} is today: ${isToday}`);
+      console.log(`Event ${event.id} is today: ${isTodayInRange}`);
 
-      return isToday;
+      return isTodayInRange;
     } catch (err) {
       console.error(`Error processing event ${event.id}:`, err);
       return false;
     }
   });
 }
-
 
 
 
