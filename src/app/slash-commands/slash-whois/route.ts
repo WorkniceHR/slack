@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import redis from "../../../redis";
-import config from "../../../config";
+import redis from "../../../../redis";
+import config from "../../../../config";
 import { z } from "zod";
 import { createZodFetcher } from "zod-fetch";
 
