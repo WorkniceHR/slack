@@ -1,7 +1,8 @@
 import { cookies } from "next/headers";
 import config from "../../config";
 import redis from "../../redis";
-import ConfigForm from "./ConfigForm"; // Import the form component
+import ConfigForm from "./ConfigForm"; 
+import Link from "next/link";
 
 type PageProps<
   Params extends string = string,
