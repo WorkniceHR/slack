@@ -1,3 +1,4 @@
+/*
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { parse } from "querystring";
@@ -43,3 +44,4 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         return new NextResponse(message, { status: 500 });
     }
 }
+*/
