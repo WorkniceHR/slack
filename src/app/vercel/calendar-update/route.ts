@@ -106,12 +106,23 @@ function filterTodayEvents(events: CalendarEvent[]): CalendarEvent[] {
   console.log(`Today is ${today}`);
 
   return events.filter((event) => {
-    const startDate = Temporal.PlainDate.from(event.startDate);
-    const endDate = Temporal.PlainDate.from(event.endDate);
+    try {
+      const startDate = Temporal.PlainDate.from(event.startDate);
+      const endDate = Temporal.PlainDate.from(event.endDate);
 
-    // Check if today is within the event date range (inclusive)
-    return (startDate.equals(today) || endDate.equals(today) ||
-      (startDate <= today && endDate >= today));
+      console.log(`Event startDate: ${startDate}, endDate: ${endDate}`);
+
+      // Check if today is within the event date range (inclusive)
+      const isToday = (startDate.equals(today) || endDate.equals(today) ||
+        (startDate <= today && endDate >= today));
+
+      console.log(`Event ${event.id} is today: ${isToday}`);
+
+      return isToday;
+    } catch (err) {
+      console.error(`Error processing event ${event.id}:`, err);
+      return false;
+    }
   });
 }
 
