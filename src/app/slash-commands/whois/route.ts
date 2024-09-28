@@ -4,7 +4,7 @@ import config from "../../../config";
 import { z } from "zod";
 import { createZodFetcher } from "zod-fetch";
 
-// Zod schema for the incoming Slack request
+// Zod schema for incoming Slack request
 const slackRequestSchema = z.object({
     user_id: z.string(),
     text: z.string(),
