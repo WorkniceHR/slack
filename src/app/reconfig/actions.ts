@@ -1,6 +1,6 @@
 "use server"; // Ensure this only runs server-side
 
-import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import redis from "../../redis";
 
 export const saveSelectedChannel = async (formData: FormData) => {
@@ -18,5 +18,6 @@ export const saveSelectedChannel = async (formData: FormData) => {
     calendarUpdateChannel
   );
 
-  revalidatePath("https://app.worknice.com/admin/apps");
+  // Redirect back to the integration page after saving
+  redirect(`https://app.worknice.com/admin/apps/${integrationId}`);
 };
