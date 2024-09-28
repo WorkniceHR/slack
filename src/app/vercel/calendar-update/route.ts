@@ -211,7 +211,6 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
       channels: channels,
       slackTokens: slackTokens,
       workniceTokens: workniceTokens,
-      events: events,
       calendarEvents: calendarEvents,
     });
   } catch (error) {
