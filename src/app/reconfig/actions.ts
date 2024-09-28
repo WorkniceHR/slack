@@ -19,5 +19,5 @@ export const saveSelectedChannel = async (formData: FormData) => {
   );
 
   // Redirect back to the integration page after saving
-  redirect(`https://app.worknice.com/admin/apps/${integrationId}`);
+  redirect(`https://app.worknice.com/admin/apps/integrations/${integrationId}`);
 };
