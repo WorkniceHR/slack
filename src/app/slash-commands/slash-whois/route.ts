@@ -1,3 +1,4 @@
+/*
 import { NextRequest, NextResponse } from "next/server";
 import redis from "../../../redis";
 import config from "../../../config";
@@ -262,3 +263,5 @@ async function sendDelayedResponse(responseUrl: string, text: string) {
         throw new Error("Failed to send delayed response.");
     }
 }
+
+*/
