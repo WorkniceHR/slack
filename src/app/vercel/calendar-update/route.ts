@@ -103,12 +103,13 @@ type CalendarEvent = z.infer<
 
 function filterTodayEvents(events: CalendarEvent[]): CalendarEvent[] {
   const today = Temporal.Now.plainDateISO("Australia/Sydney");
+  console.log(`Today is ${today}`);
   return events.filter((event) =>
     Temporal.PlainDate.from(event.startDate).equals(today)
   );
 }
 
-console.log('Today is ${today}');
+
 
 function formatEventMessage(events: CalendarEvent[]): string {
   if (events.length === 0) {
@@ -196,8 +197,8 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
       const todayEvents = filterTodayEvents(events);
       calendarEvents.push(todayEvents);
       console.log(`Fetched calendar events for integration ${integrationId}`);
-      console.log('All Worknice Events ${events}');
-      console.log('Filtered Worknice Events ${todayEvents}');
+      console.log(`All Worknice Events ${events}`);
+      console.log(`Filtered Worknice Events ${todayEvents}`);
 
       const message = formatEventMessage(todayEvents);
       await sendSlackMessage(slackToken, channel, message);
