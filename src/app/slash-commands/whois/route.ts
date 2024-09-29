@@ -57,7 +57,6 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
             responseText += `>*Phone:* ${person.profilePhone ? person.profilePhone : "-"}\n`;
             responseText += `>*Email:* ${person.profileEmail ? person.profileEmail : "-"}\n`;
             responseText += `>*Birthday:* ${person.profileBirthday ? getFormattedBirthday(person.profileBirthday) : "-"}\n`;
-            responseText += person.profileImage?.url ? ` ${person.profileImage.url}\n` : "";
 
         } else {
             responseText = `Sorry, no matches for ${data.text}`;
