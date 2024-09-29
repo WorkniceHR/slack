@@ -117,7 +117,7 @@ function formatSlackBlockMessage(person: Person): any {
         type: "section",
         text: {
             type: "mrkdwn",
-            text: `*<${config.worknice.baseUrl}/people/${person.id}|${person.displayName}>* >${person.displayName} starts today as a ${positionTitle} in ${locationName}.`,
+            text: `*<${config.worknice.baseUrl}/people/${person.id}|${person.displayName}>*\n >${person.displayName} starts today as a ${positionTitle} in ${locationName}.`,
         },
         accessory: {
             type: "image",
