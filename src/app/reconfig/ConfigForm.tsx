@@ -50,7 +50,7 @@ const ConfigForm = ({
           </td>
         </tr>
         <tr>
-          <td><label htmlFor="newStarterChannel">New Starter</label></td>
+          <td><label htmlFor="newStarterChannel">New Starters</label></td>
           <td>
             <select
               id="newStarterChannel"

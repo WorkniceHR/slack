@@ -94,11 +94,11 @@ const peopleListSchema = z.object({
                     z.object({
                         id: z.string(),
                         displayName: z.string(),
-                        startDate: z.string(),
-                        location: z.object({ name: z.string() }),
+                        startDate: z.string().optional(),
+                        location: z.object({ name: z.string().optional() }),
                         profileImage: z.object({ url: z.string().optional() }),
                         currentJob: z.object({
-                            position: z.object({ title: z.string() }),
+                            position: z.object({ title: z.string().optional() }),
                         }),
                     })
                 ),
