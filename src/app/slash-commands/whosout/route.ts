@@ -80,11 +80,11 @@ async function getLeaveRequests(apiKey: string): Promise<any[]> {
                         sharedCalendarEvents: z.array(
                             z.object({
                                 eventType: z.string(),
-                                startDate: z.string(),
-                                endDate: z.string(),
+                                startDate: z.string().optional(),
+                                endDate: z.string().optional(),
                                 owner: z.object({
-                                    displayName: z.string(),
-                                }),
+                                    displayName: z.string().optional(),
+                                }).optional(),
                             })
                         ),
                     }),
