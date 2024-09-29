@@ -57,7 +57,8 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
             responseText += `>*Phone:* ${person.profilePhone ? person.profilePhone : "-"}\n`;
             responseText += `>*Email:* ${person.profileEmail ? person.profileEmail : "-"}\n`;
             responseText += `>*Birthday:* ${person.profileBirthday ? getFormattedBirthday(person.profileBirthday) : "-"}\n`;
-            responseText += person.profileImageURL
+            responseText += person.profileImage?.url ? ` ${person.profileImage.url}\n` : "";
+
         } else {
             responseText = `Sorry, no matches for ${data.text}`;
         }
@@ -251,8 +252,6 @@ function getFilteredPerson(peopleDirectory: any[], searchText: string) {
     const nameParts = person.displayName.toLowerCase().split(' ');
     const jobTitle = person.currentJob?.position.title?.toLowerCase() || '';
     const location = person.location?.name?.toLowerCase() || '';
-    const profileImageURL = person.profileImage?.url || '';
-    console.log(`profileImageURL: ${profileImageURL}`);
 
         // Check if every token is found in either name parts, job title, or location
         return tokens.every(token =>
