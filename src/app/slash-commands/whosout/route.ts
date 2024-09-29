@@ -35,7 +35,9 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         if (leaveRequests.length > 0) {
             responseText = `:desert_island: There ${leaveRequests.length === 1 ? "is *1 person*" : `are *${leaveRequests.length} people*`} on leave:\n`;
             leaveRequests.forEach((event) => {
-                responseText += `>*${event.owner.displayName}* ${event.startDate} - ${event.endDate}\n`;
+                const startDate = Temporal.PlainDate.from(event.startDate).toLocaleString('en-US', { month: 'short', day: '2-digit' });
+                const endDate = Temporal.PlainDate.from(event.endDate).toLocaleString('en-US', { month: 'short', day: '2-digit' });
+                responseText += `>*${event.owner.displayName}* ${startDate} - ${endDate}\n`;
             });
         } else {
             responseText = ":raised_hands: All hands on deck!";
