@@ -12,6 +12,62 @@ const slackRequestSchema = z.object({
     response_url: z.string(),
 });
 
+const fetchWithZod = createZodFetcher();
+
+export const POST = async (request: NextRequest): Promise<NextResponse> => {
+    try {
+        const data = await request.json();
+        // Validate incoming request with Zod schema
+        slackRequestSchema.parse(data);
+
+        const integrationId = await getIntegrationId(data.team_id);
+        const workniceApiKey = await redis.get<string>(`worknice_api_key:${integrationId}`);
+
+        if (!workniceApiKey) {
+            throw new Error("API key not found.");
+        }
+
+        // Check if the current integration is archived
+        const integrations = await getWorkniceIntegrations(workniceApiKey);
+        const integration = integrations.find((i) => i.id === integrationId);
+
+        if (!integration || integration.archived) {
+            console.log(`Integration ${integrationId} is archived.`);
+            return new NextResponse('Integration is archived', { status: 200 }); // Early return if archived
+        }
+
+        // Fetch and validate with Zod
+        const peopleDirectory = await getWorknicePeopleDirectory(workniceApiKey);
+        const filteredPeople = getFilteredPerson(peopleDirectory, data.text);
+
+        let responseText = "";
+        if (filteredPeople.length > 0) {
+            const person = filteredPeople[0];
+            responseText = `> *<https://app.worknice.com/people/${person.id}|${person.displayName}>*\n`;
+            responseText += `>*Position:* ${person.currentJob?.position.title ? person.currentJob?.position.title : "-"}\n`;
+            responseText += `>*Manager:* ${person.currentJob?.position.manager?.currentJob?.person.displayName ? person.currentJob?.position.manager?.currentJob?.person.displayName : "-"}\n`;
+            responseText += `>*Location:* ${person.location.name ? person.location.name : "-"}\n`;
+            responseText += `>*Bio:* ${person.profileBio ? person.profileBio : "-"}\n`;
+            responseText += `>*Pronouns:* ${person.profilePronouns ? person.profilePronouns : "-"}\n`;
+            responseText += `>*Phone:* ${person.profilePhone ? person.profilePhone : "-"}\n`;
+            responseText += `>*Email:* ${person.profileEmail ? person.profileEmail : "-"}\n`;
+            responseText += `>*Birthday:* ${person.profileBirthday ? getFormattedBirthday(person.profileBirthday) : "-"}\n`;
+        } else {
+            responseText = `Sorry, no matches for ${data.text}`;
+        }
+
+        // Send delayed response to Slack
+        await sendDelayedResponse(data.response_url, responseText);
+
+        return new NextResponse('Background job completed', { status: 200 });
+    } catch (error: unknown) {
+        console.error("Error in background task:", error);
+        return new NextResponse('Error in background job', { status: 500 });
+    }
+};
+
+// Utility functions
+
 // Zod schema for the Worknice people directory response
 const worknicePeopleDirectorySchema = z.object({
     data: z.object({
@@ -57,53 +113,6 @@ const worknicePeopleDirectorySchema = z.object({
     }),
 });
 
-
-const fetchWithZod = createZodFetcher();
-
-export const POST = async (request: NextRequest): Promise<NextResponse> => {
-    try {
-        const data = await request.json();
-        // Validate incoming request with Zod schema
-        slackRequestSchema.parse(data);
-
-        const integrationId = await getIntegrationId(data.team_id);
-        const workniceApiKey = await redis.get<string>(`worknice_api_key:${integrationId}`);
-
-        if (!workniceApiKey) {
-            throw new Error("API key not found.");
-        }
-
-        // Fetch and validate with Zod
-        const peopleDirectory = await getWorknicePeopleDirectory(workniceApiKey);
-        const filteredPeople = getFilteredPerson(peopleDirectory, data.text);
-
-        let responseText = "";
-        if (filteredPeople.length > 0) {
-            const person = filteredPeople[0];
-            responseText = `> *<https://app.worknice.com/people/${person.id}|${person.displayName}>*\n`;
-            responseText += `>*Position:* ${person.currentJob?.position.title ? person.currentJob?.position.title : "-"}\n`;
-            responseText += `>*Manager:* ${person.currentJob?.position.manager?.currentJob?.person.displayName ? person.currentJob?.position.manager?.currentJob?.person.displayName : "-"}\n`;
-            responseText += `>*Location:* ${person.location.name ? person.location.name : "-"}\n`;
-            responseText += `>*Bio:* ${person.profileBio ? person.profileBio : "-"}\n`;
-            responseText += `>*Pronouns:* ${person.profilePronouns ? person.profilePronouns : "-"}\n`;
-            responseText += `>*Phone:* ${person.profilePhone ? person.profilePhone : "-"}\n`;
-            responseText += `>*Email:* ${person.profileEmail ? person.profileEmail : "-"}\n`;
-            responseText += `>*Birthday:* ${person.profileBirthday ? getFormattedBirthday(person.profileBirthday) : "-"}\n`;
-        } else {
-            responseText = `Sorry, no matches for ${data.text}`;
-        }
-
-        // Send delayed response to Slack
-        await sendDelayedResponse(data.response_url, responseText);
-
-        return new NextResponse('Background job completed', { status: 200 });
-    } catch (error: unknown) {
-        console.error("Error in background task:", error);
-        return new NextResponse('Error in background job', { status: 500 });
-    }
-};
-
-// Utility functions
 async function getIntegrationId(team_id: string) {
     console.log("Retrieving integration ID for team ID:", team_id);
 
@@ -121,6 +130,50 @@ async function getIntegrationId(team_id: string) {
             return integrationId;
         }
     }
+}
+
+
+// Get the Worknice integrations so we can check whether they are archived or not
+async function getWorkniceIntegrations(apiKey: string): Promise<{ id: string, archived: boolean }[]> {
+    const response = await fetchWithZod(
+        z.object({
+            data: z.object({
+                session: z.object({
+                    org: z.object({
+                        integrations: z.array(
+                            z.object({
+                                id: z.string(),
+                                archived: z.boolean(),
+                            })
+                        ),
+                    }),
+                }),
+            }),
+        }),
+        `${config.worknice.baseUrl}/api/graphql`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "worknice-api-token": apiKey,
+            },
+            body: JSON.stringify({
+                query: `
+          query Integrations {
+            session {
+              org {
+                integrations(includeArchived: true) {
+                  id
+                  archived
+                }
+              }
+            }
+          }
+        `,
+            }),
+        }
+    );
+    return response.data.session.org.integrations;
 }
 
 async function getWorknicePeopleDirectory(apiKey: string): Promise<any[]> {
