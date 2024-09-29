@@ -8,6 +8,7 @@ const slackRequestSchema = z.object({
     text: z.string(),
     team_id: z.string(),
     response_url: z.string(),
+    command: z.string(),
 });
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
@@ -17,12 +18,12 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
 
         // Immediate response to the user
         const immediateResponse = NextResponse.json(
-            { text: "Searching the employee directory..." },
+            { text: "Working..." },
             { status: 200 }
         );
 
         // Trigger the background job by calling the separate route asynchronously
-        fetch(`https://slack.worknice.com/slash-commands/whois`, {
+        fetch(`https://slack.worknice.com/slash-commands${data.command}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
