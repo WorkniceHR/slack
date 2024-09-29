@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import redis from "@redis";
-import config from "@config";
+import redis from "@/redis";
+import config from "@/config";
 import { z } from "zod";
 import { createZodFetcher } from "zod-fetch";
 import { Temporal } from "temporal-polyfill";
@@ -15,6 +15,7 @@ const slackRequestSchema = z.object({
 
 const fetchWithZod = createZodFetcher();
 
+// Main function below
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
     try {
         const data = await request.json();
