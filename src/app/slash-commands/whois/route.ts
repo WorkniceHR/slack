@@ -33,6 +33,11 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
 
         if (!integration || integration.archived) {
             console.log(`Integration ${integrationId} is archived.`);
+            // Remove the Redis entries for this integration
+            await redis.del(`slack_channel:calendar_update:${integrationId}`);
+            await redis.del(`slack_access_token:${integrationId}`);
+            await redis.del(`worknice_api_key:${integrationId}`);
+            await redis.del(`slack_team_id:${integrationId}`);
             return new NextResponse('Integration is archived', { status: 200 }); // Early return if archived
         }
 
