@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Temporal } from "temporal-polyfill";
 import { z } from "zod";
 import { createZodFetcher } from "zod-fetch";
-import redis from "../../../redis";
+import redis from "@/redis";
 import config from "@/config";
 
 
