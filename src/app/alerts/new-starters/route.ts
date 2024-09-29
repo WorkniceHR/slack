@@ -94,12 +94,12 @@ const peopleListSchema = z.object({
                     z.object({
                         id: z.string(),
                         displayName: z.string(),
-                        startDate: z.string().optional(),
-                        location: z.object({ name: z.string().optional() }),
-                        profileImage: z.object({ url: z.string().optional() }),
+                        startDate: z.string().nullable(), 
+                        location: z.object({ name: z.string().nullable() }).nullable(), 
+                        profileImage: z.object({ url: z.string().nullable() }).nullable(),
                         currentJob: z.object({
-                            position: z.object({ title: z.string().optional() }),
-                        }),
+                            position: z.object({ title: z.string().nullable() }).nullable(),
+                        }).nullable(), 
                     })
                 ),
             }),
@@ -107,13 +107,17 @@ const peopleListSchema = z.object({
     }),
 });
 
-// Helper to format Slack block message
+
+// Format Slack block message
 function formatSlackBlockMessage(person: Person): any {
+    const locationName = person.location?.name || "our team";
+    const positionTitle = person.currentJob?.position?.title || "new team member";
+
     return {
         type: "section",
         text: {
             type: "mrkdwn",
-            text: `*<${config.worknice.baseUrl}/people/${person.id}|${person.displayName}>* starts today as a ${person.currentJob.position.title} in ${person.location.name}.`,
+            text: `*<${config.worknice.baseUrl}/people/${person.id}|${person.displayName}>* starts today as a ${positionTitle} in ${locationName}.`,
         },
         accessory: {
             type: "image",
@@ -122,6 +126,7 @@ function formatSlackBlockMessage(person: Person): any {
         },
     };
 }
+
 
 // Send a Slack block message
 async function sendSlackBlockMessage(token: string, channel: string, blocks: any[]): Promise<void> {
