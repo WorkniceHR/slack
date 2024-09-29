@@ -13,6 +13,7 @@ type Props = {
   integrationId: string;
   personActivatedChannel: string | null;
   calendarUpdateChannel: string | null;
+  newStarterChannel: string | null;
 };
 
 const ConfigForm = ({
@@ -20,6 +21,7 @@ const ConfigForm = ({
   integrationId,
   personActivatedChannel,
   calendarUpdateChannel,
+  newStarterChannel,
 }: Props) => {
   return (
     <form action={saveSelectedChannel} className="Card">
@@ -48,7 +50,25 @@ const ConfigForm = ({
           </td>
         </tr>
         <tr>
-          <td><label htmlFor="calendarUpdateChannel">Calendar Update Channel</label></td>
+          <td><label htmlFor="newStarterChannel">New Starter</label></td>
+          <td>
+            <select
+              id="newStarterChannel"
+              name="newStarterChannel"
+              className="wn-input"
+              defaultValue={newStarterChannel ?? ""}
+            >
+              <option value="">None (do not send an alert)</option>
+              {channels.map((channel) => (
+                <option key={channel.id} value={channel.id}>
+                  {channel.name}
+                </option>
+              ))}
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td><label htmlFor="calendarUpdateChannel">Daily Calendar Updates</label></td>
           <td>
           <select
           id="calendarUpdateChannel"

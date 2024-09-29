@@ -10,7 +10,7 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
         const integrationIds = await getWorkniceIntegrationIds();
 
         for (const integrationId of integrationIds) {
-            const channel = await redis.get(`slack_channel:new_starter_update:${integrationId}`);
+            const channel = await redis.get(`slack_channel:new_starter:${integrationId}`);
             if (typeof channel !== "string") {
                 console.log(`No Slack channel found for integration ${integrationId}. Skipping.`);
                 continue;

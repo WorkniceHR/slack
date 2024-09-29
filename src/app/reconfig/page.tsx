@@ -62,6 +62,12 @@ const ReconfigPage = async ({ searchParams }: PageProps) => {
     `slack_channel:calendar_update:${integrationId}`
   );
 
+  console.log("Fetching saved new starter channel…");
+
+  const savedNewStarterChannel = await redis.get<string>(
+    `slack_channel:new_starter:${integrationId}`
+  );
+
   return (
     <div className="Container">
   <br />
@@ -73,7 +79,8 @@ const ReconfigPage = async ({ searchParams }: PageProps) => {
           channels={channels}
           integrationId={integrationId}
           personActivatedChannel={savedPersonActivatedChannel}
-          calendarUpdateChannel={savedCalendarUpdateChannel} // Pass the birthday channel
+          calendarUpdateChannel={savedCalendarUpdateChannel} 
+          newStarterChannel={savedNewStarterChannel} 
         />
       ) : (
         <p>No channels found.</p>

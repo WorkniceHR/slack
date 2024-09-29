@@ -7,6 +7,7 @@ export const saveSelectedChannel = async (formData: FormData) => {
   const integrationId = formData.get("integrationId");
   const personActivatedChannel = formData.get("personActivatedChannel");
   const calendarUpdateChannel = formData.get("calendarUpdateChannel");
+  const newStarterChannel = formData.get("newStarterChannel");
 
   await redis.set(
     `slack_channel:person_activated:${integrationId}`,
@@ -15,6 +16,11 @@ export const saveSelectedChannel = async (formData: FormData) => {
 
   await redis.set(
     `slack_channel:calendar_update:${integrationId}`,
+    calendarUpdateChannel
+  );
+
+  await redis.set(
+    `slack_channel:new_starter:${integrationId}`,
     calendarUpdateChannel
   );
 
