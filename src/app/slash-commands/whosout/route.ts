@@ -79,7 +79,7 @@ async function getLeaveRequests(apiKey: string): Promise<any[]> {
                     org: z.object({
                         sharedCalendarEvents: z.array(
                             z.object({
-                                eventType: z.literal("LeaveRequest"),
+                                eventType: z.string(),
                                 startDate: z.string(),
                                 endDate: z.string(),
                                 owner: z.object({
