@@ -33,12 +33,12 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
 
         let responseText = "";
         if (leaveRequests.length > 0) {
-            responseText = `There are *${leaveRequests.length} people* on leave:\n`;
+            responseText = `:desert_island: There ${leaveRequests.length === 1 ? "is *1 person*" : `are *${leaveRequests.length} people*`} on leave:\n`;
             leaveRequests.forEach((event) => {
                 responseText += `>*${event.owner.displayName}* ${event.startDate} - ${event.endDate}\n`;
             });
         } else {
-            responseText = "There are no people on leave.";
+            responseText = ":raised_hands: All hands on deck!";
         }
 
         // Send delayed response to Slack
