@@ -46,7 +46,7 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
     }
 };
 
-// Helper to query people list
+// Query Worknice to a list of all people and filter to people starting today
 async function getPeopleStartingToday(apiKey: string): Promise<Person[]> {
     const response = await fetchWithZod(
         peopleListSchema,
@@ -80,8 +80,8 @@ async function getPeopleStartingToday(apiKey: string): Promise<Person[]> {
 
     const today = Temporal.Now.plainDateISO("Australia/Sydney");
     return response.data.session.org.people.filter((person) => {
-        const startDate = Temporal.PlainDate.from(person.startDate);
-        return Temporal.PlainDate.compare(startDate, today) === 0;
+        const startDate = person.startDate ? Temporal.PlainDate.from(person.startDate) : null;
+        return startDate && Temporal.PlainDate.compare(startDate, today) === 0;
     });
 }
 
