@@ -42,7 +42,14 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
       const integration = integrations.find((i) => i.id === integrationId);
 
       if (!integration || integration.archived) {
-        console.log(`Integration ${integrationId} is archived. Skipping.`);
+        console.log(`Integration ${integrationId} is archived. Removing from Redis and skipping.`);
+
+        // Remove the Redis entries for this integration
+        await redis.del(`slack_channel:calendar_update:${integrationId}`);
+        await redis.del(`slack_access_token:${integrationId}`);
+        await redis.del(`worknice_api_key:${integrationId}`);
+        await redis.del(`slack_team_id:${integrationId}`);
+
         continue;
       }
 
