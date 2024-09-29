@@ -3,6 +3,7 @@ import redis from "../../../redis";
 import config from "../../../config";
 import { z } from "zod";
 import { createZodFetcher } from "zod-fetch";
+import { Temporal } from "temporal-polyfill";
 
 // Zod schema for incoming Slack request
 const slackRequestSchema = z.object({
@@ -123,9 +124,38 @@ async function getLeaveRequests(apiKey: string): Promise<any[]> {
     );
 
     // Filter for "LeaveRequest" events
-    return response.data.session.org.sharedCalendarEvents.filter(
+    const leaveRequests = response.data.session.org.sharedCalendarEvents.filter(
         event => event.eventType === "LeaveRequest"
     );
+
+    // Filter the events for today's date
+    return filterTodayEvents(leaveRequests);
+}
+
+// Filter events for today's date using Temporal
+function filterTodayEvents(events: any[]): any[] {
+    const today = Temporal.Now.plainDateISO("Australia/Sydney");
+
+    return events.filter(event => {
+        if (!event.startDate || !event.endDate) {
+            return false;
+        }
+
+        try {
+            const startDate = Temporal.PlainDate.from(event.startDate);
+            const endDate = Temporal.PlainDate.from(event.endDate);
+
+            // Check if today falls between startDate and endDate (inclusive)
+            const isTodayInRange =
+                Temporal.PlainDate.compare(startDate, today) <= 0 &&
+                Temporal.PlainDate.compare(endDate, today) >= 0;
+
+            return isTodayInRange;
+        } catch (err) {
+            console.error(`Error processing event ${event.id}:`, err);
+            return false;
+        }
+    });
 }
 
 async function sendDelayedResponse(responseUrl: string, text: string) {
