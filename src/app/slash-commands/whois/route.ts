@@ -268,15 +268,28 @@ function getFilteredPerson(peopleDirectory: any[], searchText: string) {
     const stopWords = [
         'from', 'the', 'and', 'a', 'an', 'at', 'in', 'on', 'with', 'of', 
         'for', 'to', 'by', 'about', 'as', 'is', 'it', 'this', 'that', 'are', 'or'
-    ];
+    ]; // Expanded stop words list
+
     const tokens = searchText
         .toLowerCase()
         .split(' ')
-        .filter(token => !stopWords.includes(token));
+        .filter(token => !stopWords.includes(token)); // Filter out stop words
+
+    if (tokens.length === 0) {
+        return []; // If only stop words were given, return no matches
+    }
+
+    // Precompute lowercase fields and store them for reuse
+    const lowerCasePeople = peopleDirectory.map(person => ({
+        ...person,
+        lowerCaseDisplayName: person.displayName.toLowerCase(),
+        lowerCaseJobTitle: person.currentJob?.position.title?.toLowerCase() || '',
+        lowerCaseLocation: person.location?.name?.toLowerCase() || ''
+    }));
 
     // Try to find an exact match first (full name match)
-    const exactMatch = peopleDirectory.find(person =>
-        person.displayName.toLowerCase() === searchText.toLowerCase()
+    const exactMatch = lowerCasePeople.find(person =>
+        person.lowerCaseDisplayName === searchText.toLowerCase()
     );
 
     if (exactMatch) {
@@ -284,26 +297,24 @@ function getFilteredPerson(peopleDirectory: any[], searchText: string) {
     }
 
     // If no exact match, filter for partial matches
-    const partialMatches = peopleDirectory.filter(person => {
-    const nameParts = person.displayName.toLowerCase().split(' ');
-    const jobTitle = person.currentJob?.position.title?.toLowerCase() || '';
-    const location = person.location?.name?.toLowerCase() || '';
+    for (const person of lowerCasePeople) {
+        const nameParts = person.lowerCaseDisplayName.split(' ');
 
         // Check if every token is found in either name parts, job title, or location
-        return tokens.every(token =>
-            nameParts.some((part: string) => part.includes(token)) || // Match on name
-            jobTitle.includes(token) || // Match on job title
-            location.includes(token) // Match on location
+        const isMatch = tokens.every(token =>
+            nameParts.some(part => part.includes(token)) || // Match on name
+            person.lowerCaseJobTitle.includes(token) || // Match on job title
+            person.lowerCaseLocation.includes(token) // Match on location
         );
-    });
 
-    // Return the top partial match if found, otherwise return an empty array
-    if (partialMatches.length > 0) {
-        return [partialMatches[0]]; // Return the first partial match
-    } else {
-        return []; // No matches found
+        if (isMatch) {
+            return [person]; // Return as soon as the first match is found
+        }
     }
+
+    return []; // No matches found
 }
+
 
 
 // Function to format the birthday using Temporal
