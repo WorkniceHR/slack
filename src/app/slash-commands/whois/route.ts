@@ -272,6 +272,7 @@ function getFilteredPerson(peopleDirectory: any[], searchText: string) {
 
     const tokens = searchText
         .toLowerCase()
+        .replace(/[!.,?;:'"-_@#$%&*+=/\\]/g, '') // Remove special characters
         .split(' ')
         .filter(token => !stopWords.includes(token)); // Filter out stop words
 
