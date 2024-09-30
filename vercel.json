@@ -1,16 +1,19 @@
 {
   "crons": [
     {
-      "path": "/alerts/calendar-update",
+      "path": "alerts/calendar-update",
       "schedule": "0 22 * * 0-4"
     },
     {
-      "path": "/alerts/new-starters",
+      "path": "alerts/new-starters",
       "schedule": "0 22 * * 0-4"
     }
   ],
   "functions": {
-    "/alerts/*": {
+    "alerts/*": {
+      "maxDuration": 60
+    },
+    "slash-commands/*": {
       "maxDuration": 60
     }
   }
