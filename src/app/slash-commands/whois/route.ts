@@ -298,11 +298,11 @@ function getFilteredPerson(peopleDirectory: any[], searchText: string) {
 
     // If no exact match, filter for partial matches
     for (const person of lowerCasePeople) {
-        const nameParts = person.lowerCaseDisplayName.split(' ');
+        const nameParts: string[] = person.lowerCaseDisplayName.split(' '); // Explicitly type as string[]
 
         // Check if every token is found in either name parts, job title, or location
         const isMatch = tokens.every(token =>
-            nameParts.some(part => part.includes(token)) || // Match on name
+            nameParts.some((part: string) => part.includes(token)) || // Match on name
             person.lowerCaseJobTitle.includes(token) || // Match on job title
             person.lowerCaseLocation.includes(token) // Match on location
         );
