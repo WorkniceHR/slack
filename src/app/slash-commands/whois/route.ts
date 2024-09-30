@@ -118,8 +118,9 @@ const worknicePeopleDirectorySchema = z.object({
                             url: z.string(),
                         }).nullable(),
                         profileBio: z.string().nullable(),
-                        profileEmail: z.string().nullable(), // profileEmail can be null
-                        startDate: z.string().nullable(), // startDate can be null
+                        profileEmail: z.string().nullable(), 
+                        profilePhone: z.string().nullable(),
+                        startDate: z.string().nullable(), 
                         currentJob: z.object({
                             position: z.object({
                                 title: z.string(),
@@ -129,7 +130,7 @@ const worknicePeopleDirectorySchema = z.object({
                                             displayName: z.string(),
                                         }),
                                     }),
-                                }).nullable(), // manager can be null
+                                }).nullable(),
                             }),
                         }).nullable(),
                         profilePronouns: z.string().nullable(),
@@ -234,6 +235,7 @@ async function getWorknicePeopleDirectory(apiKey: string): Promise<any[]> {
                                 profileImage { url }
                                 profileBio
                                 profileEmail
+                                profilePhone
                                 startDate
                                 currentJob {
                                     position {
