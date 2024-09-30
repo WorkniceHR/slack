@@ -69,7 +69,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
                         },
                         accessory: {
                             type: "image",
-                            image_url: profileImage,
+                            image_url: person.profileImage?.url || "https://via.placeholder.com/150",
                             alt_text: "Profile Image"
                         }
                     }
