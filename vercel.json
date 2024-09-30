@@ -8,13 +8,6 @@
       "path": "/alerts/new-starters",
       "schedule": "0 22 * * 0-4"
     }
-  ],
-  "functions": {
-    "alerts/*": {
-      "maxDuration": 60
-    },
-    "slash-commands/*": {
-      "maxDuration": 60
-    }
-  }
+    
+  ]
 }
