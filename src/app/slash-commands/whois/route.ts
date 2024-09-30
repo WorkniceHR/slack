@@ -3,7 +3,7 @@ import redis from "@/redis";
 import config from "@/config";
 import { z } from "zod";
 import { createZodFetcher } from "zod-fetch";
-import { Temporal } from '@js-temporal/polyfill';
+import { Temporal } from "temporal-polyfill";
 
 // Zod schema for incoming Slack request
 const slackRequestSchema = z.object({
