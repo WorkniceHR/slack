@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import redis from "../../../redis";
-import config from "../../../config";
+import redis from "@/redis";
+import config from "@/config";
 import { z } from "zod";
 import { createZodFetcher } from "zod-fetch";
+import { Temporal } from '@js-temporal/polyfill';
 
 // Zod schema for incoming Slack request
 const slackRequestSchema = z.object({
@@ -269,43 +270,10 @@ function getFilteredPerson(peopleDirectory: any[], searchText: string) {
 }
 
 
-// Function to format the birthday
+// Function to format the birthday using Temporal
 function getFormattedBirthday(birthday: { month: number, day: number }): string {
-    const daySuffix = getDaySuffix(birthday.day);
-    const monthName = getMonthName(birthday.month);
-    return `${birthday.day}${daySuffix} ${monthName}`;
-}
-
-// Function to get the suffix for the day
-function getDaySuffix(day: number): string {
-    if (day >= 11 && day <= 13) {
-        return "th";
-    }
-    switch (day % 10) {
-        case 1:
-            return "st";
-        case 2:
-            return "nd";
-        case 3:
-            return "rd";
-        default:
-            return "th";
-    }
-}
-
-// Function to get the month name
-function getMonthName(month: number | undefined): string {
-    const monthNames = [
-        "January", "February", "March", "April", "May", "June", "July",
-        "August", "September", "October", "November", "December"
-    ];
-
-    // Ensure month is defined and within the valid range
-    if (month !== undefined && month >= 1 && month <= 12) {
-        return monthNames[month - 1]!;
-    }
-
-    return "";
+    const date = Temporal.PlainDate.from({ year: 2000, month: birthday.month, day: birthday.day });
+    return date.toLocaleString('en-US', { day: 'numeric', month: 'long' });
 }
 
 async function sendDelayedResponse(responseUrl: string, text: string) {
