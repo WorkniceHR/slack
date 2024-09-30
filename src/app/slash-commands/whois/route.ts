@@ -58,13 +58,13 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
                         text: {
                             type: "mrkdwn",
                             text: `>*<https://app.worknice.com/people/${person.id}|${person.displayName}>*\n` +
-                                  `>*Position:* ${person.currentJob?.position.title ? person.currentJob?.position.title : "-"}\n` +
-                                  `>*Manager:* ${person.currentJob?.position.manager?.currentJob?.person.displayName ? person.currentJob?.position.manager?.currentJob?.person.displayName : "-"}\n` +
-                                  `>*Location:* ${person.location.name ? person.location.name : "-"}\n` +
-                                  `>*Bio:* ${person.profileBio ? person.profileBio : "-"}\n` +
-                                  `>*Pronouns:* ${person.profilePronouns ? person.profilePronouns : "-"}\n` +
-                                  `>*Phone:* ${person.profilePhone ? person.profilePhone : "-"}\n` +
-                                  `>*Email:* ${person.profileEmail ? person.profileEmail : "-"}\n` +
+                                  `>*Position:* ${person.currentJob?.position?.title || "-"}\n` +
+                                  `>*Manager:* ${person.currentJob?.position?.manager?.currentJob?.person?.displayName || "-"}\n` +
+                                  `>*Location:* ${person.location?.name || "-"}\n` +
+                                  `>*Bio:* ${person.profileBio || "-"}\n` +
+                                  `>*Pronouns:* ${person.profilePronouns || "-"}\n` +
+                                  `>*Phone:* ${person.profilePhone || "-"}\n` +
+                                  `>*Email:* ${person.profileEmail || "-"}\n` +
                                   `>*Birthday:* ${person.profileBirthday ? getFormattedBirthday(person.profileBirthday) : "-"}\n`
                         },
                         accessory: {
