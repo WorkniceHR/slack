@@ -265,7 +265,14 @@ async function getWorknicePeopleDirectory(apiKey: string): Promise<any[]> {
 
 
 function getFilteredPerson(peopleDirectory: any[], searchText: string) {
-    const tokens = searchText.toLowerCase().split(' '); // Split search text into tokens
+    const stopWords = [
+        'from', 'the', 'and', 'a', 'an', 'at', 'in', 'on', 'with', 'of', 
+        'for', 'to', 'by', 'about', 'as', 'is', 'it', 'this', 'that', 'are', 'or'
+    ];
+    const tokens = searchText
+        .toLowerCase()
+        .split(' ')
+        .filter(token => !stopWords.includes(token));
 
     // Try to find an exact match first (full name match)
     const exactMatch = peopleDirectory.find(person =>
