@@ -46,12 +46,12 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         const peopleDirectory = await getWorknicePeopleDirectory(workniceApiKey);
         const filteredPeople = getFilteredPerson(peopleDirectory, data.text);
 
-        let responseText = "";
+        let responseText: { blocks: Array<{ type: string; text: { type: string; text: string }; accessory?: { type: string; image_url: string; alt_text: string } }> };
         if (filteredPeople.length > 0) {
             const person = filteredPeople[0];
             const profileImage = person.profileImage ? person.profileImage : "default_image_url";
 
-            responseText = JSON.stringify({
+            responseText = {
                 blocks: [
                     {
                         type: "section",
@@ -69,19 +69,29 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
                         },
                         accessory: {
                             type: "image",
-                            image_url: person.profileImage?.url || "https://via.placeholder.com/150",
+                            image_url: person.profileImage?.url,
                             alt_text: "Profile Image"
                         }
                     }
                 ]
-            });
+            };
 
         } else {
-            responseText = `Sorry, no matches for ${data.text}`;
+            responseText = {
+                blocks: [
+                    {
+                        type: "section",
+                        text: {
+                            type: "mrkdwn",
+                            text: `Sorry, no matches for ${data.text}`
+                        }
+                    }
+                ]
+            };
         }
 
         // Send delayed response to Slack
-        await sendDelayedResponse(data.response_url, responseText);
+        await sendDelayedResponse(data.response_url, responseText.blocks);
 
         return new NextResponse('Background job completed', { status: 200 });
     } catch (error: unknown) {
@@ -293,13 +303,13 @@ function getFormattedBirthday(birthday: { month: number, day: number }): string 
     return date.toLocaleString('en-US', { day: 'numeric', month: 'long' });
 }
 
-async function sendDelayedResponse(responseUrl: string, text: string) {
+async function sendDelayedResponse(responseUrl: string, blocks: any[]) {
     const delayedResponse = await fetch(responseUrl, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ blocks, }),
     });
 
     if (!delayedResponse.ok) {
