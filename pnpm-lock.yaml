@@ -8,6 +8,9 @@ dependencies:
   '@upstash/redis':
     specifier: ^1.34.0
     version: 1.34.0
+  '@worknice/js-sdk':
+    specifier: ^0.0.2
+    version: 0.0.2(currency.js@2.0.4)(temporal-polyfill@0.2.5)
   next:
     specifier: 14.2.7
     version: 14.2.7(react-dom@18.3.1)(react@18.3.1)
@@ -367,6 +370,26 @@ packages:
       crypto-js: 4.2.0
     dev: false
 
+  /@worknice/js-sdk@0.0.2(currency.js@2.0.4)(temporal-polyfill@0.2.5):
+    resolution: {integrity: sha512-81VKZGC+is1Q6zKgjpe5EpIhi0qbODbz7U06bVqXIfcMOBajCeNsLo+hkX7Uj+u+sq2qdVIgZk+lMIQT9S5qZw==}
+    peerDependencies:
+      currency.js: ^2.0.4
+    dependencies:
+      '@worknice/utils': 0.0.1(temporal-polyfill@0.2.5)
+      currency.js: 2.0.4
+      dedent: 0.7.0
+    transitivePeerDependencies:
+      - temporal-polyfill
+    dev: false
+
+  /@worknice/utils@0.0.1(temporal-polyfill@0.2.5):
+    resolution: {integrity: sha512-4c8a+R7RpFrhJFmgIijBrC7D1an56q1xvy1PDr0FCyNWy8Jo74sNXYCv5/3HlUiXdYGtxEJwj86DE79anrgeSA==}
+    peerDependencies:
+      temporal-polyfill: ^0.2.1
+    dependencies:
+      temporal-polyfill: 0.2.5
+    dev: false
+
   /acorn-jsx@5.3.2(acorn@8.12.1):
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
     peerDependencies:
@@ -633,6 +656,11 @@ packages:
     resolution: {integrity: sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==}
     dev: true
 
+  /currency.js@2.0.4:
+    resolution: {integrity: sha512-6/OplJYgJ0RUlli74d93HJ/OsKVBi8lB1+Z6eJYS1YZzBuIp4qKKHpJ7ad+GvTlWmLR/hLJOWTykN5Nm8NJ7+w==}
+    engines: {node: '>=4'}
+    dev: false
+
   /damerau-levenshtein@1.0.8:
     resolution: {integrity: sha512-sdQSFB7+llfUcQHUQO3+B8ERRj0Oa4w9POWMI/puGtuf7gFywGmkaLCElnudfTiKZV+NvHqL0ifzdrI8Ro7ESA==}
     dev: true
@@ -686,6 +714,10 @@ packages:
     dependencies:
       ms: 2.1.2
     dev: true
+
+  /dedent@0.7.0:
+    resolution: {integrity: sha512-Q6fKUPqnAHAyhiUgFU7BUzLiv0kd8saH9al7tnu5Q/okj6dnupxyTgFIBjVzJATdfIAm9NAsvXNzjaKa+bxVyA==}
+    dev: false
 
   /deep-equal@2.2.3:
     resolution: {integrity: sha512-ZIwpnevOurS8bpT4192sqAowWM76JDKSHYzMLty3BZGSswgq6pBaH3DhCSW5xVAZICZyKdOBPjwww5wfgT/6PA==}
