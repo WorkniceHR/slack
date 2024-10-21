@@ -22,7 +22,9 @@ export const POST = async (request: Request): Promise<Response> =>
           }
         );
 
-        return authorizationCode;
+        return `${config.protocol}://${request.headers.get(
+          "host"
+        )}/auth-request?${config.sessionCodeParam}=${authorizationCode}`;
       },
     },
     {
