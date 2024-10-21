@@ -9,8 +9,8 @@ dependencies:
     specifier: ^1.34.0
     version: 1.34.0
   '@worknice/js-sdk':
-    specifier: ^0.0.3
-    version: 0.0.3(currency.js@2.0.4)(temporal-polyfill@0.2.5)
+    specifier: ^0.0.4
+    version: 0.0.4(currency.js@2.0.4)(temporal-polyfill@0.2.5)
   next:
     specifier: 14.2.7
     version: 14.2.7(react-dom@18.3.1)(react@18.3.1)
@@ -370,8 +370,8 @@ packages:
       crypto-js: 4.2.0
     dev: false
 
-  /@worknice/js-sdk@0.0.3(currency.js@2.0.4)(temporal-polyfill@0.2.5):
-    resolution: {integrity: sha512-4Xsie6igL6puSLP1KE3Zs8iF5QopXGpajy5oBhwKsN8fXNMnHiPUTtjMgyFLImbRKXJVU6LUJmKLiMh424Pyug==}
+  /@worknice/js-sdk@0.0.4(currency.js@2.0.4)(temporal-polyfill@0.2.5):
+    resolution: {integrity: sha512-I7f/8EXXURr0xmFXRWiwPUsgNnh2WLAXVEtJjqJ1yfD5rkHpMZhwYfgiVL9ne8gOV9lXrYfc2oQ23222WFUHKA==}
     peerDependencies:
       currency.js: ^2.0.4
       temporal-polyfill: ^0.2.1
