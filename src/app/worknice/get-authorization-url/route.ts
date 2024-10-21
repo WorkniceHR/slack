@@ -1,48 +1,32 @@
+import { handleGetAuthorizationUrlWebhook } from "@worknice/js-sdk/helpers";
 import crypto from "crypto";
-import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
 import config from "../../../config";
 import redis from "../../../redis";
 
-export const POST = async (request: NextRequest): Promise<NextResponse> => {
-  try {
-    console.log("Parsing request…");
+export const POST = async (request: Request): Promise<Response> =>
+  handleGetAuthorizationUrlWebhook(
+    request,
+    {
+      getAuthorisationUrl: async ({ logger, payload }) => {
+        logger.debug("Generating authorization code…");
 
-    const data = z
-      .object({
-        integrationId: z.string(),
-      })
-      .parse(await request.json());
+        const authorizationCode = crypto.randomBytes(16).toString("hex");
 
-    console.log("Generating authorization code…");
+        logger.debug("Saving authorization code…");
 
-    const authorizationCode = crypto.randomBytes(16).toString("hex");
+        await redis.set(
+          `session_code_integration_id:${authorizationCode}`,
+          payload.integrationId,
+          {
+            ex: config.sessionCodeExpiry,
+          }
+        );
 
-    console.log("Saving authorization code…");
-
-    await redis.set(
-      `session_code_integration_id:${authorizationCode}`,
-      data.integrationId,
-      {
-        ex: config.sessionCodeExpiry,
-      }
-    );
-
-    console.log("Done.");
-
-    return NextResponse.json(
-      {
-        authorizationUrl: `${config.protocol}://${request.headers.get(
-          "host"
-        )}/auth-request?${config.sessionCodeParam}=${authorizationCode}`,
+        return authorizationCode;
       },
-      { status: 200 }
-    );
-  } catch (error) {
-    const message = error instanceof Error ? error.message : `${error}`;
-
-    return new NextResponse(message, {
-      status: 500,
-    });
-  }
-};
+    },
+    {
+      apiUrl: `${config.worknice.baseUrl}/api/graphql`,
+      debug: true,
+    }
+  );
