@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@upstash/redis": "^1.34.0",
-    "@worknice/js-sdk": "^0.0.2",
+    "@worknice/js-sdk": "^0.0.3",
     "next": "14.2.7",
     "react": "^18",
     "react-dom": "^18",
