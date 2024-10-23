@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import config from "../../config";
 import redis from "../../redis";
+import slack from "@/slack";
 
 export const GET = async (request: NextRequest): Promise<NextResponse> => {
   try {
@@ -35,13 +36,7 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
 
     console.log("Done.");
 
-    return NextResponse.redirect(
-      `https://slack.com/oauth/v2/authorize?scope=${config.slack.scopes.join(
-        ","
-      )}&client_id=${config.slack.clientId}&redirect_uri=${encodeURIComponent(
-        config.slack.redirectUri
-      )}`
-    );
+    return NextResponse.redirect(await slack.getAuthorizationUrl());
   } catch (error) {
     const message = error instanceof Error ? error.message : `${error}`;
 

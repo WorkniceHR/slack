@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createZodFetcher } from "zod-fetch";
 import redis from "@/redis";
 import config from "@/config";
+import slack, { type Block } from "@/slack";
 
 export const GET = async (request: NextRequest): Promise<NextResponse> => {
   try {
@@ -43,7 +44,7 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
       }
 
       const blocks = people.map((person) => formatSlackBlockMessage(person));
-      await sendSlackBlockMessage(slackToken, channel, blocks);
+      await slack.postChatMessage(slackToken, channel, { blocks });
       console.log(`Sent Slack block message for integration ${integrationId}`);
     }
 
@@ -120,7 +121,7 @@ const peopleListSchema = z.object({
 });
 
 // Format Slack block message
-function formatSlackBlockMessage(person: Person): any {
+function formatSlackBlockMessage(person: Person): Block {
   const locationName = person.location?.name || "our team";
   const positionTitle = person.currentJob?.position?.title || "new team member";
 
@@ -136,34 +137,6 @@ function formatSlackBlockMessage(person: Person): any {
       alt_text: `${person.displayName}'s profile picture`,
     },
   };
-}
-
-// Send a Slack block message
-async function sendSlackBlockMessage(
-  token: string,
-  channel: string,
-  blocks: any[]
-): Promise<void> {
-  const response = await fetch("https://slack.com/api/chat.postMessage", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      channel,
-      blocks,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  const result = await response.json();
-  if (!result.ok) {
-    throw new Error(`Slack API error: ${result.error}`);
-  }
 }
 
 type Person = z.infer<

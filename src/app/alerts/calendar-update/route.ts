@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createZodFetcher } from "zod-fetch";
 import redis from "@/redis";
 import config from "@/config";
+import slack from "@/slack";
 
 // Send daily summary of events to Slack channels
 export const GET = async (request: NextRequest): Promise<NextResponse> => {
@@ -66,7 +67,7 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
       console.log(`Filtered Worknice Events ${JSON.stringify(todayEvents)}`);
 
       const message = formatEventMessage(todayEvents);
-      await sendSlackMessage(slackToken, channel, message);
+      await slack.postChatMessage(slackToken, channel, { text: message });
       console.log(`Sent Slack message for integration ${integrationId}`);
     }
 
@@ -191,31 +192,6 @@ async function getWorkniceCalendarEvents(apiKey: string): Promise<any[]> {
     }
   );
   return response.data.session.org.sharedCalendarEvents;
-}
-
-// Send a Slack message to the specified Slack channel
-async function sendSlackMessage(
-  token: string,
-  channel: string,
-  message: string
-): Promise<void> {
-  const response = await fetch("https://slack.com/api/chat.postMessage", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ channel, text: message }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  const result = await response.json();
-  if (!result.ok) {
-    throw new Error(`Slack API error: ${result.error}`);
-  }
 }
 
 type CalendarEvent = z.infer<

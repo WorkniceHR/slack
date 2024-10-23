@@ -1,6 +1,7 @@
 import { handleTriggerIntegrationSyncWebhook } from "@worknice/js-sdk/helpers";
 import config from "../../../config";
 import redis from "../../../redis";
+import slack from "@/slack";
 
 type Env = {
   slackAccessToken: string;
@@ -41,14 +42,14 @@ export const POST = async (request: Request): Promise<Response> =>
         mode: "connection-only",
       }),
       getRemotePeople: async ({ env }) => {
-        const slackUsers = await fetchSlackUsers(env.slackAccessToken);
+        const slackUsers = await slack.listUsers(env.slackAccessToken);
         return slackUsers.map((user) => ({
           bankAccounts: null,
           emergencyContacts: null,
           metadata: {
             deleted: false,
             employeeCode: null,
-            sourceId: user.userId,
+            sourceId: user.id,
             targetId: null,
             updatedAt: "",
           },
@@ -56,8 +57,8 @@ export const POST = async (request: Request): Promise<Response> =>
           postalAddress: null,
           residentialAddress: null,
           profile: {
-            displayName: user.displayName,
-            profileEmail: user.email,
+            displayName: user.profile.display_name,
+            profileEmail: user.profile.email,
           },
           superFunds: null,
           taxDetails: null,
@@ -70,34 +71,3 @@ export const POST = async (request: Request): Promise<Response> =>
       debug: true,
     }
   );
-
-// Fetches users from the Slack API using the access token
-const fetchSlackUsers = async (
-  accessToken: string
-): Promise<{ userId: string; displayName: string; email: string }[]> => {
-  const response = await fetch("https://slack.com/api/users.list", {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-    },
-  });
-
-  const data = await response.json();
-
-  if (!data.ok) {
-    throw new Error("Failed to fetch Slack users.");
-  }
-
-  // Filter out deleted, bot, and USLACKBOT users
-  const filteredUsers = data.members.filter(
-    (user: any) => !user.deleted && !user.is_bot && user.id !== "USLACKBOT"
-  );
-
-  // Map through filtered users and return userId, displayName, and email
-  return filteredUsers.map((user: any) => ({
-    userId: user.id,
-    displayName: user.profile.real_name || user.name,
-    email: user.profile.email || "",
-  }));
-};

@@ -3,6 +3,7 @@ import config from "../../config";
 import redis from "../../redis";
 import ConfigForm from "./ConfigForm";
 import Link from "next/link";
+import slack from "@/slack";
 
 type PageProps<
   Params extends string = string,
@@ -10,13 +11,6 @@ type PageProps<
 > = {
   params: Record<Params, string>;
   searchParams: Record<SearchParams, string | string[] | undefined>;
-};
-
-// Define the type for Slack channels
-type SlackChannel = {
-  id: string;
-  name: string;
-  is_channel: boolean;
 };
 
 const ReconfigPage = async ({ searchParams }: PageProps) => {
@@ -46,7 +40,7 @@ const ReconfigPage = async ({ searchParams }: PageProps) => {
 
   console.log("Fetching list of Slack channels…");
 
-  const channels: SlackChannel[] = await fetchSlackChannels(accessToken);
+  const channels = await slack.listChannels(accessToken);
 
   console.log("Fetching saved person activated channel…");
 
@@ -105,27 +99,6 @@ const getSessionCode = (
   if (sessionCodeCookie !== undefined) return sessionCodeCookie.value;
 
   throw Error("Unable to retrieve session code.");
-};
-
-// Fetches channels from the Slack API using the access token
-const fetchSlackChannels = async (
-  accessToken: string
-): Promise<SlackChannel[]> => {
-  const response = await fetch("https://slack.com/api/conversations.list", {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-    },
-  });
-
-  const data = await response.json();
-
-  if (!data.ok) {
-    throw new Error("Failed to fetch Slack channels.");
-  }
-
-  return data.channels || [];
 };
 
 export default ReconfigPage;

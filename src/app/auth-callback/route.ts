@@ -1,3 +1,4 @@
+import slack from "@/slack";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -29,36 +30,7 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
 
     console.log("Exchanging callback code for access token…");
 
-    const response = await fetchWithZod(
-      z
-        .object({
-          access_token: z.string(),
-          ok: z.literal(true),
-          bot_user_id: z.string(),
-          team: z.object({
-            name: z.string(),
-            id: z.string(),
-          }),
-          enterprise: z
-            .object({
-              id: z.string(),
-            })
-            .nullable(),
-        })
-        .passthrough(),
-      "https://slack.com/api/oauth.v2.access",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          client_id: config.slack.clientId,
-          client_secret: config.slack.clientSecret,
-          code,
-        }),
-      }
-    );
+    const response = await slack.getAccessToken(code);
 
     console.log("Retrieving integration ID…");
 
