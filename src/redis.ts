@@ -19,6 +19,9 @@ const getCalendarUpdateSlackChannel = async (integrationId: string) =>
 const getIntegrationIdFromSessionCode = async (sessionCode: string) =>
   client.get<string>(`session_code_integration_id:${sessionCode}`);
 
+const getIntegrationIdFromTeamId = async (teamId: string) =>
+  client.get<string>(`slack_team_id_integration_id:${teamId}`);
+
 const getNewStarterSlackChannel = async (integrationId: string) =>
   client.get<string>(`slack_channel:new_starter:${integrationId}`);
 
@@ -56,6 +59,12 @@ const setIntegrationIdFromSessionCode = async (
     }
   );
 
+const setIntegrationIdFromSlackTeamId = async (
+  teamId: string,
+  integrationId: string
+) =>
+  client.set<string>(`slack_team_id_integration_id:${teamId}`, integrationId);
+
 const setNewStarterSlackChannel = async (
   integrationId: string,
   channel: string
@@ -83,17 +92,14 @@ const setSlackEnterpriseId = async (
   enterpriseId: string
 ) => client.set<string>(`slack_enterprise_id:${integrationId}`, enterpriseId);
 
-const setSlackTeamId = async (integrationId: string, teamId: string) =>
-  client.set<string>(`slack_team_id:${integrationId}`, teamId);
-
 const setWorkniceApiKey = async (integrationId: string, apiKey: string) =>
   client.set<string>(`worknice_api_key:${integrationId}`, apiKey);
 
 const redis = {
-  client,
   getAllIntegrationIds,
   getCalendarUpdateSlackChannel,
   getIntegrationIdFromSessionCode,
+  getIntegrationIdFromTeamId,
   getNewStarterSlackChannel,
   getPersonActivatedSlackChannel,
   getSlackAccessToken,
@@ -101,12 +107,12 @@ const redis = {
   purgeIntegration,
   setCalendarUpdateSlackChannel,
   setIntegrationIdFromSessionCode,
+  setIntegrationIdFromSlackTeamId,
   setNewStarterSlackChannel,
   setPersonActivatedSlackChannel,
   setSlackAccessToken,
   setSlackBotUserId,
   setSlackEnterpriseId,
-  setSlackTeamId,
   setWorkniceApiKey,
 };
 
