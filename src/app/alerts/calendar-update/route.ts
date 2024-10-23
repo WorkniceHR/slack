@@ -5,12 +5,10 @@ import { createZodFetcher } from "zod-fetch";
 import redis from "@/redis";
 import config from "@/config";
 
-
-
 // Send daily summary of events to Slack channels
 export const GET = async (request: NextRequest): Promise<NextResponse> => {
   try {
-    const integrationIds = await getWorkniceIntegrationIds();
+    const integrationIds = await redis.getAllIntegrationIds();
 
     const channels: Array<string> = [];
     const slackTokens: Array<string> = [];
@@ -18,37 +16,40 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
     const calendarEvents: Array<CalendarEvent[]> = [];
 
     for (const integrationId of integrationIds) {
-      const channel = await redis.get(`slack_channel:calendar_update:${integrationId}`);
-      if (typeof channel !== "string") {
-        console.log(`No Slack channel found for integration ${integrationId}. Skipping.`);
+      const channel = await redis.getCalendarUpdateSlackChannel(integrationId);
+      if (channel === null) {
+        console.log(
+          `No Slack channel found for integration ${integrationId}. Skipping.`
+        );
         continue;
       }
 
-      const slackToken = await redis.get(`slack_access_token:${integrationId}`);
-      if (typeof slackToken !== "string") {
-        console.log(`No Slack token found for integration ${integrationId}. Skipping.`);
+      const slackToken = await redis.getSlackAccessToken(integrationId);
+      if (slackToken === null) {
+        console.log(
+          `No Slack token found for integration ${integrationId}. Skipping.`
+        );
         continue;
       }
 
-      const workniceToken = await redis.get(`worknice_api_key:${integrationId}`);
-      if (typeof workniceToken !== "string") {
-        console.log(`No Worknice token found for integration ${integrationId}. Skipping.`);
+      const workniceToken = await redis.getWorkniceApiKey(integrationId);
+      if (workniceToken === null) {
+        console.log(
+          `No Worknice token found for integration ${integrationId}. Skipping.`
+        );
         continue;
       }
-
 
       // Fetch the list of integrations and check if the current integration is archived
       const integrations = await getWorkniceIntegrations(workniceToken);
       const integration = integrations.find((i) => i.id === integrationId);
 
       if (!integration || integration.archived) {
-        console.log(`Integration ${integrationId} is archived. Removing from Redis and skipping.`);
+        console.log(
+          `Integration ${integrationId} is archived. Removing from Redis and skipping.`
+        );
 
-        // Remove the Redis entries for this integration
-        await redis.del(`slack_channel:calendar_update:${integrationId}`);
-        await redis.del(`slack_access_token:${integrationId}`);
-        await redis.del(`worknice_api_key:${integrationId}`);
-        await redis.del(`slack_team_id:${integrationId}`);
+        await redis.purgeIntegration(integrationId);
 
         continue;
       }
@@ -88,15 +89,10 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
 
 const fetchWithZod = createZodFetcher();
 
-async function getWorkniceIntegrationIds(): Promise<string[]> {
-  const keys = await redis.keys("worknice_api_key:*");
-  return keys
-    .map((key) => key.split(":")[1])
-    .filter((id): id is string => id !== undefined);
-}
-
 // Get the Worknice integrations so we can check whether they are archived or not
-async function getWorkniceIntegrations(apiKey: string): Promise<{ id: string, archived: boolean }[]> {
+async function getWorkniceIntegrations(
+  apiKey: string
+): Promise<{ id: string; archived: boolean }[]> {
   const response = await fetchWithZod(
     z.object({
       data: z.object({
@@ -138,7 +134,6 @@ async function getWorkniceIntegrations(apiKey: string): Promise<{ id: string, ar
   return response.data.session.org.integrations;
 }
 
-
 const workniceCalendarEventsSchema = z.object({
   data: z.object({
     session: z.object({
@@ -162,8 +157,6 @@ const workniceCalendarEventsSchema = z.object({
     }),
   }),
 });
-
-
 
 // Get the calendar events from Worknice
 async function getWorkniceCalendarEvents(apiKey: string): Promise<any[]> {
@@ -198,7 +191,6 @@ async function getWorkniceCalendarEvents(apiKey: string): Promise<any[]> {
     }
   );
   return response.data.session.org.sharedCalendarEvents;
-  
 }
 
 // Send a Slack message to the specified Slack channel
@@ -251,7 +243,6 @@ function filterTodayEvents(events: CalendarEvent[]): CalendarEvent[] {
   });
 }
 
-
 // Format the calendar events into a Slack message
 function formatEventMessage(events: CalendarEvent[]): string {
   if (events.length === 0) {
@@ -302,4 +293,3 @@ function formatEventMessageSet(
 
   return "";
 }
-

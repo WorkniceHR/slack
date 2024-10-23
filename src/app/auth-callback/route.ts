@@ -1,9 +1,9 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { createZodFetcher } from "zod-fetch";
 import config from "../../config";
 import redis from "../../redis";
-import { createZodFetcher } from "zod-fetch";
-import { z } from "zod";
 
 const fetchWithZod = createZodFetcher();
 
@@ -62,8 +62,8 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
 
     console.log("Retrieving integration ID…");
 
-    const integrationId = await redis.get<string>(
-      `session_code_integration_id:${sessionCodeCookie.value}`
+    const integrationId = await redis.getIntegrationIdFromSessionCode(
+      sessionCodeCookie.value
     );
 
     if (integrationId === null) {
@@ -72,34 +72,23 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
 
     console.log("Saving access token…");
 
-    await redis.set(
-      `slack_access_token:${integrationId}`,
-      response.access_token
-    );
+    await redis.setSlackAccessToken(integrationId, response.access_token);
 
     if (response.bot_user_id) {
-      await redis.set(
-        `slack_bot_user_id:${integrationId}`,
-        response.bot_user_id
-      );
+      await redis.setSlackBotUserId(integrationId, response.bot_user_id);
     }
 
     if (response.team?.id) {
-      await redis.set(`slack_team_id:${integrationId}`, response.team.id);
+      await redis.setSlackTeamId(integrationId, response.team.id);
     }
 
-    if (response.enterprise_id) {
-      await redis.set(
-        `slack_enterprise_id:${integrationId}`,
-        response.enterprise_id
-      );
+    if (response.enterprise?.id) {
+      await redis.setSlackEnterpriseId(integrationId, response.enterprise.id);
     }
 
     console.log("Retrieving API token…");
 
-    const apiToken = await redis.get<string>(
-      `worknice_api_key:${integrationId}`
-    );
+    const apiToken = await redis.getWorkniceApiKey(integrationId);
 
     if (apiToken === null) {
       throw Error("Unable to retrieving API key.");

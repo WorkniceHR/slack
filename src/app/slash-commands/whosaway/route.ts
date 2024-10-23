@@ -23,7 +23,10 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         slackRequestSchema.parse(data);
 
         const integrationId = await getIntegrationId(data.team_id);
-        const workniceApiKey = await redis.get<string>(`worknice_api_key:${integrationId}`);
+        if (integrationId === undefined) {
+            throw new Error("Integration ID not found.");
+        }
+        const workniceApiKey = await redis.getWorkniceApiKey(integrationId);
 
         if (!workniceApiKey) {
             throw new Error("API key not found.");
@@ -59,11 +62,11 @@ async function getIntegrationId(team_id: string) {
     console.log("Retrieving integration ID for team ID:", team_id);
 
     // Get all keys matching the pattern slack_team_id:*
-    const keys = await redis.keys('slack_team_id:*');
+    const keys = await redis.client.keys("slack_team_id:*");
 
     // Iterate through the keys and find the one that matches the team_id
     for (const key of keys) {
-        const storedTeamId = await redis.get(key);
+        const storedTeamId = await redis.client.get(key);
 
         // If the team_id matches, extract the integrationId from the key
         if (storedTeamId === team_id) {

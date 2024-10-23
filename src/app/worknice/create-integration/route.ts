@@ -7,10 +7,7 @@ export const POST = async (request: Request): Promise<Response> =>
     request,
     {
       persistDetails: async ({ payload }) => {
-        await redis.set(
-          `worknice_api_key:${payload.integrationId}`,
-          payload.apiToken
-        );
+        await redis.setWorkniceApiKey(payload.integrationId, payload.apiToken);
       },
     },
     {

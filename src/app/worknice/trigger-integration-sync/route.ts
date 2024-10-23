@@ -13,9 +13,7 @@ export const POST = async (request: Request): Promise<Response> =>
     request,
     {
       getApiToken: async ({ payload }) => {
-        const token = await redis.get<string>(
-          `worknice_api_key:${payload.integrationId}`
-        );
+        const token = await redis.getWorkniceApiKey(payload.integrationId);
 
         if (!token) {
           throw Error("Worknice API token not found");
@@ -26,8 +24,8 @@ export const POST = async (request: Request): Promise<Response> =>
       getEnv: async ({ logger, payload }) => {
         logger.info("Retrieving Slack access token…");
 
-        const slackAccessToken = await redis.get<string>(
-          `slack_access_token:${payload.integrationId}`
+        const slackAccessToken = await redis.getSlackAccessToken(
+          payload.integrationId
         );
 
         if (!slackAccessToken) {

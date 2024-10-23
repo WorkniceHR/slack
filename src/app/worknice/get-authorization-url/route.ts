@@ -10,21 +10,18 @@ export const POST = async (request: Request): Promise<Response> =>
       getAuthorisationUrl: async ({ logger, payload }) => {
         logger.debug("Generating authorization code…");
 
-        const authorizationCode = crypto.randomBytes(16).toString("hex");
+        const sessionCode = crypto.randomBytes(16).toString("hex");
 
         logger.debug("Saving authorization code…");
 
-        await redis.set(
-          `session_code_integration_id:${authorizationCode}`,
-          payload.integrationId,
-          {
-            ex: config.sessionCodeExpiry,
-          }
+        await redis.setIntegrationIdFromSessionCode(
+          sessionCode,
+          payload.integrationId
         );
 
         return `${config.protocol}://${request.headers.get(
           "host"
-        )}/auth-request?${config.sessionCodeParam}=${authorizationCode}`;
+        )}/auth-request?${config.sessionCodeParam}=${sessionCode}`;
       },
     },
     {

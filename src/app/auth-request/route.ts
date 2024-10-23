@@ -19,8 +19,8 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
 
     console.log("Retrieving integration ID…");
 
-    const integrationId = await redis.get<string>(
-      `session_code_integration_id:${sessionCode}`
+    const integrationId = await redis.getIntegrationIdFromSessionCode(
+      sessionCode
     );
 
     if (integrationId === null) {
@@ -38,7 +38,9 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
     return NextResponse.redirect(
       `https://slack.com/oauth/v2/authorize?scope=${config.slack.scopes.join(
         ","
-      )}&client_id=${config.slack.clientId}&redirect_uri=${encodeURIComponent(config.slack.redirectUri)}`
+      )}&client_id=${config.slack.clientId}&redirect_uri=${encodeURIComponent(
+        config.slack.redirectUri
+      )}`
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : `${error}`;

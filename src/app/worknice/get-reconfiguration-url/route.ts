@@ -8,21 +8,18 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
   try {
     const data = requestSchema.parse(await request.json());
 
-    const authorizationCode = crypto.randomBytes(16).toString("hex");
+    const sessionCode = crypto.randomBytes(16).toString("hex");
 
-    await redis.set(
-      `session_code_integration_id:${authorizationCode}`,
-      data.integrationId,
-      {
-        ex: config.sessionCodeExpiry,
-      }
+    await redis.setIntegrationIdFromSessionCode(
+      sessionCode,
+      data.integrationId
     );
 
     return NextResponse.json(
       {
         reconfigurationUrl: `${config.protocol}://${request.headers.get(
           "host"
-        )}/reconfig?${config.sessionCodeParam}=${authorizationCode}`,
+        )}/reconfig?${config.sessionCodeParam}=${sessionCode}`,
       },
       { status: 200 }
     );

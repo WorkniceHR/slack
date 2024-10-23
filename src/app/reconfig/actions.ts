@@ -9,20 +9,33 @@ export const saveSelectedChannel = async (formData: FormData) => {
   const calendarUpdateChannel = formData.get("calendarUpdateChannel");
   const newStarterChannel = formData.get("newStarterChannel");
 
-  await redis.set(
-    `slack_channel:person_activated:${integrationId}`,
+  if (typeof integrationId !== "string") {
+    throw new Error("Integration ID is required.");
+  }
+
+  if (typeof personActivatedChannel !== "string") {
+    throw new Error("Person activated channel is required.");
+  }
+
+  if (typeof calendarUpdateChannel !== "string") {
+    throw new Error("Calendar update channel is required.");
+  }
+
+  if (typeof newStarterChannel !== "string") {
+    throw new Error("New starter channel is required.");
+  }
+
+  await redis.setPersonActivatedSlackChannel(
+    integrationId,
     personActivatedChannel
   );
 
-  await redis.set(
-    `slack_channel:calendar_update:${integrationId}`,
+  await redis.setCalendarUpdateSlackChannel(
+    integrationId,
     calendarUpdateChannel
   );
 
-  await redis.set(
-    `slack_channel:new_starter:${integrationId}`,
-    calendarUpdateChannel
-  );
+  await redis.setNewStarterSlackChannel(integrationId, newStarterChannel);
 
   // Redirect back to the integration page after saving
   redirect(`https://app.worknice.com/admin/apps/integrations/${integrationId}`);
