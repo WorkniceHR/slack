@@ -10,5 +10,5 @@ services:
     image: hiett/serverless-redis-http:latest
     environment:
       SRH_MODE: env
-      SRH_TOKEN: example_token
+      SRH_TOKEN: token_for_development_use_only
       SRH_CONNECTION_STRING: "redis://redis:6379" # Using `redis` hostname since they're in the same Docker network.
