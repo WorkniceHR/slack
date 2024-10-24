@@ -1,47 +1,46 @@
 import slack from "@/slack";
+import { handleRequestWithWorknice } from "@worknice/js-sdk/helpers";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import config from "../../config";
 import redis from "../../redis";
 
-export const GET = async (request: NextRequest): Promise<NextResponse> => {
-  try {
-    console.log("Retrieving session code…");
+export const GET = async (request: NextRequest) =>
+  handleRequestWithWorknice(request, {
+    getApiToken: async () => "",
+    getEnv: async () => null,
+    handleRequest: async ({ logger }) => {
+      const cookieStore = await cookies();
 
-    const cookieStore = await cookies();
+      const sessionCode = request.nextUrl.searchParams.get(
+        config.sessionCodeParam
+      );
 
-    const sessionCode = request.nextUrl.searchParams.get(
-      config.sessionCodeParam
-    );
+      if (sessionCode === null) {
+        throw Error("Missing session code.");
+      }
 
-    if (sessionCode === null) {
-      throw Error("Missing session code.");
-    }
+      logger.debug("Retrieved session code.");
 
-    console.log("Retrieving integration ID…");
+      const integrationId = await redis.getIntegrationIdFromSessionCode(
+        sessionCode
+      );
 
-    const integrationId = await redis.getIntegrationIdFromSessionCode(
-      sessionCode
-    );
+      if (integrationId === null) {
+        throw Error("Authorization request not found");
+      }
 
-    if (integrationId === null) {
-      throw Error("Authorization request not found");
-    }
+      logger.debug("Retrieved integration ID.");
 
-    console.log("Saving session code to cookie…");
+      cookieStore.set(config.sessionCodeCookieName, sessionCode, {
+        maxAge: config.sessionCodeExpiry,
+      });
 
-    cookieStore.set(config.sessionCodeCookieName, sessionCode, {
-      maxAge: config.sessionCodeExpiry,
-    });
+      logger.debug("Saved session code to cookie.");
 
-    console.log("Done.");
+      const authorizationUrl = await slack.getAuthorizationUrl();
 
-    return NextResponse.redirect(await slack.getAuthorizationUrl());
-  } catch (error) {
-    const message = error instanceof Error ? error.message : `${error}`;
-
-    return new NextResponse(message, {
-      status: 500,
-    });
-  }
-};
+      return NextResponse.redirect(authorizationUrl);
+    },
+    parsePayload: async () => null,
+  });
