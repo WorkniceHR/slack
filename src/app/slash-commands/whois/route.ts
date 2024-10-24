@@ -9,6 +9,7 @@ import {
   SimpleTokenizer,
   StemmingTokenizer,
 } from "js-search";
+import queryString from "querystring";
 import { Temporal } from "temporal-polyfill";
 import { z } from "zod";
 
@@ -208,7 +209,7 @@ export const POST = async (request: Request) =>
 
         slack.verifyRequest(timestamp, signature, text);
 
-        return slackRequestSchema.parse(JSON.parse(text));
+        return slackRequestSchema.parse(queryString.parse(text));
       },
     }
   );

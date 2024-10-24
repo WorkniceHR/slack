@@ -2,6 +2,7 @@ import redis from "@/redis";
 import slack from "@/slack";
 import { handleRequestWithWorknice } from "@worknice/js-sdk/helpers";
 import gql from "dedent";
+import queryString from "querystring";
 import { Temporal } from "temporal-polyfill";
 import { z } from "zod";
 
@@ -154,7 +155,7 @@ export const POST = async (request: Request) =>
 
         slack.verifyRequest(timestamp, signature, text);
 
-        return slackRequestSchema.parse(JSON.parse(text));
+        return slackRequestSchema.parse(queryString.parse(text));
       },
     }
   );
