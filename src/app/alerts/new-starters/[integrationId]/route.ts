@@ -57,6 +57,15 @@ export const GET = async (
     handleRequest: async ({ env, logger, worknice }) => {
       const { integrationId } = await props.params;
 
+      const integration = await worknice.getIntegration({
+        integrationId,
+      });
+
+      if (integration.archived) {
+        await redis.purgeIntegration(integrationId);
+        throw Error("Integration is archived.");
+      }
+
       const rawPeople = await worknice.fetchFromApi(
         gql`
           query PeopleList {

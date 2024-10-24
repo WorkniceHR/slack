@@ -40,17 +40,14 @@ export const POST = async (request: Request) =>
           integrationId,
         };
       },
-      handleRequest: async ({ env, logger, payload, worknice }) => {
+      handleRequest: async ({ env, payload, worknice }) => {
         const integration = await worknice.getIntegration({
           integrationId: env.integrationId,
         });
 
-        if (!integration || integration.archived) {
-          logger.debug(`Integration ${integration.id} is archived.`);
-
-          redis.purgeIntegration(integration.id);
-
-          throw Error("Integration is archived");
+        if (integration.archived) {
+          await redis.purgeIntegration(integration.id);
+          throw Error("Integration is archived.");
         }
 
         const rawPeopleDirectory = await worknice.fetchFromApi(gql`

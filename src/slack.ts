@@ -11,16 +11,12 @@ const getAccessToken = async (code: string) =>
       .object({
         access_token: z.string(),
         ok: z.literal(true),
-        bot_user_id: z.string(),
-        team: z.object({
-          name: z.string(),
-          id: z.string(),
-        }),
-        enterprise: z
+        team: z
           .object({
+            name: z.string(),
             id: z.string(),
           })
-          .nullable(),
+          .passthrough(),
       })
       .passthrough(),
     "https://slack.com/api/oauth.v2.access",

@@ -1,99 +1,137 @@
-import { Redis } from "@upstash/redis";
+import { Redis, type SetCommandOptions } from "@upstash/redis";
 import config from "./config";
+
+type Key =
+  | `session:${string}:worknice_integration_id`
+  | `slack_team:${string}:worknice_integration_id`
+  | `worknice_integration${string}:slack_access_token`
+  | `worknice_integration${string}:slack_calendar_update_channel`
+  | `worknice_integration${string}:slack_new_starter_channel`
+  | `worknice_integration${string}:slack_person_activated_channel`
+  | `worknice_integration${string}:slack_team_id`
+  | `worknice_integration${string}:worknice_api_key`;
 
 const client = new Redis({
   url: config.redis.restApiUrl,
   token: config.redis.restApiToken,
 });
 
+const getString = async (key: Key) => client.get<string>(key);
+
+const setString = async (key: Key, value: string, opts?: SetCommandOptions) =>
+  client.set<string>(key, value, opts);
+
 const getAllIntegrationIds = async () => {
-  const keys = await client.keys("worknice_api_key:*");
+  const keys = await client.keys("worknice_integration:*:worknice_api_key");
   return keys
     .map((key) => key.split(":")[1])
     .filter((id): id is string => id !== undefined);
 };
 
 const getCalendarUpdateSlackChannel = async (integrationId: string) =>
-  client.get<string>(`slack_channel:calendar_update:${integrationId}`);
+  getString(
+    `worknice_integration:${integrationId}:slack_calendar_update_channel`
+  );
 
 const getIntegrationIdFromSessionCode = async (sessionCode: string) =>
-  client.get<string>(`session_code_integration_id:${sessionCode}`);
+  getString(`session:${sessionCode}:worknice_integration_id`);
 
 const getIntegrationIdFromTeamId = async (teamId: string) =>
-  client.get<string>(`slack_team_id_integration_id:${teamId}`);
+  getString(`slack_team:${teamId}:worknice_integration_id`);
 
 const getNewStarterSlackChannel = async (integrationId: string) =>
-  client.get<string>(`slack_channel:new_starter:${integrationId}`);
+  getString(`worknice_integration:${integrationId}:slack_new_starter_channel`);
 
 const getPersonActivatedSlackChannel = async (integrationId: string) =>
-  client.get<string>(`slack_channel:person_activated:${integrationId}`);
+  getString(
+    `worknice_integration:${integrationId}:slack_person_activated_channel`
+  );
 
 const getSlackAccessToken = async (integrationId: string) =>
-  client.get<string>(`slack_access_token:${integrationId}`);
+  getString(`worknice_integration:${integrationId}:slack_access_token`);
+
+const getSlackTeamIdFromIntegrationId = async (integrationId: string) =>
+  getString(`worknice_integration:${integrationId}:slack_team_id`);
 
 const getWorkniceApiKey = async (integrationId: string) =>
-  client.get<string>(`worknice_api_key:${integrationId}`);
+  getString(`worknice_integration:${integrationId}:worknice_api_key`);
 
 const purgeIntegration = async (integrationId: string) => {
-  await client.del(`slack_channel:calendar_update:${integrationId}`);
-  await client.del(`slack_access_token:${integrationId}`);
-  await client.del(`worknice_api_key:${integrationId}`);
-  await client.del(`slack_team_id:${integrationId}`);
+  const teamId = await client.get(
+    `worknice_integration:${integrationId}:slack_team_id`
+  );
+
+  await client.del(`slack_team:${teamId}:worknice_integration_id`);
+  await client.del(`worknice_integration:${integrationId}:slack_access_token`);
+  await client.del(
+    `worknice_integration:${integrationId}:slack_calendar_update_channel`
+  );
+  await client.del(
+    `worknice_integration:${integrationId}:slack_new_starter_channel`
+  );
+  await client.del(
+    `worknice_integration:${integrationId}:slack_person_activated_channel`
+  );
+  await client.del(`worknice_integration:${integrationId}:slack_team_id`);
+  await client.del(`worknice_integration:${integrationId}:worknice_api_key`);
 };
 
 const setCalendarUpdateSlackChannel = async (
   integrationId: string,
   channel: string
 ) =>
-  client.set<string>(`slack_channel:calendar_update:${integrationId}`, channel);
+  setString(
+    `worknice_integration:${integrationId}:slack_calendar_update_channel`,
+    channel
+  );
 
 const setIntegrationIdFromSessionCode = async (
   sessionCode: string,
   integrationId: string
 ) =>
-  client.set<string>(
-    `session_code_integration_id:${sessionCode}`,
-    integrationId,
-    {
-      ex: config.sessionCodeExpiry,
-    }
-  );
+  setString(`session:${sessionCode}:worknice_integration_id`, integrationId, {
+    ex: config.sessionCodeExpiry,
+  });
 
 const setIntegrationIdFromSlackTeamId = async (
   teamId: string,
   integrationId: string
-) =>
-  client.set<string>(`slack_team_id_integration_id:${teamId}`, integrationId);
+) => setString(`slack_team:${teamId}:worknice_integration_id`, integrationId);
 
 const setNewStarterSlackChannel = async (
   integrationId: string,
   channel: string
-) => client.set<string>(`slack_channel:new_starter:${integrationId}`, channel);
+) =>
+  setString(
+    `worknice_integration:${integrationId}:slack_new_starter_channel`,
+    channel
+  );
 
 const setPersonActivatedSlackChannel = async (
   integrationId: string,
   channel: string
 ) =>
-  client.set<string>(
-    `slack_channel:person_activated:${integrationId}`,
+  setString(
+    `worknice_integration:${integrationId}:slack_person_activated_channel`,
     channel
   );
 
 const setSlackAccessToken = async (
   integrationId: string,
   accessToken: string
-) => client.set<string>(`slack_access_token:${integrationId}`, accessToken);
+) =>
+  setString(
+    `worknice_integration:${integrationId}:slack_access_token`,
+    accessToken
+  );
 
-const setSlackBotUserId = async (integrationId: string, botUserId: string) =>
-  client.set<string>(`slack_bot_user_id:${integrationId}`, botUserId);
-
-const setSlackEnterpriseId = async (
+const setSlackTeamIdFromIntegrationId = async (
   integrationId: string,
-  enterpriseId: string
-) => client.set<string>(`slack_enterprise_id:${integrationId}`, enterpriseId);
+  teamId: string
+) => setString(`worknice_integration:${integrationId}:slack_team_id`, teamId);
 
 const setWorkniceApiKey = async (integrationId: string, apiKey: string) =>
-  client.set<string>(`worknice_api_key:${integrationId}`, apiKey);
+  setString(`worknice_integration:${integrationId}:worknice_api_key`, apiKey);
 
 const redis = {
   getAllIntegrationIds,
@@ -103,6 +141,7 @@ const redis = {
   getNewStarterSlackChannel,
   getPersonActivatedSlackChannel,
   getSlackAccessToken,
+  getSlackTeamIdFromIntegrationId,
   getWorkniceApiKey,
   purgeIntegration,
   setCalendarUpdateSlackChannel,
@@ -111,8 +150,7 @@ const redis = {
   setNewStarterSlackChannel,
   setPersonActivatedSlackChannel,
   setSlackAccessToken,
-  setSlackBotUserId,
-  setSlackEnterpriseId,
+  setSlackTeamIdFromIntegrationId,
   setWorkniceApiKey,
 };
 

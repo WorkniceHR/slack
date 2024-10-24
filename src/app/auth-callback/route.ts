@@ -46,20 +46,16 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
 
     await redis.setSlackAccessToken(integrationId, response.access_token);
 
-    if (response.bot_user_id) {
-      await redis.setSlackBotUserId(integrationId, response.bot_user_id);
-    }
+    console.log("Saving team ID…");
 
-    if (response.team?.id) {
-      await redis.setIntegrationIdFromSlackTeamId(
-        response.team.id,
-        integrationId
-      );
-    }
-
-    if (response.enterprise?.id) {
-      await redis.setSlackEnterpriseId(integrationId, response.enterprise.id);
-    }
+    await redis.setIntegrationIdFromSlackTeamId(
+      response.team.id,
+      integrationId
+    );
+    await redis.setSlackTeamIdFromIntegrationId(
+      integrationId,
+      response.team.id
+    );
 
     console.log("Retrieving API token…");
 

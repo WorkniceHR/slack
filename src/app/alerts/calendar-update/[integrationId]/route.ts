@@ -60,11 +60,9 @@ export const GET = async (
 
       const integration = await worknice.getIntegration({ integrationId });
 
-      if (!integration || integration.archived) {
+      if (integration.archived) {
         await redis.purgeIntegration(integrationId);
-        throw Error(
-          `Integration ${integrationId} is archived. Removing from Redis and skipping.`
-        );
+        throw Error("Integration is archived.");
       }
 
       const rawEvents = await worknice.fetchFromApi(
