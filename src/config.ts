@@ -6,6 +6,7 @@ function check(
     throw Error(`Missing \`${name}\` environment variable.`);
 }
 
+check(process.env.CRON_SECRET, "CRON_SECRET");
 check(process.env.REDIS_REST_API_TOKEN, "REDIS_REST_API_TOKEN");
 check(process.env.REDIS_REST_API_URL, "REDIS_REST_API_URL");
 check(process.env.SLACK_CLIENT_ID, "SLACK_CLIENT_ID");
@@ -34,6 +35,9 @@ const config = {
       "users:read",
       "users:read.email",
     ],
+  },
+  vercel: {
+    cronSecret: process.env.CRON_SECRET,
   },
   worknice: {
     baseUrl: process.env.WORKNICE_BASE_URL ?? "https://app.worknice.com",

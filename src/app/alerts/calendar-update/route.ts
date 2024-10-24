@@ -9,6 +9,14 @@ import slack from "@/slack";
 // Send daily summary of events to Slack channels
 export const GET = async (request: NextRequest): Promise<NextResponse> => {
   try {
+    const authHeader = request.headers.get("authorization");
+
+    if (authHeader !== `Bearer ${config.vercel.cronSecret}`) {
+      return new NextResponse("Unauthorized", {
+        status: 401,
+      });
+    }
+
     const integrationIds = await redis.getAllIntegrationIds();
 
     const channels: Array<string> = [];

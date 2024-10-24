@@ -8,6 +8,14 @@ import slack, { type Block } from "@/slack";
 
 export const GET = async (request: NextRequest): Promise<NextResponse> => {
   try {
+    const authHeader = request.headers.get("authorization");
+
+    if (authHeader !== `Bearer ${config.vercel.cronSecret}`) {
+      return new NextResponse("Unauthorized", {
+        status: 401,
+      });
+    }
+
     const integrationIds = await redis.getAllIntegrationIds();
 
     for (const integrationId of integrationIds) {
