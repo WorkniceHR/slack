@@ -11,7 +11,7 @@ type Payload = {
 };
 
 export const POST = async (request: Request) =>
-  handleRequestWithWorknice<Payload, { text: string }>(request, {
+  handleRequestWithWorknice<Payload, Response>(request, {
     getApiToken: async () => "",
     getEnv: async () => null,
     handleRequest: async ({ request, payload }) => {
@@ -33,10 +33,7 @@ export const POST = async (request: Request) =>
           }
         );
       });
-      return {
-        response_type: "in_channel",
-        text: "Working...",
-      };
+      return new Response(null, { status: 200 });
     },
     parsePayload: async ({ request }) => {
       const text = await request.text();
