@@ -33,7 +33,10 @@ export const POST = async (request: Request) =>
           }
         );
       });
-      return { text: "Working..." };
+      return {
+        response_type: "in_channel",
+        text: "Working...",
+      };
     },
     parsePayload: async ({ request }) => {
       const text = await request.text();
