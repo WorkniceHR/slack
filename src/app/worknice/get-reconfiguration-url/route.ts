@@ -1,36 +1,42 @@
+import { handleRequestWithWorknice } from "@worknice/js-sdk/helpers";
 import crypto from "crypto";
-import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import config from "../../../config";
 import redis from "../../../redis";
 
-export const POST = async (request: NextRequest): Promise<NextResponse> => {
-  try {
-    const data = requestSchema.parse(await request.json());
+export const POST = async (request: Request) =>
+  handleRequestWithWorknice<z.infer<typeof requestSchema>, Response>(
+    request,
+    {
+      getApiToken: async () => "",
+      getEnv: async () => null,
+      handleRequest: async ({ logger, payload }) => {
+        logger.debug("Generating authorization code…");
 
-    const sessionCode = crypto.randomBytes(16).toString("hex");
+        const sessionCode = crypto.randomBytes(16).toString("hex");
 
-    await redis.setIntegrationIdFromSessionCode(
-      sessionCode,
-      data.integrationId
-    );
+        logger.debug("Saving authorization code…");
 
-    return NextResponse.json(
-      {
-        reconfigurationUrl: `${config.protocol}://${request.headers.get(
-          "host"
-        )}/reconfig?${config.sessionCodeParam}=${sessionCode}`,
+        await redis.setIntegrationIdFromSessionCode(
+          sessionCode,
+          payload.integrationId
+        );
+
+        return Response.json(
+          {
+            reconfigurationUrl: `${config.baseUrl}/reconfig?${config.sessionCodeParam}=${sessionCode}`,
+          },
+          { status: 200 }
+        );
       },
-      { status: 200 }
-    );
-  } catch (error) {
-    const message = error instanceof Error ? error.message : `${error}`;
-
-    return new NextResponse(message, {
-      status: 500,
-    });
-  }
-};
+      parsePayload: async ({ request }) =>
+        requestSchema.parse(await request.json()),
+    },
+    {
+      apiUrl: `${config.worknice.baseUrl}/api/graphql`,
+      debug: true,
+    }
+  );
 
 const requestSchema = z.object({
   integrationId: z.string(),
