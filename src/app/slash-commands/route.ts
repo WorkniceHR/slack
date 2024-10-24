@@ -5,11 +5,13 @@ import { unstable_after as after } from "next/server";
 import queryString from "querystring";
 import { z } from "zod";
 
+type Payload = {
+  original: string;
+  parsed: z.infer<typeof slackRequestSchema>;
+};
+
 export const POST = async (request: Request) =>
-  handleRequestWithWorknice<
-    z.infer<typeof slackRequestSchema>,
-    { text: string }
-  >(request, {
+  handleRequestWithWorknice<Payload, { text: string }>(request, {
     getApiToken: async () => "",
     getEnv: async () => null,
     handleRequest: async ({ request, payload }) => {
@@ -50,25 +52,23 @@ export const POST = async (request: Request) =>
 
       slack.verifyRequest(timestamp, signature, text);
 
-      return slackRequestSchema.parse(queryString.parse(text));
+      return {
+        original: text,
+        parsed: slackRequestSchema.parse(queryString.parse(text)),
+      };
     },
   });
 
-const HANDLERS: Record<
-  z.infer<typeof slackRequestSchema>["parsed"]["command"],
-  string
-> = {
-  "/whois": "whois",
-  "/whosaway": "whosaway",
-} as const;
+const HANDLERS: Record<z.infer<typeof slackRequestSchema>["command"], string> =
+  {
+    "/whois": "whois",
+    "/whosaway": "whosaway",
+  } as const;
 
 const slackRequestSchema = z.object({
-  original: z.string(),
-  parsed: z.object({
-    command: z.union([z.literal("/whois"), z.literal("/whosaway")]),
-    response_url: z.string(),
-    team_id: z.string(),
-    text: z.string(),
-    user_id: z.string(),
-  }),
+  command: z.union([z.literal("/whois"), z.literal("/whosaway")]),
+  response_url: z.string(),
+  team_id: z.string(),
+  text: z.string(),
+  user_id: z.string(),
 });
