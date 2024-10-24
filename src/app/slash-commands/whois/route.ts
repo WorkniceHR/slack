@@ -5,6 +5,7 @@ import { handleRequestWithWorknice } from "@worknice/js-sdk/helpers";
 import gql from "dedent";
 import {
   AllSubstringsIndexStrategy,
+  LowerCaseSanitizer,
   Search,
   SimpleTokenizer,
   StemmingTokenizer,
@@ -104,6 +105,8 @@ export const POST = async (request: Request) =>
 
         const search = new Search("id");
 
+        search.sanitizer = new LowerCaseSanitizer();
+
         search.tokenizer = new StemmingTokenizer(
           stemmer,
           new SimpleTokenizer()
@@ -111,9 +114,9 @@ export const POST = async (request: Request) =>
 
         search.indexStrategy = new AllSubstringsIndexStrategy();
 
-        search.addIndex(["person", "displayName"]);
-        search.addIndex(["person", "currentJob", "position", "title"]);
-        search.addIndex(["person", "location", "name"]);
+        search.addIndex(["displayName"]);
+        search.addIndex(["currentJob", "position", "title"]);
+        search.addIndex(["location", "name"]);
 
         search.addDocuments(peopleDirectory);
 
