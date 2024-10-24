@@ -1,11 +1,179 @@
-import config from "@/config";
 import redis from "@/redis";
-import { NextRequest, NextResponse } from "next/server";
+import { handleRequestWithWorknice } from "@worknice/js-sdk/helpers";
+import gql from "dedent";
 import { Temporal } from "temporal-polyfill";
 import { z } from "zod";
-import { createZodFetcher } from "zod-fetch";
 
-// Zod schema for incoming Slack request
+type Env = {
+  integrationId: string;
+};
+
+export const POST = async (request: Request) =>
+  handleRequestWithWorknice<z.infer<typeof slackRequestSchema>, undefined, Env>(
+    request,
+    {
+      getApiToken: async ({ env }) => {
+        const token = await redis.getWorkniceApiKey(env.integrationId);
+        if (token === null) {
+          throw Error("Unable to find Worknice API token.");
+        }
+        return token;
+      },
+      getEnv: async ({ payload }) => {
+        const integrationId = await redis.getIntegrationIdFromTeamId(
+          payload.team_id
+        );
+
+        if (integrationId === null) {
+          throw new Error("Integration ID not found.");
+        }
+
+        return {
+          integrationId,
+        };
+      },
+      handleRequest: async ({ env, logger, payload, worknice }) => {
+        const integration = await worknice.getIntegration({
+          integrationId: env.integrationId,
+        });
+
+        if (!integration || integration.archived) {
+          logger.debug(`Integration ${integration.id} is archived.`);
+
+          redis.purgeIntegration(integration.id);
+
+          throw Error("Integration is archived");
+        }
+
+        const rawPeopleDirectory = await worknice.fetchFromApi(gql`
+          query PeopleDirectory {
+            session {
+              org {
+                people(includeArchived: false, status: [ACTIVE]) {
+                  id
+                  displayName
+                  status
+                  role
+                  employeeCode
+                  profileImage {
+                    url
+                  }
+                  profileBio
+                  profileEmail
+                  profilePhone
+                  startDate
+                  currentJob {
+                    position {
+                      title
+                      manager {
+                        currentJob {
+                          person {
+                            displayName
+                          }
+                        }
+                      }
+                    }
+                  }
+                  profilePronouns
+                  profileBirthday {
+                    day
+                    month
+                  }
+                  location {
+                    name
+                  }
+                }
+              }
+            }
+          }
+        `);
+
+        const peopleDirectory =
+          worknicePeopleDirectorySchema.parse(rawPeopleDirectory).data.session
+            .org.people;
+
+        const filteredPeople = getFilteredPerson(peopleDirectory, payload.text);
+
+        let responseText: {
+          blocks: Array<{
+            type: string;
+            text: { type: string; text: string };
+            accessory?: { type: string; image_url: string; alt_text: string };
+          }>;
+        };
+
+        if (filteredPeople.length > 0) {
+          const person = filteredPeople[0];
+
+          responseText = {
+            blocks: [
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text:
+                    `>*<https://app.worknice.com/people/${person.id}|${person.displayName}>*\n` +
+                    `>*Position:* ${
+                      person.currentJob?.position?.title || "-"
+                    }\n` +
+                    `>*Manager:* ${
+                      person.currentJob?.position?.manager?.currentJob?.person
+                        ?.displayName || "-"
+                    }\n` +
+                    `>*Location:* ${person.location?.name || "-"}\n` +
+                    `>*Bio:* ${person.profileBio || "-"}\n` +
+                    `>*Pronouns:* ${person.profilePronouns || "-"}\n` +
+                    `>*Phone:* ${person.profilePhone || "-"}\n` +
+                    `>*Email:* ${person.profileEmail || "-"}\n` +
+                    `>*Birthday:* ${
+                      person.profileBirthday
+                        ? getFormattedBirthday(person.profileBirthday)
+                        : "-"
+                    }\n`,
+                },
+                accessory: {
+                  type: "image",
+                  image_url: person.profileImage?.url,
+                  alt_text: "Profile Image",
+                },
+              },
+            ],
+          };
+        } else {
+          responseText = {
+            blocks: [
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: `Sorry, no matches for ${payload.text}`,
+                },
+              },
+            ],
+          };
+        }
+
+        const delayedResponse = await fetch(payload.response_url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ blocks: responseText.blocks }),
+        });
+
+        if (!delayedResponse.ok) {
+          throw new Error("Failed to send delayed response.");
+        }
+
+        return undefined;
+      },
+      parsePayload: async ({ request }) => {
+        const data = await request.json();
+        return slackRequestSchema.parse(data);
+      },
+    }
+  );
+
 const slackRequestSchema = z.object({
   user_id: z.string(),
   text: z.string(),
@@ -13,112 +181,6 @@ const slackRequestSchema = z.object({
   response_url: z.string(),
 });
 
-const fetchWithZod = createZodFetcher();
-
-export const POST = async (request: NextRequest): Promise<NextResponse> => {
-  try {
-    const data = await request.json();
-    // Validate incoming request with Zod schema
-    slackRequestSchema.parse(data);
-
-    const integrationId = await redis.getIntegrationIdFromTeamId(data.team_id);
-    if (integrationId === null) {
-      throw new Error("Integration ID not found.");
-    }
-    const workniceApiKey = await redis.getWorkniceApiKey(integrationId);
-
-    if (!workniceApiKey) {
-      throw new Error("API key not found.");
-    }
-
-    // Check if the current integration is archived
-    const integrations = await getWorkniceIntegrations(workniceApiKey);
-    const integration = integrations.find((i) => i.id === integrationId);
-
-    if (!integration || integration.archived) {
-      console.log(`Integration ${integrationId} is archived.`);
-
-      redis.purgeIntegration(integrationId);
-
-      return new NextResponse("Integration is archived", { status: 200 }); // Early return if archived
-    }
-
-    // Fetch and validate with Zod
-    const peopleDirectory = await getWorknicePeopleDirectory(workniceApiKey);
-    const filteredPeople = getFilteredPerson(peopleDirectory, data.text);
-
-    let responseText: {
-      blocks: Array<{
-        type: string;
-        text: { type: string; text: string };
-        accessory?: { type: string; image_url: string; alt_text: string };
-      }>;
-    };
-    if (filteredPeople.length > 0) {
-      const person = filteredPeople[0];
-      const profileImage = person.profileImage
-        ? person.profileImage
-        : "default_image_url";
-
-      responseText = {
-        blocks: [
-          {
-            type: "section",
-            text: {
-              type: "mrkdwn",
-              text:
-                `>*<https://app.worknice.com/people/${person.id}|${person.displayName}>*\n` +
-                `>*Position:* ${person.currentJob?.position?.title || "-"}\n` +
-                `>*Manager:* ${
-                  person.currentJob?.position?.manager?.currentJob?.person
-                    ?.displayName || "-"
-                }\n` +
-                `>*Location:* ${person.location?.name || "-"}\n` +
-                `>*Bio:* ${person.profileBio || "-"}\n` +
-                `>*Pronouns:* ${person.profilePronouns || "-"}\n` +
-                `>*Phone:* ${person.profilePhone || "-"}\n` +
-                `>*Email:* ${person.profileEmail || "-"}\n` +
-                `>*Birthday:* ${
-                  person.profileBirthday
-                    ? getFormattedBirthday(person.profileBirthday)
-                    : "-"
-                }\n`,
-            },
-            accessory: {
-              type: "image",
-              image_url: person.profileImage?.url,
-              alt_text: "Profile Image",
-            },
-          },
-        ],
-      };
-    } else {
-      responseText = {
-        blocks: [
-          {
-            type: "section",
-            text: {
-              type: "mrkdwn",
-              text: `Sorry, no matches for ${data.text}`,
-            },
-          },
-        ],
-      };
-    }
-
-    // Send delayed response to Slack
-    await sendDelayedResponse(data.response_url, responseText.blocks);
-
-    return new NextResponse("Background job completed", { status: 200 });
-  } catch (error: unknown) {
-    console.error("Error in background task:", error);
-    return new NextResponse("Error in background job", { status: 500 });
-  }
-};
-
-// Utility functions
-
-// Zod schema for the Worknice people directory response
 const worknicePeopleDirectorySchema = z.object({
   data: z.object({
     session: z.object({
@@ -173,103 +235,6 @@ const worknicePeopleDirectorySchema = z.object({
     }),
   }),
 });
-
-// Get the Worknice integrations so we can check whether they are archived or not
-async function getWorkniceIntegrations(
-  apiKey: string
-): Promise<{ id: string; archived: boolean }[]> {
-  const response = await fetchWithZod(
-    z.object({
-      data: z.object({
-        session: z.object({
-          org: z.object({
-            integrations: z.array(
-              z.object({
-                id: z.string(),
-                archived: z.boolean(),
-              })
-            ),
-          }),
-        }),
-      }),
-    }),
-    `${config.worknice.baseUrl}/api/graphql`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "worknice-api-token": apiKey,
-      },
-      body: JSON.stringify({
-        query: `
-          query Integrations {
-            session {
-              org {
-                integrations(includeArchived: true) {
-                  id
-                  archived
-                }
-              }
-            }
-          }
-        `,
-      }),
-    }
-  );
-  return response.data.session.org.integrations;
-}
-
-async function getWorknicePeopleDirectory(apiKey: string): Promise<any[]> {
-  const response = await fetchWithZod(
-    worknicePeopleDirectorySchema,
-    `${config.worknice.baseUrl}/api/graphql`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "worknice-api-token": apiKey,
-      },
-      body: JSON.stringify({
-        query: `
-                query PeopleDirectory {
-                    session {
-                        org {
-                            people(includeArchived: false, status: [ACTIVE]) {
-                                id
-                                displayName
-                                status
-                                role
-                                employeeCode
-                                profileImage { url }
-                                profileBio
-                                profileEmail
-                                profilePhone
-                                startDate
-                                currentJob {
-                                    position {
-                                        title
-                                        manager {
-                                            currentJob {
-                                                person {
-                                                    displayName
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                profilePronouns
-                                profileBirthday { day month }
-                                location {name}
-                            }
-                        }
-                    }
-                }
-                `,
-      }),
-    }
-  );
-  return response.data.session.org.people;
-}
 
 function getFilteredPerson(peopleDirectory: any[], searchText: string) {
   const stopWords = [
@@ -343,7 +308,6 @@ function getFilteredPerson(peopleDirectory: any[], searchText: string) {
   return []; // No matches found
 }
 
-// Function to format the birthday using Temporal
 function getFormattedBirthday(birthday: {
   month: number;
   day: number;
@@ -354,18 +318,4 @@ function getFormattedBirthday(birthday: {
     day: birthday.day,
   });
   return date.toLocaleString("en-US", { day: "numeric", month: "long" });
-}
-
-async function sendDelayedResponse(responseUrl: string, blocks: any[]) {
-  const delayedResponse = await fetch(responseUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ blocks }),
-  });
-
-  if (!delayedResponse.ok) {
-    throw new Error("Failed to send delayed response.");
-  }
 }
