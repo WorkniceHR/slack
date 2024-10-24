@@ -1,4 +1,4 @@
-import "@worknice/whiteboard/dist/shared.css";
+import "@worknice/whiteboard/shared.css";
 import type { ReactNode } from "react";
 import "./layout.css";
 
