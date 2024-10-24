@@ -9,6 +9,9 @@ overrides:
   '@types/react-dom': npm:types-react-dom@19.0.0-rc.1
 
 dependencies:
+  '@stdlib/nlp-porter-stemmer':
+    specifier: ^0.2.2
+    version: 0.2.2
   '@upstash/redis':
     specifier: ^1.34.0
     version: 1.34.0
@@ -18,6 +21,9 @@ dependencies:
   dedent:
     specifier: ^1.5.3
     version: 1.5.3
+  js-search:
+    specifier: ^2.0.1
+    version: 2.0.1
   next:
     specifier: 15.0.1
     version: 15.0.1(react-dom@19.0.0-rc-69d4b800-20241021)(react@19.0.0-rc-69d4b800-20241021)
@@ -41,6 +47,9 @@ devDependencies:
   '@total-typescript/tsconfig':
     specifier: ^1.0.4
     version: 1.0.4
+  '@types/js-search':
+    specifier: ^1.4.4
+    version: 1.4.4
   '@types/node':
     specifier: ^20
     version: 20.16.3
@@ -425,6 +434,127 @@ packages:
     resolution: {integrity: sha512-WJgX9nzTqknM393q1QJDJmoW28kUfEnybeTfVNcNAPnIx210RXm2DiXiHzfNPJNIUUb1tJnz/l4QGtJ30PgWmA==}
     dev: true
 
+  /@stdlib/assert-has-own-property@0.2.2:
+    resolution: {integrity: sha512-m5rV4Z2/iNkwx2vRsNheM6sQZMzc8rQQOo90LieICXovXZy8wA5jNld4kRKjMNcRt/TjrNP7i2Rhh8hruRDlHg==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+    dev: false
+
+  /@stdlib/assert-has-symbol-support@0.2.2:
+    resolution: {integrity: sha512-vCsGGmDZz5dikGgdF26rIL0y0nHvH7qaVf89HLLTybceuZijAqFSJEqcB3Gpl5uaeueLNAWExHi2EkoUVqKHGg==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+    dev: false
+
+  /@stdlib/assert-has-tostringtag-support@0.2.2:
+    resolution: {integrity: sha512-bSHGqku11VH0swPEzO4Y2Dr+lTYEtjSWjamwqCTC8udOiOIOHKoxuU4uaMGKJjVfXG1L+XefLHqzuO5azxdRaA==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+    dependencies:
+      '@stdlib/assert-has-symbol-support': 0.2.2
+    dev: false
+
+  /@stdlib/assert-is-string@0.2.2:
+    resolution: {integrity: sha512-SOkFg4Hq443hkadM4tzcwTHWvTyKP9ULOZ8MSnnqmU0nBX1zLVFLFGY8jnF6Cary0dL0V7QQBCfuxqKFM6u2PQ==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+    dependencies:
+      '@stdlib/assert-has-tostringtag-support': 0.2.2
+      '@stdlib/utils-define-nonenumerable-read-only-property': 0.2.2
+      '@stdlib/utils-native-class': 0.2.2
+    dev: false
+
+  /@stdlib/error-tools-fmtprodmsg@0.2.2:
+    resolution: {integrity: sha512-2IliQfTes4WV5odPidZFGD5eYDswZrPXob7oOu95Q69ERqImo8WzSwnG2EDbHPyOyYCewuMfM5Ha6Ggf+u944Q==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+    dev: false
+
+  /@stdlib/nlp-porter-stemmer@0.2.2:
+    resolution: {integrity: sha512-ECXPFdJ6A6/7iJ2NRhw8VnDqreG5ZIdkhroY1o9Y4897peLYSsISr+2TzV3Lsp4nbDtAk8h6lHVFBqM628KuPA==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+    dependencies:
+      '@stdlib/assert-is-string': 0.2.2
+      '@stdlib/error-tools-fmtprodmsg': 0.2.2
+      '@stdlib/string-base-ends-with': 0.2.2
+      '@stdlib/string-base-lowercase': 0.4.0
+      '@stdlib/string-base-replace': 0.2.2
+      '@stdlib/string-format': 0.2.2
+    dev: false
+
+  /@stdlib/string-base-ends-with@0.2.2:
+    resolution: {integrity: sha512-7nPRBQzrNENLegyRQ2KE5l4/abxb3rFASvO7LIEylQhixSDKkw8kewnc3wkYuS6d9aICuDt3rDnh6Q5MNI/+LQ==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+    dev: false
+
+  /@stdlib/string-base-format-interpolate@0.2.2:
+    resolution: {integrity: sha512-i9nU9rAB2+o/RR66TS9iQ8x+YzeUDL1SGiAo6GY3hP6Umz5Dx9Qp/v8T69gWVsb4a1YSclz5+YeCWaFgwvPjKA==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+    dev: false
+
+  /@stdlib/string-base-format-tokenize@0.2.2:
+    resolution: {integrity: sha512-kXq2015i+LJjqth5dN+hYnvJXBSzRm8w0ABWB5tYAsIuQTpQK+mSo2muM8JBEFEnqUHAwpUsu2qNTK/9o8lsJg==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+    dev: false
+
+  /@stdlib/string-base-lowercase@0.4.0:
+    resolution: {integrity: sha512-IH35Z5e4T+S3b3SfYY39mUhrD2qvJVp4VS7Rn3+jgj4+C3syocuAPsJ8C4OQXWGfblX/N9ymizbpFBCiVvMW8w==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+    dev: false
+
+  /@stdlib/string-base-replace@0.2.2:
+    resolution: {integrity: sha512-Y4jZwRV4Uertw7AlA/lwaYl1HjTefSriN5+ztRcQQyDYmoVN3gzoVKLJ123HPiggZ89vROfC+sk/6AKvly+0CA==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+    dev: false
+
+  /@stdlib/string-format@0.2.2:
+    resolution: {integrity: sha512-GUa50uxgMAtoItsxTbMmwkyhIwrCxCrsjzk3nAbLnt/1Kt1EWOWMwsALqZdD6K4V/xSJ4ns6PZur3W6w+vKk9g==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+    dependencies:
+      '@stdlib/string-base-format-interpolate': 0.2.2
+      '@stdlib/string-base-format-tokenize': 0.2.2
+    dev: false
+
+  /@stdlib/symbol-ctor@0.2.2:
+    resolution: {integrity: sha512-XsmiTfHnTb9jSPf2SoK3O0wrNOXMxqzukvDvtzVur1XBKfim9+seaAS4akmV1H3+AroAXQWVtde885e1B6jz1w==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+    dev: false
+
+  /@stdlib/utils-define-nonenumerable-read-only-property@0.2.2:
+    resolution: {integrity: sha512-V3mpAesJemLYDKG376CsmoczWPE/4LKsp8xBvUxCt5CLNAx3J/1W39iZQyA5q6nY1RStGinGn1/dYZwa8ig0Uw==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+    dependencies:
+      '@stdlib/utils-define-property': 0.2.4
+    dev: false
+
+  /@stdlib/utils-define-property@0.2.4:
+    resolution: {integrity: sha512-XlMdz7xwuw/sqXc9LbsV8XunCzZXjbZPC+OAdf4t4PBw4ZRwGzlTI6WED+f4PYR5Tp9F1cHgLPyMYCIBfA2zRg==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+    dependencies:
+      '@stdlib/error-tools-fmtprodmsg': 0.2.2
+      '@stdlib/string-format': 0.2.2
+    dev: false
+
+  /@stdlib/utils-native-class@0.2.2:
+    resolution: {integrity: sha512-cSn/FozbEpfR/FlJAoceQtZ8yUJFhZ8RFkbEsxW/7+H4o09yln3lBS0HSfUJISYNtpTNN/2/Fup88vmvwspvwA==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+    dependencies:
+      '@stdlib/assert-has-own-property': 0.2.2
+      '@stdlib/assert-has-tostringtag-support': 0.2.2
+      '@stdlib/symbol-ctor': 0.2.2
+    dev: false
+
   /@swc/counter@0.1.3:
     resolution: {integrity: sha512-e2BR4lsJkkRlKZ/qCHPw9ZaSxc0MVUd7gtbtaB7aMvHeJVYe8sOB8DBZkP2DtISHGSku9sCK6T6cnY0CtXrOCQ==}
     dev: false
@@ -437,6 +567,10 @@ packages:
 
   /@total-typescript/tsconfig@1.0.4:
     resolution: {integrity: sha512-fO4ctMPGz1kOFOQ4RCPBRBfMy3gDn+pegUfrGyUFRMv/Rd0ZM3/SHH3hFCYG4u6bPLG8OlmOGcBLDexvyr3A5w==}
+    dev: true
+
+  /@types/js-search@1.4.4:
+    resolution: {integrity: sha512-NYIBuSRTi2h6nLne0Ygx78BZaiT/q0lLU7YSkjOrDJWpSx6BioIZA/i2GZ+WmMUzEQs2VNIWcXRRAqisrG3ZNA==}
     dev: true
 
   /@types/json5@0.0.29:
@@ -1993,6 +2127,10 @@ packages:
       reflect.getprototypeof: 1.0.6
       set-function-name: 2.0.2
     dev: true
+
+  /js-search@2.0.1:
+    resolution: {integrity: sha512-8k12LiC3fPt7gLRJTc1azE1BFvlxIw+BG3J9YzjuYf4wSE65uqYSYP4VhweApcTfV51Fzq/ogBulQew5937A9A==}
+    dev: false
 
   /js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}

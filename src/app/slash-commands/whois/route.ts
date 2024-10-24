@@ -1,6 +1,13 @@
 import redis from "@/redis";
+import stemmer from "@stdlib/nlp-porter-stemmer";
 import { handleRequestWithWorknice } from "@worknice/js-sdk/helpers";
 import gql from "dedent";
+import {
+  AllSubstringsIndexStrategy,
+  Search,
+  SimpleTokenizer,
+  StemmingTokenizer,
+} from "js-search";
 import { Temporal } from "temporal-polyfill";
 import { z } from "zod";
 
@@ -92,7 +99,24 @@ export const POST = async (request: Request) =>
           worknicePeopleDirectorySchema.parse(rawPeopleDirectory).data.session
             .org.people;
 
-        const filteredPeople = getFilteredPerson(peopleDirectory, payload.text);
+        const search = new Search("id");
+
+        search.tokenizer = new StemmingTokenizer(
+          stemmer,
+          new SimpleTokenizer()
+        );
+
+        search.indexStrategy = new AllSubstringsIndexStrategy();
+
+        search.addIndex(["person", "displayName"]);
+        search.addIndex(["person", "currentJob", "position", "title"]);
+        search.addIndex(["person", "location", "name"]);
+
+        search.addDocuments(peopleDirectory);
+
+        const filteredPeople = search.search(
+          payload.text
+        ) as typeof peopleDirectory;
 
         let responseText: {
           blocks: Array<{
@@ -102,9 +126,9 @@ export const POST = async (request: Request) =>
           }>;
         };
 
-        if (filteredPeople.length > 0) {
-          const person = filteredPeople[0];
+        const person = filteredPeople.at(0);
 
+        if (person) {
           responseText = {
             blocks: [
               {
@@ -131,11 +155,13 @@ export const POST = async (request: Request) =>
                         : "-"
                     }\n`,
                 },
-                accessory: {
-                  type: "image",
-                  image_url: person.profileImage?.url,
-                  alt_text: "Profile Image",
-                },
+                accessory: person.profileImage?.url
+                  ? {
+                      type: "image",
+                      image_url: person.profileImage.url,
+                      alt_text: "Profile Image",
+                    }
+                  : undefined,
               },
             ],
           };
@@ -235,78 +261,6 @@ const worknicePeopleDirectorySchema = z.object({
     }),
   }),
 });
-
-function getFilteredPerson(peopleDirectory: any[], searchText: string) {
-  const stopWords = [
-    "from",
-    "the",
-    "and",
-    "a",
-    "an",
-    "at",
-    "in",
-    "on",
-    "with",
-    "of",
-    "for",
-    "to",
-    "by",
-    "about",
-    "as",
-    "is",
-    "it",
-    "this",
-    "that",
-    "are",
-    "or",
-  ]; // Expanded stop words list
-
-  const tokens = searchText
-    .toLowerCase()
-    .replace(/[!.,?;:'"-_@#$%&*+=/\\]/g, "") // Remove special characters
-    .split(" ")
-    .filter((token) => !stopWords.includes(token)); // Filter out stop words
-
-  if (tokens.length === 0) {
-    return []; // If only stop words were given, return no matches
-  }
-
-  // Precompute lowercase fields and store them for reuse
-  const lowerCasePeople = peopleDirectory.map((person) => ({
-    ...person,
-    lowerCaseDisplayName: person.displayName.toLowerCase(),
-    lowerCaseJobTitle: person.currentJob?.position.title?.toLowerCase() || "",
-    lowerCaseLocation: person.location?.name?.toLowerCase() || "",
-  }));
-
-  // Try to find an exact match first (full name match)
-  const exactMatch = lowerCasePeople.find(
-    (person) => person.lowerCaseDisplayName === searchText.toLowerCase()
-  );
-
-  if (exactMatch) {
-    return [exactMatch]; // Return the exact match if found
-  }
-
-  // If no exact match, filter for partial matches
-  for (const person of lowerCasePeople) {
-    const nameParts: string[] = person.lowerCaseDisplayName.split(" "); // Explicitly type as string[]
-
-    // Check if every token is found in either name parts, job title, or location
-    const isMatch = tokens.every(
-      (token) =>
-        nameParts.some((part: string) => part.includes(token)) || // Match on name
-        person.lowerCaseJobTitle.includes(token) || // Match on job title
-        person.lowerCaseLocation.includes(token) // Match on location
-    );
-
-    if (isMatch) {
-      return [person]; // Return as soon as the first match is found
-    }
-  }
-
-  return []; // No matches found
-}
 
 function getFormattedBirthday(birthday: {
   month: number;
