@@ -194,7 +194,10 @@ export const POST = async (request: Request) =>
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ blocks: responseText.blocks }),
+          body: JSON.stringify({
+            replace_original: true,
+            blocks: responseText.blocks,
+          }),
         });
 
         if (!delayedResponse.ok) {
