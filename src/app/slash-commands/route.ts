@@ -23,7 +23,7 @@ export const POST = async (request: Request) =>
           {
             method: "POST",
             headers: {
-              "Content-Type": "application/json",
+              "Content-Type": "application/x-www-form-urlencoded",
               "X-Slack-Signature":
                 request.headers.get("X-Slack-Signature") ?? "",
               "X-Slack-Request-Timestamp":
