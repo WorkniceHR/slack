@@ -19,9 +19,7 @@ export const POST = async (request: Request): Promise<Response> =>
           payload.integrationId
         );
 
-        return `${config.protocol}://${request.headers.get(
-          "host"
-        )}/auth-request?${config.sessionCodeParam}=${sessionCode}`;
+        return `${config.baseUrl}/auth-request?${config.sessionCodeParam}=${sessionCode}`;
       },
     },
     {
