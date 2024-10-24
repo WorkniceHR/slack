@@ -41,10 +41,12 @@ export const POST = async (request: Request) =>
           integrationId,
         };
       },
-      handleRequest: async ({ env, payload, worknice }) => {
+      handleRequest: async ({ env, logger, payload, worknice }) => {
         const integration = await worknice.getIntegration({
           integrationId: env.integrationId,
         });
+
+        logger.info("Retrieved integration.");
 
         if (integration.archived) {
           await redis.purgeIntegration(integration.id);
@@ -98,6 +100,8 @@ export const POST = async (request: Request) =>
           worknicePeopleDirectorySchema.parse(rawPeopleDirectory).data.session
             .org.people;
 
+        logger.info(`Retrieved ${peopleDirectory.length} people.`);
+
         const search = new Search("id");
 
         search.tokenizer = new StemmingTokenizer(
@@ -113,9 +117,13 @@ export const POST = async (request: Request) =>
 
         search.addDocuments(peopleDirectory);
 
+        logger.info(`Filtered with "${payload.text}".`);
+
         const filteredPeople = search.search(
           payload.text
         ) as typeof peopleDirectory;
+
+        logger.info(`Filtered down to ${filteredPeople.length} people.`);
 
         let responseText: {
           blocks: Array<{
