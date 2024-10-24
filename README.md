@@ -28,7 +28,7 @@ An app to integrate Slack with Worknice.
     pnpm dev
     ```
 
-    The app will be available at [http://localhost:26000](http://localhost:26000).
+    The app will be available at [http://localhost:6000](http://localhost:6000).
 
 ## Common tasks
 
@@ -48,5 +48,5 @@ An app to integrate Slack with Worknice.
   You can connect like this:
 
   ```
-  redis-cli -p 26001 PING
+  redis-cli -p 6001 PING
   ```
