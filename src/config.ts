@@ -12,6 +12,7 @@ check(process.env.REDIS_REST_API_TOKEN, "REDIS_REST_API_TOKEN");
 check(process.env.REDIS_REST_API_URL, "REDIS_REST_API_URL");
 check(process.env.SLACK_CLIENT_ID, "SLACK_CLIENT_ID");
 check(process.env.SLACK_CLIENT_SECRET, "SLACK_CLIENT_SECRET");
+check(process.env.SLACK_SIGNING_SECRET, "SLACK_SIGNING_SECRET");
 
 const config = {
   baseUrl: process.env.BASE_URL,
@@ -37,6 +38,7 @@ const config = {
       "users:read",
       "users:read.email",
     ],
+    signingSecret: process.env.SLACK_SIGNING_SECRET,
   },
   vercel: {
     cronSecret: process.env.CRON_SECRET,

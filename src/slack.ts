@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { z } from "zod";
 import { createZodFetcher } from "zod-fetch";
 import config from "./config";
@@ -107,6 +108,28 @@ const postChatMessage = async (
   }
 };
 
+const verifyRequest = (timestamp: string, signature: string, body: string) => {
+  if (Date.now() - Number(timestamp) * 1000 > 1000 * 60 * 5) {
+    throw Error("Stale request.");
+  }
+
+  const requestSignature =
+    "v0=" +
+    crypto
+      .createHmac("sha256", config.slack.signingSecret)
+      .update(["v0", timestamp, body].join(":"))
+      .digest("hex");
+
+  if (
+    !crypto.timingSafeEqual(
+      Buffer.from(requestSignature),
+      Buffer.from(signature)
+    )
+  ) {
+    throw Error("Invalid request signature.");
+  }
+};
+
 export type Block = {
   type: "section";
   text: {
@@ -143,6 +166,7 @@ const slack = {
   listChannels,
   listUsers,
   postChatMessage,
+  verifyRequest,
 };
 
 export default slack;

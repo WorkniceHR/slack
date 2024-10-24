@@ -1,4 +1,5 @@
 import redis from "@/redis";
+import slack from "@/slack";
 import { handleRequestWithWorknice } from "@worknice/js-sdk/helpers";
 import gql from "dedent";
 import { Temporal } from "temporal-polyfill";
@@ -128,8 +129,23 @@ export const POST = async (request: Request) =>
         }
       },
       parsePayload: async ({ request }) => {
-        const data = await request.json();
-        return slackRequestSchema.parse(data);
+        const text = await request.text();
+
+        const signature = request.headers.get("X-Slack-Signature");
+
+        if (signature === null) {
+          throw Error("Missing signature header.");
+        }
+
+        const timestamp = request.headers.get("X-Slack-Request-Timestamp");
+
+        if (timestamp === null) {
+          throw Error("Missing timestamp header.");
+        }
+
+        slack.verifyRequest(timestamp, signature, text);
+
+        return slackRequestSchema.parse(JSON.parse(text));
       },
     }
   );
