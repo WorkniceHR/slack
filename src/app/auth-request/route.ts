@@ -1,14 +1,14 @@
+import slack from "@/slack";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import config from "../../config";
 import redis from "../../redis";
-import slack from "@/slack";
 
 export const GET = async (request: NextRequest): Promise<NextResponse> => {
   try {
     console.log("Retrieving session code…");
 
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
 
     const sessionCode = request.nextUrl.searchParams.get(
       config.sessionCodeParam

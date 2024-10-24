@@ -12,7 +12,7 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
   try {
     console.log("Retrieving session code…");
 
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
 
     const sessionCodeCookie = cookieStore.get(config.sessionCodeCookieName);
 

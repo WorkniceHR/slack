@@ -17,17 +17,23 @@ type Env = {
 
 export const GET = async (
   request: Request,
-  { params: { integrationId } }: { params: Params }
+  props: { params: Promise<Params> }
 ) =>
   handleRequestWithWorknice<null, undefined, Env>(request, {
     getApiToken: async () => {
+      const { integrationId } = await props.params;
+
       const token = await redis.getWorkniceApiKey(integrationId);
+
       if (token === null) {
         throw Error("Unable to find Worknice API token.");
       }
+
       return token;
     },
     getEnv: async () => {
+      const { integrationId } = await props.params;
+
       const channel = await redis.getCalendarUpdateSlackChannel(integrationId);
 
       if (channel === null) {
@@ -50,6 +56,8 @@ export const GET = async (
       };
     },
     handleRequest: async ({ env, logger, worknice }) => {
+      const { integrationId } = await props.params;
+
       const integration = await worknice.getIntegration({ integrationId });
 
       if (!integration || integration.archived) {

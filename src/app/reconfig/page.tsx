@@ -1,20 +1,15 @@
+import slack from "@/slack";
 import { cookies } from "next/headers";
+import Link from "next/link";
 import config from "../../config";
 import redis from "../../redis";
 import ConfigForm from "./ConfigForm";
-import Link from "next/link";
-import slack from "@/slack";
 
-type PageProps<
-  Params extends string = string,
-  SearchParams extends string = string
-> = {
-  params: Record<Params, string>;
-  searchParams: Record<SearchParams, string | string[] | undefined>;
-};
+type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
-const ReconfigPage = async ({ searchParams }: PageProps) => {
-  const cookieStore = cookies();
+const ReconfigPage = async (props: { searchParams: SearchParams }) => {
+  const searchParams = await props.searchParams;
+  const cookieStore = await cookies();
 
   console.log("Retrieving session code…");
 
@@ -87,8 +82,8 @@ const ReconfigPage = async ({ searchParams }: PageProps) => {
 };
 
 const getSessionCode = (
-  cookieStore: ReturnType<typeof cookies>,
-  searchParams: PageProps["searchParams"]
+  cookieStore: Awaited<ReturnType<typeof cookies>>,
+  searchParams: Awaited<SearchParams>
 ) => {
   const param = searchParams[config.sessionCodeParam];
 

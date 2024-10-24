@@ -6,7 +6,7 @@
     "activate": "docker compose up --detach",
     "build": "next build",
     "deactivate": "docker compose down --volumes && (kill $(lsof -t -s TCP:LISTEN -i :26000) 2>/dev/null || true)",
-    "dev": "next dev -p 26000",
+    "dev": "next dev --turbopack -p 26000",
     "lint": "next lint",
     "start": "next start",
     "test:types": "tsc --noEmit"
@@ -15,9 +15,9 @@
     "@upstash/redis": "^1.34.0",
     "@worknice/js-sdk": "^0.0.4",
     "dedent": "^1.5.3",
-    "next": "14.2.7",
-    "react": "^18",
-    "react-dom": "^18",
+    "next": "15.0.1",
+    "react": "19.0.0-rc-69d4b800-20241021",
+    "react-dom": "19.0.0-rc-69d4b800-20241021",
     "temporal-polyfill": "^0.2.5",
     "zod": "^3.23.8",
     "zod-fetch": "^0.1.1"
@@ -25,10 +25,16 @@
   "devDependencies": {
     "@total-typescript/tsconfig": "^1.0.4",
     "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "eslint": "^8",
-    "eslint-config-next": "14.2.7",
+    "eslint-config-next": "15.0.1",
     "typescript": "^5"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "npm:types-react@19.0.0-rc.1",
+      "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
+    }
   }
 }
