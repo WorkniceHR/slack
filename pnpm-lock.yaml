@@ -11,6 +11,9 @@ dependencies:
   '@worknice/js-sdk':
     specifier: ^0.0.4
     version: 0.0.4(currency.js@2.0.4)(temporal-polyfill@0.2.5)
+  dedent:
+    specifier: ^1.5.3
+    version: 1.5.3
   next:
     specifier: 14.2.7
     version: 14.2.7(react-dom@18.3.1)(react@18.3.1)
@@ -718,6 +721,15 @@ packages:
 
   /dedent@0.7.0:
     resolution: {integrity: sha512-Q6fKUPqnAHAyhiUgFU7BUzLiv0kd8saH9al7tnu5Q/okj6dnupxyTgFIBjVzJATdfIAm9NAsvXNzjaKa+bxVyA==}
+    dev: false
+
+  /dedent@1.5.3:
+    resolution: {integrity: sha512-NHQtfOOW68WD8lgypbLA5oT+Bt0xXJhiYvoR6SmmNXZfpzOGXwdKWmcwG8N7PwVVWV3eF/68nmD9BaJSsTBhyQ==}
+    peerDependencies:
+      babel-plugin-macros: ^3.1.0
+    peerDependenciesMeta:
+      babel-plugin-macros:
+        optional: true
     dev: false
 
   /deep-equal@2.2.3:
