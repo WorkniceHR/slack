@@ -16,14 +16,14 @@ check(process.env.SLACK_SIGNING_SECRET, "SLACK_SIGNING_SECRET");
 
 const config = {
   baseUrl: process.env.BASE_URL,
-  protocol: process.env.PROTOCOL ?? "https",
   redis: {
     restApiUrl: process.env.REDIS_REST_API_URL,
     restApiToken: process.env.REDIS_REST_API_TOKEN,
   },
-  sessionCodeCookieName: "session_code",
   sessionCodeExpiry: 60 * 5, // 5 minutes
   sessionCodeParam: "code",
+  sessionTokenCookieName: "session_token",
+  sessionTokenExpiry: 60 * 60 * 1, // 1 hour
   slack: {
     clientId: process.env.SLACK_CLIENT_ID,
     clientSecret: process.env.SLACK_CLIENT_SECRET,

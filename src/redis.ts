@@ -2,7 +2,8 @@ import { Redis, type SetCommandOptions } from "@upstash/redis";
 import config from "./config";
 
 type Key =
-  | `session:${string}:worknice_integration_id`
+  | `session_code:${string}:worknice_integration_id`
+  | `session_token:${string}:worknice_integration_id`
   | `slack_team:${string}:worknice_integration_id`
   | `worknice_integration${string}:slack_access_token`
   | `worknice_integration${string}:slack_calendar_update_channel`
@@ -16,6 +17,8 @@ const client = new Redis({
   token: config.redis.restApiToken,
 });
 
+const getAndDeleteString = async (key: Key) => client.getdel<string>(key);
+
 const getString = async (key: Key) => client.get<string>(key);
 
 const setString = async (key: Key, value: string, opts?: SetCommandOptions) =>
@@ -28,13 +31,16 @@ const getAllIntegrationIds = async () => {
     .filter((id): id is string => id !== undefined);
 };
 
+const getAndDeleteIntegrationIdFromSessionCode = async (sessionCode: string) =>
+  getAndDeleteString(`session_code:${sessionCode}:worknice_integration_id`);
+
 const getCalendarUpdateSlackChannel = async (integrationId: string) =>
   getString(
     `worknice_integration:${integrationId}:slack_calendar_update_channel`
   );
 
-const getIntegrationIdFromSessionCode = async (sessionCode: string) =>
-  getString(`session:${sessionCode}:worknice_integration_id`);
+const getIntegrationIdFromSessionToken = async (sessionToken: string) =>
+  getString(`session_token:${sessionToken}:worknice_integration_id`);
 
 const getIntegrationIdFromTeamId = async (teamId: string) =>
   getString(`slack_team:${teamId}:worknice_integration_id`);
@@ -89,9 +95,25 @@ const setIntegrationIdFromSessionCode = async (
   sessionCode: string,
   integrationId: string
 ) =>
-  setString(`session:${sessionCode}:worknice_integration_id`, integrationId, {
-    ex: config.sessionCodeExpiry,
-  });
+  setString(
+    `session_code:${sessionCode}:worknice_integration_id`,
+    integrationId,
+    {
+      ex: config.sessionCodeExpiry,
+    }
+  );
+
+const setIntegrationIdFromSessionToken = async (
+  sessionToken: string,
+  integrationId: string
+) =>
+  setString(
+    `session_token:${sessionToken}:worknice_integration_id`,
+    integrationId,
+    {
+      ex: config.sessionTokenExpiry,
+    }
+  );
 
 const setIntegrationIdFromSlackTeamId = async (
   teamId: string,
@@ -135,8 +157,9 @@ const setWorkniceApiKey = async (integrationId: string, apiKey: string) =>
 
 const redis = {
   getAllIntegrationIds,
+  getAndDeleteIntegrationIdFromSessionCode,
   getCalendarUpdateSlackChannel,
-  getIntegrationIdFromSessionCode,
+  getIntegrationIdFromSessionToken,
   getIntegrationIdFromTeamId,
   getNewStarterSlackChannel,
   getPersonActivatedSlackChannel,
@@ -146,6 +169,7 @@ const redis = {
   purgeIntegration,
   setCalendarUpdateSlackChannel,
   setIntegrationIdFromSessionCode,
+  setIntegrationIdFromSessionToken,
   setIntegrationIdFromSlackTeamId,
   setNewStarterSlackChannel,
   setPersonActivatedSlackChannel,

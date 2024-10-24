@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 import config from "../../config";
 import redis from "../../redis";
+import session from "@/session";
 
 type Env = {
   integrationId: string;
@@ -20,27 +21,7 @@ export const GET = async (request: NextRequest) =>
 
       return token;
     },
-    getEnv: async ({ request }) => {
-      const cookieStore = await cookies();
-
-      const sessionCodeCookie = cookieStore.get(config.sessionCodeCookieName);
-
-      if (sessionCodeCookie === undefined) {
-        throw Error("Unable to retrieve session code.");
-      }
-
-      const integrationId = await redis.getIntegrationIdFromSessionCode(
-        sessionCodeCookie.value
-      );
-
-      if (integrationId === null) {
-        throw Error("Authorization request not found");
-      }
-
-      return {
-        integrationId,
-      };
-    },
+    getEnv: async () => session.getSession(),
     handleRequest: async ({ env, logger, worknice }) => {
       const code = request.nextUrl.searchParams.get("code");
 

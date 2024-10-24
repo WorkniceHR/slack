@@ -1,3 +1,4 @@
+import session from "@/session";
 import slack from "@/slack";
 import { cookies } from "next/headers";
 import Link from "next/link";
@@ -9,23 +10,14 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 const ReconfigPage = async (props: { searchParams: SearchParams }) => {
   const searchParams = await props.searchParams;
-  const cookieStore = await cookies();
 
   console.log("Retrieving session code…");
 
-  const sessionCode = getSessionCode(cookieStore, searchParams);
+  const sessionCode = searchParams[config.sessionCodeParam];
 
-  console.log("Retrieving integration ID…");
-
-  const integrationId = await redis.getIntegrationIdFromSessionCode(
-    sessionCode
+  const { integrationId } = await session.getSession(
+    typeof sessionCode === "string" ? sessionCode : undefined
   );
-
-  if (integrationId === null) {
-    throw Error("Unable to retrieve integration ID.");
-  }
-
-  console.log("Retrieving access token…");
 
   const accessToken = await redis.getSlackAccessToken(integrationId);
 
@@ -79,21 +71,6 @@ const ReconfigPage = async (props: { searchParams: SearchParams }) => {
       )}
     </div>
   );
-};
-
-const getSessionCode = (
-  cookieStore: Awaited<ReturnType<typeof cookies>>,
-  searchParams: Awaited<SearchParams>
-) => {
-  const param = searchParams[config.sessionCodeParam];
-
-  if (typeof param === "string") return param;
-
-  const sessionCodeCookie = cookieStore.get(config.sessionCodeCookieName);
-
-  if (sessionCodeCookie !== undefined) return sessionCodeCookie.value;
-
-  throw Error("Unable to retrieve session code.");
 };
 
 export default ReconfigPage;
