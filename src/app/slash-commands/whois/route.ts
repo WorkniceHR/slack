@@ -18,6 +18,21 @@ type Env = {
   integrationId: string;
 };
 
+type Block =
+  | {
+      type: "section";
+      text: { type: string; text: string };
+      fields?: Array<{ type: string; text: string }>;
+      accessory?: {
+        type: string;
+        image_url: string;
+        alt_text: string;
+      };
+    }
+  | {
+      type: "divider";
+    };
+
 export const POST = async (request: Request) =>
   handleRequestWithWorknice<z.infer<typeof slackRequestSchema>, undefined, Env>(
     request,
@@ -129,12 +144,7 @@ export const POST = async (request: Request) =>
         logger.info(`Filtered down to ${filteredPeople.length} people.`);
 
         let responseText: {
-          blocks: Array<{
-            type: string;
-            text: { type: string; text: string };
-            fields?: Array<{ type: string; text: string }>;
-            accessory?: { type: string; image_url: string; alt_text: string };
-          }>;
+          blocks: Array<Block>;
         };
 
         if (filteredPeople.length > 0) {
@@ -150,81 +160,86 @@ export const POST = async (request: Request) =>
                     filteredPeople.length > 3 ? " (showing top 3 matches)" : ""
                   }:`,
                 },
-              },
+              } as Block,
             ].concat(
-              filteredPeople.slice(0, 3).map((person) => ({
-                type: "section",
-                text: {
-                  type: "mrkdwn",
-                  text: [
-                    `<https://app.worknice.com/people/${person.id}|${person.displayName}>`,
-                    person.profileBio ? `\n> ${person.profileBio}` : "-",
-                    person.profilePronouns
-                      ? `\n> Pronouns: ${person.profilePronouns}`
-                      : "-",
-                    person.profileBirthday
-                      ? `\n> Birthday: ${getFormattedBirthday(
-                          person.profileBirthday
-                        )}`
-                      : "-",
-                  ].join(""),
+              filteredPeople.slice(0, 3).flatMap((person) => [
+                {
+                  type: "divider",
                 },
-                fields: [
-                  {
+                {
+                  type: "section" as const,
+                  text: {
                     type: "mrkdwn",
-                    text: "*Position*",
+                    text: [
+                      `<https://app.worknice.com/people/${person.id}|${person.displayName}>`,
+                      person.profileBio ? `\n> ${person.profileBio}` : "",
+                      person.profilePronouns
+                        ? `\n> Pronouns: ${person.profilePronouns}`
+                        : "",
+                      person.profileBirthday
+                        ? `\n> Birthday: ${getFormattedBirthday(
+                            person.profileBirthday
+                          )}`
+                        : "",
+                    ].join(""),
                   },
-                  {
-                    type: "plain_text",
-                    text: person.currentJob?.position?.title ?? "-",
-                  },
-                  {
-                    type: "mrkdwn",
-                    text: "*Manager*",
-                  },
-                  {
-                    type: "plain_text",
-                    text:
-                      person.currentJob?.position?.manager?.currentJob?.person
-                        ?.displayName ?? "-",
-                  },
-                  {
-                    type: "mrkdwn",
-                    text: "*Location*",
-                  },
-                  {
-                    type: "plain_text",
-                    text: person.location?.name ?? "-",
-                  },
-                  {
-                    type: "mrkdwn",
-                    text: "*Phone*",
-                  },
-                  {
-                    type: "mrkdwn",
-                    text: person.profilePhone
-                      ? `<tel:${person.profilePhone}|${person.profilePhone}>`
-                      : "-",
-                  },
-                  {
-                    type: "mrkdwn",
-                    text: "*Email*",
-                  },
-                  {
-                    type: "mrkdwn",
-                    text: person.profileEmail
-                      ? `<mailto:${person.profileEmail}|${person.profileEmail}>`
-                      : "-",
-                  },
-                ],
-                accessory: person.profileImage?.url
-                  ? {
-                      type: "image",
-                      image_url: person.profileImage.url,
-                      alt_text: "Profile Image",
-                    }
-                  : undefined,
-              }))
+                  fields: [
+                    {
+                      type: "mrkdwn",
+                      text: "*Position*",
+                    },
+                    {
+                      type: "plain_text",
+                      text: person.currentJob?.position?.title ?? "-",
+                    },
+                    {
+                      type: "mrkdwn",
+                      text: "*Manager*",
+                    },
+                    {
+                      type: "plain_text",
+                      text:
+                        person.currentJob?.position?.manager?.currentJob?.person
+                          ?.displayName ?? "-",
+                    },
+                    {
+                      type: "mrkdwn",
+                      text: "*Location*",
+                    },
+                    {
+                      type: "plain_text",
+                      text: person.location?.name ?? "-",
+                    },
+                    {
+                      type: "mrkdwn",
+                      text: "*Phone*",
+                    },
+                    {
+                      type: "mrkdwn",
+                      text: person.profilePhone
+                        ? `<tel:${person.profilePhone}|${person.profilePhone}>`
+                        : "-",
+                    },
+                    {
+                      type: "mrkdwn",
+                      text: "*Email*",
+                    },
+                    {
+                      type: "mrkdwn",
+                      text: person.profileEmail
+                        ? `<mailto:${person.profileEmail}|${person.profileEmail}>`
+                        : "-",
+                    },
+                  ],
+                  accessory: person.profileImage?.url
+                    ? {
+                        type: "image",
+                        image_url: person.profileImage.url,
+                        alt_text: "Profile Image",
+                      }
+                    : undefined,
+                },
+              ])
             ),
           };
         } else {
