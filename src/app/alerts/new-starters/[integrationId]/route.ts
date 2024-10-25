@@ -3,6 +3,7 @@ import redis from "@/redis";
 import slack, { type Block } from "@/slack";
 import { handleRequestWithWorknice } from "@worknice/js-sdk/helpers";
 import gql from "dedent";
+import { Temporal } from "temporal-polyfill";
 import { z } from "zod";
 
 type Params = {
@@ -95,14 +96,27 @@ export const GET = async (
 
       const people = peopleListSchema.parse(rawPeople).data.session.org.people;
 
-      if (people.length === 0) {
+      const today = Temporal.Now.plainDateISO("Australia/Sydney");
+
+      const filteredPeople = people.filter(
+        (person) =>
+          person.startDate !== null &&
+          Temporal.PlainDate.compare(
+            Temporal.PlainDate.from(person.startDate),
+            today
+          ) === 0
+      );
+
+      if (filteredPeople.length === 0) {
         logger.debug(
           `No people starting today for integration ${integrationId}.`
         );
         return undefined;
       }
 
-      const blocks = people.map((person) => formatSlackBlockMessage(person));
+      const blocks = filteredPeople.map((person) =>
+        formatSlackBlockMessage(person)
+      );
 
       await slack.postChatMessage(env.slackToken, env.channel, { blocks });
 
