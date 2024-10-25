@@ -13,11 +13,14 @@ export const GET = async (request: Request) =>
 
       await Promise.all(
         integrationIds.map((integrationId) =>
-          fetch(`${config.baseUrl}/alerts/new-starters/${integrationId}`, {
-            headers: {
-              authorization: `Bearer ${config.vercel.cronSecret}`,
-            },
-          })
+          fetch(
+            `${config.baseUrl}/vercel-cron-jobs/new-starters/${integrationId}`,
+            {
+              headers: {
+                authorization: `Bearer ${config.vercel.cronSecret}`,
+              },
+            }
+          )
         )
       );
 

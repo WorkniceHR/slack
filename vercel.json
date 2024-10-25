@@ -1,13 +1,12 @@
 {
   "crons": [
     {
-      "path": "/alerts/calendar-update",
+      "path": "/vercel-cron-jobs/calendar-update",
       "schedule": "0 22 * * 0-4"
     },
     {
-      "path": "/alerts/new-starters",
+      "path": "/vercel-cron-jobs/new-starters",
       "schedule": "0 22 * * 0-4"
     }
-    
   ]
 }
