@@ -138,7 +138,9 @@ export const POST = async (request: Request) =>
         });
 
         if (!delayedResponse.ok) {
-          throw new Error("Failed to send delayed response.");
+          throw Error(
+            `Failed to send delayed response. ${delayedResponse.status} ${delayedResponse.statusText}`
+          );
         }
       },
       parsePayload: async ({ request }) => {
