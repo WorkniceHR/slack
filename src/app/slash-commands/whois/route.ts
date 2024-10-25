@@ -78,16 +78,20 @@ export const POST = async (request: Request) =>
         };
       },
       handleRequest: async ({ env, logger, payload, worknice }) => {
-        const integration = await worknice.getIntegration({
-          integrationId: env.integrationId,
-        });
+        try {
+          const integration = await worknice.getIntegration({
+            integrationId: env.integrationId,
+          });
+
+          if (integration.archived) {
+            throw Error("Integration is archived.");
+          }
+        } catch (error) {
+          await redis.purgeIntegration(env.integrationId);
+          throw error;
+        }
 
         logger.info("Retrieved integration.");
-
-        if (integration.archived) {
-          await redis.purgeIntegration(integration.id);
-          throw Error("Integration is archived.");
-        }
 
         const rawPeopleDirectory = await worknice.fetchFromApi(gql`
           query PeopleDirectory {

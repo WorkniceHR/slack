@@ -35,13 +35,17 @@ export const POST = async (request: Request) =>
         };
       },
       handleRequest: async ({ env, logger, payload, worknice }) => {
-        const integration = await worknice.getIntegration({
-          integrationId: env.integrationId,
-        });
+        try {
+          const integration = await worknice.getIntegration({
+            integrationId: env.integrationId,
+          });
 
-        if (integration.archived) {
-          await redis.purgeIntegration(integration.id);
-          throw Error("Integration is archived.");
+          if (integration.archived) {
+            throw Error("Integration is archived.");
+          }
+        } catch (error) {
+          await redis.purgeIntegration(env.integrationId);
+          throw error;
         }
 
         const rawLeaveRequests = await worknice.fetchFromApi(

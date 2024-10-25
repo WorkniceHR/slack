@@ -10,16 +10,11 @@ type Params = {
   integrationId: string;
 };
 
-type Env = {
-  channel: string;
-  slackToken: string;
-};
-
 export const GET = async (
   request: Request,
   props: { params: Promise<Params> }
 ) =>
-  handleRequestWithWorknice<null, undefined, Env>(request, {
+  handleRequestWithWorknice(request, {
     getApiToken: async () => {
       const { integrationId } = await props.params;
 
@@ -31,40 +26,39 @@ export const GET = async (
 
       return token;
     },
-    getEnv: async () => {
+    getEnv: async () => "",
+    handleRequest: async ({ logger, worknice }) => {
       const { integrationId } = await props.params;
 
-      const channel = await redis.getNewStarterSlackChannel(integrationId);
+      try {
+        const integration = await worknice.getIntegration({
+          integrationId,
+        });
+
+        if (integration.archived) {
+          throw Error("Integration is archived.");
+        }
+      } catch (error) {
+        await redis.purgeIntegration(integrationId);
+        throw error;
+      }
+
+      const channel = await redis.getCalendarUpdateSlackChannel(integrationId);
 
       if (channel === null) {
-        throw Error(
+        logger.debug(
           `No Slack channel found for integration ${integrationId}. Skipping.`
         );
+        return undefined;
       }
 
       const slackToken = await redis.getSlackAccessToken(integrationId);
 
       if (slackToken === null) {
-        throw Error(
+        logger.debug(
           `No Slack token found for integration ${integrationId}. Skipping.`
         );
-      }
-
-      return {
-        channel,
-        slackToken,
-      };
-    },
-    handleRequest: async ({ env, logger, worknice }) => {
-      const { integrationId } = await props.params;
-
-      const integration = await worknice.getIntegration({
-        integrationId,
-      });
-
-      if (integration.archived) {
-        await redis.purgeIntegration(integrationId);
-        throw Error("Integration is archived.");
+        return undefined;
       }
 
       const rawPeople = await worknice.fetchFromApi(
@@ -118,7 +112,7 @@ export const GET = async (
         formatSlackBlockMessage(person)
       );
 
-      await slack.postChatMessage(env.slackToken, env.channel, { blocks });
+      await slack.postChatMessage(slackToken, channel, { blocks });
 
       logger.debug(`Sent Slack block message for integration ${integrationId}`);
 
