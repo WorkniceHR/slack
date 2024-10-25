@@ -168,55 +168,55 @@ export const POST = async (request: Request) =>
                         )}`
                       : "-",
                   ].join(""),
-                  fields: [
-                    {
-                      type: "mrkdwn",
-                      text: "*Position*",
-                    },
-                    {
-                      type: "plain_text",
-                      text: person.currentJob?.position?.title ?? "-",
-                    },
-                    {
-                      type: "mrkdwn",
-                      text: "*Manager*",
-                    },
-                    {
-                      type: "plain_text",
-                      text:
-                        person.currentJob?.position?.manager?.currentJob?.person
-                          ?.displayName ?? "-",
-                    },
-                    {
-                      type: "mrkdwn",
-                      text: "*Location*",
-                    },
-                    {
-                      type: "plain_text",
-                      text: person.location?.name ?? "-",
-                    },
-                    {
-                      type: "mrkdwn",
-                      text: "*Phone*",
-                    },
-                    {
-                      type: "mrkdwn",
-                      text: person.profilePhone
-                        ? `<tel:${person.profilePhone}|${person.profilePhone}>`
-                        : "-",
-                    },
-                    {
-                      type: "mrkdwn",
-                      text: "*Email*",
-                    },
-                    {
-                      type: "mrkdwn",
-                      text: person.profileEmail
-                        ? `<mailto:${person.profileEmail}|${person.profileEmail}>`
-                        : "-",
-                    },
-                  ],
                 },
+                fields: [
+                  {
+                    type: "mrkdwn",
+                    text: "*Position*",
+                  },
+                  {
+                    type: "plain_text",
+                    text: person.currentJob?.position?.title ?? "-",
+                  },
+                  {
+                    type: "mrkdwn",
+                    text: "*Manager*",
+                  },
+                  {
+                    type: "plain_text",
+                    text:
+                      person.currentJob?.position?.manager?.currentJob?.person
+                        ?.displayName ?? "-",
+                  },
+                  {
+                    type: "mrkdwn",
+                    text: "*Location*",
+                  },
+                  {
+                    type: "plain_text",
+                    text: person.location?.name ?? "-",
+                  },
+                  {
+                    type: "mrkdwn",
+                    text: "*Phone*",
+                  },
+                  {
+                    type: "mrkdwn",
+                    text: person.profilePhone
+                      ? `<tel:${person.profilePhone}|${person.profilePhone}>`
+                      : "-",
+                  },
+                  {
+                    type: "mrkdwn",
+                    text: "*Email*",
+                  },
+                  {
+                    type: "mrkdwn",
+                    text: person.profileEmail
+                      ? `<mailto:${person.profileEmail}|${person.profileEmail}>`
+                      : "-",
+                  },
+                ],
                 accessory: person.profileImage?.url
                   ? {
                       type: "image",
@@ -247,7 +247,7 @@ export const POST = async (request: Request) =>
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            response_type: "in_channel",
+            response_type: "ephemeral",
             blocks: responseText.blocks,
           }),
         });
