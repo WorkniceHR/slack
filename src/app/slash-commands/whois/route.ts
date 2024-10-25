@@ -21,8 +21,14 @@ type Env = {
 type Block =
   | {
       type: "section";
-      text: { type: string; text: string };
-      fields?: Array<{ type: string; text: string }>;
+      text?: {
+        type: "plain_text" | "mrkdwn";
+        text: string;
+      };
+      fields?: Array<{
+        type: "plain_text" | "mrkdwn";
+        text: string;
+      }>;
       accessory?: {
         type: string;
         image_url: string;
@@ -31,6 +37,20 @@ type Block =
     }
   | {
       type: "divider";
+    }
+  | {
+      type: "header";
+      text: {
+        type: "plain_text";
+        text: string;
+      };
+    }
+  | {
+      type: "context";
+      elements: Array<{
+        type: "plain_text" | "mrkdwn";
+        text: string;
+      }>;
     };
 
 export const POST = async (request: Request) =>
@@ -164,25 +184,37 @@ export const POST = async (request: Request) =>
             ].concat(
               filteredPeople.slice(0, 3).flatMap((person) => [
                 {
-                  type: "divider",
+                  type: "header",
+                  text: {
+                    type: "plain_text",
+                    text: person.displayName,
+                  },
                 },
                 {
                   type: "section" as const,
-                  text: {
-                    type: "mrkdwn",
-                    text: [
-                      `<https://app.worknice.com/people/${person.id}|${person.displayName}>`,
-                      person.profileBio ? `\n> ${person.profileBio}` : "",
-                      person.profilePronouns
-                        ? `\n> Pronouns: ${person.profilePronouns}`
-                        : "",
-                      person.profileBirthday
-                        ? `\n> Birthday: ${getFormattedBirthday(
+                  text:
+                    person.profileBio ||
+                    person.profilePronouns ||
+                    person.profileBirthday
+                      ? {
+                          type: "mrkdwn",
+                          text: [
+                            person.profileBio
+                              ? `> ${person.profileBio}`
+                              : undefined,
+                            person.profilePronouns
+                              ? `> Pronouns: ${person.profilePronouns}`
+                              : undefined,
                             person.profileBirthday
-                          )}`
-                        : "",
-                    ].join(""),
-                  },
+                              ? `> Birthday: ${getFormattedBirthday(
+                                  person.profileBirthday
+                                )}`
+                              : undefined,
+                          ]
+                            .filter((x) => x !== undefined)
+                            .join("\n"),
+                        }
+                      : undefined,
                   fields: [
                     {
                       type: "mrkdwn",
@@ -238,6 +270,15 @@ export const POST = async (request: Request) =>
                         alt_text: "Profile Image",
                       }
                     : undefined,
+                },
+                {
+                  type: "context",
+                  elements: [
+                    {
+                      type: "mrkdwn",
+                      text: `<https://app.worknice.com/people/${person.id}|${person.displayName}>`,
+                    },
+                  ],
                 },
               ])
             ),
