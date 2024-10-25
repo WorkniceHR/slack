@@ -276,7 +276,7 @@ export const POST = async (request: Request) =>
                   elements: [
                     {
                       type: "mrkdwn",
-                      text: `<https://app.worknice.com/people/${person.id}|${person.displayName}>`,
+                      text: `<https://app.worknice.com/people/${person.id}|View in Worknice>`,
                     },
                   ],
                 },
