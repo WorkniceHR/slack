@@ -17,7 +17,7 @@ export const POST = async (request: Request) =>
     handleRequest: async ({ request, payload }) => {
       after(async () => {
         await fetch(
-          `${config.baseUrl}/slash-commands/${
+          `${config.baseUrl}/slack-slash-commands/${
             HANDLERS[payload.parsed.command]
           }`,
           {
