@@ -136,44 +136,40 @@ export const POST = async (request: Request) =>
           }>;
         };
 
-        const person = filteredPeople.at(0);
-
-        if (person) {
+        if (filteredPeople.length > 0) {
           responseText = {
-            blocks: [
-              {
-                type: "section",
-                text: {
-                  type: "mrkdwn",
-                  text:
-                    `>*<https://app.worknice.com/people/${person.id}|${person.displayName}>*\n` +
-                    `>*Position:* ${
-                      person.currentJob?.position?.title || "-"
-                    }\n` +
-                    `>*Manager:* ${
-                      person.currentJob?.position?.manager?.currentJob?.person
-                        ?.displayName || "-"
-                    }\n` +
-                    `>*Location:* ${person.location?.name || "-"}\n` +
-                    `>*Bio:* ${person.profileBio || "-"}\n` +
-                    `>*Pronouns:* ${person.profilePronouns || "-"}\n` +
-                    `>*Phone:* ${person.profilePhone || "-"}\n` +
-                    `>*Email:* ${person.profileEmail || "-"}\n` +
-                    `>*Birthday:* ${
-                      person.profileBirthday
-                        ? getFormattedBirthday(person.profileBirthday)
-                        : "-"
-                    }\n`,
-                },
-                accessory: person.profileImage?.url
-                  ? {
-                      type: "image",
-                      image_url: person.profileImage.url,
-                      alt_text: "Profile Image",
-                    }
-                  : undefined,
+            blocks: filteredPeople.slice(0, 5).map((person) => ({
+              type: "section",
+              text: {
+                type: "mrkdwn",
+                text:
+                  `>*<https://app.worknice.com/people/${person.id}|${person.displayName}>*\n` +
+                  `>*Position:* ${
+                    person.currentJob?.position?.title || "-"
+                  }\n` +
+                  `>*Manager:* ${
+                    person.currentJob?.position?.manager?.currentJob?.person
+                      ?.displayName || "-"
+                  }\n` +
+                  `>*Location:* ${person.location?.name || "-"}\n` +
+                  `>*Bio:* ${person.profileBio || "-"}\n` +
+                  `>*Pronouns:* ${person.profilePronouns || "-"}\n` +
+                  `>*Phone:* ${person.profilePhone || "-"}\n` +
+                  `>*Email:* ${person.profileEmail || "-"}\n` +
+                  `>*Birthday:* ${
+                    person.profileBirthday
+                      ? getFormattedBirthday(person.profileBirthday)
+                      : "-"
+                  }\n`,
               },
-            ],
+              accessory: person.profileImage?.url
+                ? {
+                    type: "image",
+                    image_url: person.profileImage.url,
+                    alt_text: "Profile Image",
+                  }
+                : undefined,
+            })),
           };
         } else {
           responseText = {
