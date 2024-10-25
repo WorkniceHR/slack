@@ -24,7 +24,7 @@ export const POST = async (request: Request) =>
 
         return Response.json(
           {
-            reconfigurationUrl: `${config.baseUrl}/reconfig?${config.sessionCodeParam}=${sessionCode}`,
+            reconfigurationUrl: `${config.baseUrl}/reconfig-request?${config.sessionCodeParam}=${sessionCode}`,
           },
           { status: 200 }
         );

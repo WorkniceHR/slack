@@ -57,9 +57,7 @@ export const GET = async (request: NextRequest) =>
 
       logger.debug("Activated integration.");
 
-      return Response.redirect(
-        `${config.worknice.baseUrl}/admin/apps/integrations/${env.integrationId}`
-      );
+      return Response.redirect(`${config.baseUrl}/config`);
     },
     parsePayload: async () => null,
   });

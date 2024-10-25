@@ -1,6 +1,5 @@
 import config from "@/config";
 import session from "@/session";
-import slack from "@/slack";
 import { handleRequestWithWorknice } from "@worknice/js-sdk/helpers";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -16,9 +15,7 @@ export const GET = async (request: NextRequest) =>
       }
       return session.createSession(sessionCode);
     },
-    handleRequest: async () => {
-      const authorizationUrl = await slack.getAuthorizationUrl();
-      return NextResponse.redirect(authorizationUrl);
-    },
+    handleRequest: async () =>
+      NextResponse.redirect(`${config.baseUrl}/config`),
     parsePayload: async () => null,
   });

@@ -1,7 +1,8 @@
-"use server"; // Ensure this only runs server-side
+"use server";
 
 import { redirect } from "next/navigation";
 import redis from "../../redis";
+import config from "@/config";
 
 export const saveSelectedChannel = async (formData: FormData) => {
   const integrationId = formData.get("integrationId");
@@ -37,6 +38,7 @@ export const saveSelectedChannel = async (formData: FormData) => {
 
   await redis.setNewStarterSlackChannel(integrationId, newStarterChannel);
 
-  // Redirect back to the integration page after saving
-  redirect(`https://app.worknice.com/admin/apps/integrations/${integrationId}`);
+  redirect(
+    `${config.worknice.baseUrl}/admin/apps/integrations/${integrationId}`
+  );
 };

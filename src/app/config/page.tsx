@@ -1,23 +1,13 @@
 import session from "@/session";
 import slack from "@/slack";
-import { cookies } from "next/headers";
 import Link from "next/link";
-import config from "../../config";
 import redis from "../../redis";
 import ConfigForm from "./ConfigForm";
 
-type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
-
-const ReconfigPage = async (props: { searchParams: SearchParams }) => {
-  const searchParams = await props.searchParams;
-
+const ReconfigPage = async () => {
   console.log("Retrieving session code…");
 
-  const sessionCode = searchParams[config.sessionCodeParam];
-
-  const { integrationId } = await session.getSession(
-    typeof sessionCode === "string" ? sessionCode : undefined
-  );
+  const { integrationId } = await session.getSession();
 
   const accessToken = await redis.getSlackAccessToken(integrationId);
 
