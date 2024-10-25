@@ -138,38 +138,50 @@ export const POST = async (request: Request) =>
 
         if (filteredPeople.length > 0) {
           responseText = {
-            blocks: filteredPeople.slice(0, 5).map((person) => ({
-              type: "section",
-              text: {
-                type: "mrkdwn",
-                text:
-                  `>*<https://app.worknice.com/people/${person.id}|${person.displayName}>*\n` +
-                  `>*Position:* ${
-                    person.currentJob?.position?.title || "-"
-                  }\n` +
-                  `>*Manager:* ${
-                    person.currentJob?.position?.manager?.currentJob?.person
-                      ?.displayName || "-"
-                  }\n` +
-                  `>*Location:* ${person.location?.name || "-"}\n` +
-                  `>*Bio:* ${person.profileBio || "-"}\n` +
-                  `>*Pronouns:* ${person.profilePronouns || "-"}\n` +
-                  `>*Phone:* ${person.profilePhone || "-"}\n` +
-                  `>*Email:* ${person.profileEmail || "-"}\n` +
-                  `>*Birthday:* ${
-                    person.profileBirthday
-                      ? getFormattedBirthday(person.profileBirthday)
-                      : "-"
-                  }\n`,
+            blocks: [
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: `Found ${filteredPeople.length} ${
+                    filteredPeople.length === 1 ? "person" : "people"
+                  }:`,
+                },
               },
-              accessory: person.profileImage?.url
-                ? {
-                    type: "image",
-                    image_url: person.profileImage.url,
-                    alt_text: "Profile Image",
-                  }
-                : undefined,
-            })),
+            ].concat(
+              filteredPeople.slice(0, 5).map((person) => ({
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text:
+                    `>*<https://app.worknice.com/people/${person.id}|${person.displayName}>*\n` +
+                    `>*Position:* ${
+                      person.currentJob?.position?.title || "-"
+                    }\n` +
+                    `>*Manager:* ${
+                      person.currentJob?.position?.manager?.currentJob?.person
+                        ?.displayName || "-"
+                    }\n` +
+                    `>*Location:* ${person.location?.name || "-"}\n` +
+                    `>*Bio:* ${person.profileBio || "-"}\n` +
+                    `>*Pronouns:* ${person.profilePronouns || "-"}\n` +
+                    `>*Phone:* ${person.profilePhone || "-"}\n` +
+                    `>*Email:* ${person.profileEmail || "-"}\n` +
+                    `>*Birthday:* ${
+                      person.profileBirthday
+                        ? getFormattedBirthday(person.profileBirthday)
+                        : "-"
+                    }\n`,
+                },
+                accessory: person.profileImage?.url
+                  ? {
+                      type: "image",
+                      image_url: person.profileImage.url,
+                      alt_text: "Profile Image",
+                    }
+                  : undefined,
+              }))
+            ),
           };
         } else {
           responseText = {
