@@ -4,7 +4,7 @@ import Link from "next/link";
 import redis from "../../redis";
 import ConfigForm from "./ConfigForm";
 
-const ReconfigPage = async () => {
+const ConfigPage = async () => {
   console.log("Retrieving session code…");
 
   const { integrationId } = await session.getSession();
@@ -38,20 +38,18 @@ const ReconfigPage = async () => {
 
   return (
     <div className="Container">
-      <br />
       <Link
         href={`https://app.worknice.com/admin/apps/integrations/${integrationId}`}
         passHref
       >
         <button className="back-button">
           <svg className="back-icon"></svg>
-          {"Slack Integration"}
+          Back to Worknice
         </button>
       </Link>
       {channels.length > 0 ? (
         <ConfigForm
           channels={channels}
-          integrationId={integrationId}
           personActivatedChannel={savedPersonActivatedChannel}
           calendarUpdateChannel={savedCalendarUpdateChannel}
           newStarterChannel={savedNewStarterChannel}
@@ -63,4 +61,4 @@ const ReconfigPage = async () => {
   );
 };
 
-export default ReconfigPage;
+export default ConfigPage;

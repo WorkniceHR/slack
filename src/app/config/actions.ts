@@ -1,18 +1,16 @@
 "use server";
 
+import config from "@/config";
+import session from "@/session";
 import { redirect } from "next/navigation";
 import redis from "../../redis";
-import config from "@/config";
 
 export const saveSelectedChannel = async (formData: FormData) => {
-  const integrationId = formData.get("integrationId");
+  const { integrationId } = await session.getSession();
+
   const personActivatedChannel = formData.get("personActivatedChannel");
   const calendarUpdateChannel = formData.get("calendarUpdateChannel");
   const newStarterChannel = formData.get("newStarterChannel");
-
-  if (typeof integrationId !== "string") {
-    throw new Error("Integration ID is required.");
-  }
 
   if (typeof personActivatedChannel !== "string") {
     throw new Error("Person activated channel is required.");
