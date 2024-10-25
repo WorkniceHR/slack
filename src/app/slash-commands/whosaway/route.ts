@@ -34,7 +34,7 @@ export const POST = async (request: Request) =>
           integrationId,
         };
       },
-      handleRequest: async ({ env, payload, worknice }) => {
+      handleRequest: async ({ env, logger, payload, worknice }) => {
         const integration = await worknice.getIntegration({
           integrationId: env.integrationId,
         });
@@ -138,9 +138,14 @@ export const POST = async (request: Request) =>
         });
 
         if (!delayedResponse.ok) {
-          throw Error(
-            `Failed to send delayed response. ${delayedResponse.status} ${delayedResponse.statusText}`
-          );
+          try {
+            const response = await delayedResponse.json();
+            logger.error(response.error);
+          } finally {
+            throw Error(
+              `Failed to send delayed response. ${delayedResponse.status} ${delayedResponse.statusText}`
+            );
+          }
         }
       },
       parsePayload: async ({ request }) => {
