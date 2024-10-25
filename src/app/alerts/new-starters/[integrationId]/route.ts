@@ -174,10 +174,12 @@ function formatSlackBlockMessage(person: Person): Block {
       type: "mrkdwn",
       text: `*<${config.worknice.baseUrl}/people/${person.id}|${person.displayName}>*\n>${person.displayName} starts today as a ${positionTitle} in ${locationName}.`,
     },
-    accessory: {
-      type: "image",
-      image_url: person.profileImage?.url || "https://via.placeholder.com/150",
-      alt_text: `${person.displayName}'s profile picture`,
-    },
+    accessory: person.profileImage?.url
+      ? {
+          type: "image",
+          image_url: person.profileImage.url,
+          alt_text: `${person.displayName}'s profile picture`,
+        }
+      : undefined,
   };
 }
