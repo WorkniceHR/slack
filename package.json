@@ -14,7 +14,7 @@
   "dependencies": {
     "@stdlib/nlp-porter-stemmer": "^0.2.2",
     "@upstash/redis": "^1.34.0",
-    "@worknice/js-sdk": "^0.0.4",
+    "@worknice/js-sdk": "^0.0.5",
     "@worknice/whiteboard": "^0.0.2",
     "dedent": "^1.5.3",
     "js-search": "^2.0.1",

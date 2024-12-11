@@ -16,8 +16,8 @@ dependencies:
     specifier: ^1.34.0
     version: 1.34.0
   '@worknice/js-sdk':
-    specifier: ^0.0.4
-    version: 0.0.4(currency.js@2.0.4)(temporal-polyfill@0.2.5)
+    specifier: ^0.0.5
+    version: 0.0.5(currency.js@2.0.4)(temporal-polyfill@0.2.5)
   '@worknice/whiteboard':
     specifier: ^0.0.2
     version: 0.0.2
@@ -78,7 +78,7 @@ packages:
     resolution: {integrity: sha512-kEBmG8KyqtxJZv+ygbEim+KCGtIq1fC22Ms3S4ziXmYKm8uyoLX0MHONVKwp+9opg390VaKRNt4a7A9NwmpNhw==}
     requiresBuild: true
     dependencies:
-      tslib: 2.7.0
+      tslib: 2.8.1
     dev: false
     optional: true
 
@@ -656,7 +656,7 @@ packages:
   /@swc/helpers@0.5.2:
     resolution: {integrity: sha512-E4KcWTpoLHqwPHLxidpOqQbcrZVgi0rsmmZXUle1jXmJfuIf/UWpczUJ7MZZ5tlxytgJXyp0w4PGkkeLiuIdZw==}
     dependencies:
-      tslib: 2.7.0
+      tslib: 2.8.1
     dev: false
 
   /@total-typescript/tsconfig@1.0.4:
@@ -856,21 +856,21 @@ packages:
       crypto-js: 4.2.0
     dev: false
 
-  /@worknice/js-sdk@0.0.4(currency.js@2.0.4)(temporal-polyfill@0.2.5):
-    resolution: {integrity: sha512-I7f/8EXXURr0xmFXRWiwPUsgNnh2WLAXVEtJjqJ1yfD5rkHpMZhwYfgiVL9ne8gOV9lXrYfc2oQ23222WFUHKA==}
+  /@worknice/js-sdk@0.0.5(currency.js@2.0.4)(temporal-polyfill@0.2.5):
+    resolution: {integrity: sha512-Ue4f+BbpQ+VNaQg1D1sc79qgKAsB2t16KHOgw+P2H7gQpsWRKZHlsaR6x2RyhDASj32kYrHeSG1xV6PnoBgs/A==}
     peerDependencies:
       currency.js: ^2.0.4
       temporal-polyfill: ^0.2.1
     dependencies:
-      '@worknice/utils': 0.0.3(temporal-polyfill@0.2.5)
+      '@worknice/utils': 0.0.4(temporal-polyfill@0.2.5)
       currency.js: 2.0.4
       dedent: 0.7.0
       temporal-polyfill: 0.2.5
       uuid: 8.3.2
     dev: false
 
-  /@worknice/utils@0.0.3(temporal-polyfill@0.2.5):
-    resolution: {integrity: sha512-qEqG+qHdvCLb4FNf/ZX/uX2Uty5yYkvb4gkbjvRJnLW0wD2XuVN6kKJfVr7HUhTtEL5B1xqhfEu93hDm2a8nMw==}
+  /@worknice/utils@0.0.4(temporal-polyfill@0.2.5):
+    resolution: {integrity: sha512-SG/9QAhSXIXhqxx4F+ucGRMyLfPB6xObMljHsF4U0U72aV7PWZkP6e2ryQdGwXj45Ygk1TJ5NDIs8fEkfa2lVg==}
     peerDependencies:
       temporal-polyfill: ^0.2.1
     dependencies:
@@ -3043,6 +3043,10 @@ packages:
 
   /tslib@2.7.0:
     resolution: {integrity: sha512-gLXCKdN1/j47AiHiOkJN69hJmcbGTHI0ImLmbYLHykhgeN0jVGola9yVjFgzCUklsZQMW55o+dW7IXv3RCXDzA==}
+    dev: false
+
+  /tslib@2.8.1:
+    resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
     dev: false
 
   /type-check@0.4.0:

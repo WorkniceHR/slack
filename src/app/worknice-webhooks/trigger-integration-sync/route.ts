@@ -45,7 +45,10 @@ export const POST = async (request: Request): Promise<Response> =>
         const slackUsers = await slack.listUsers(env.slackAccessToken);
         return slackUsers.map((user) => ({
           bankAccounts: null,
+          dateOfBirth: null,
           emergencyContacts: null,
+          fullName: null,
+          gender: null,
           metadata: {
             deleted: false,
             employeeCode: null,
@@ -53,13 +56,14 @@ export const POST = async (request: Request): Promise<Response> =>
             targetId: null,
             updatedAt: "",
           },
-          personalDetails: null,
+          personalEmail: null,
+          personalPhone: null,
           postalAddress: null,
-          residentialAddress: null,
           profile: {
             displayName: user.profile.display_name,
             profileEmail: user.profile.email,
           },
+          residentialAddress: null,
           superFunds: null,
           taxDetails: null,
           tenure: null,
