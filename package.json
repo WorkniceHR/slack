@@ -5,8 +5,8 @@
   "scripts": {
     "activate": "docker compose up --detach",
     "build": "next build",
-    "deactivate": "docker compose down --volumes && (kill $(lsof -t -s TCP:LISTEN -i :6000) 2>/dev/null || true)",
-    "dev": "next dev --turbopack -p 6000",
+    "deactivate": "docker compose down --volumes && (kill $(lsof -t -s TCP:LISTEN -i :6100) 2>/dev/null || true)",
+    "dev": "next dev --turbopack -p 6100",
     "lint": "next lint",
     "start": "next start",
     "test:types": "tsc --noEmit"
@@ -18,9 +18,9 @@
     "@worknice/whiteboard": "^0.0.2",
     "dedent": "^1.5.3",
     "js-search": "^2.0.1",
-    "next": "15.0.1",
-    "react": "19.0.0-rc-69d4b800-20241021",
-    "react-dom": "19.0.0-rc-69d4b800-20241021",
+    "next": "15.1.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
     "temporal-polyfill": "^0.2.5",
     "zod": "^3.23.8",
     "zod-fetch": "^0.1.1"

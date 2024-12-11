@@ -1,7 +1,7 @@
 import config from "@/config";
 import slack from "@/slack";
 import { handleRequestWithWorknice } from "@worknice/js-sdk/helpers";
-import { unstable_after as after } from "next/server";
+import { after } from "next/server";
 import queryString from "querystring";
 import { z } from "zod";
 

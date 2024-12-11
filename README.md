@@ -103,7 +103,7 @@ below:
     pnpm dev
     ```
 
-    The app will be available at [http://localhost:6000](http://localhost:6000).
+    The app will be available at [http://localhost:6100](http://localhost:6100).
 
 ### Common tasks
 
@@ -129,7 +129,7 @@ below:
   You can connect like this:
 
   ```
-  redis-cli -p 6001 PING
+  redis-cli -p 6101 PING
   ```
 
 ### Learn more
