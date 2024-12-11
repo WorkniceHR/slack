@@ -24,6 +24,5 @@ export const POST = async (request: Request): Promise<Response> =>
     },
     {
       apiUrl: `${config.worknice.baseUrl}/api/graphql`,
-      debug: true,
     }
   );

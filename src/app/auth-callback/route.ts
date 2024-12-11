@@ -1,10 +1,9 @@
+import session from "@/session";
 import slack from "@/slack";
 import { handleRequestWithWorknice } from "@worknice/js-sdk/helpers";
-import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 import config from "../../config";
 import redis from "../../redis";
-import session from "@/session";
 
 type Env = {
   integrationId: string;
