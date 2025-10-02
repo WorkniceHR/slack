@@ -62,6 +62,7 @@ export const POST = async (request: Request): Promise<Response> =>
           profile: {
             displayName: user.profile.display_name,
             profileEmail: user.profile.email,
+            profilePhone: null,
           },
           residentialAddress: null,
           superFunds: null,
