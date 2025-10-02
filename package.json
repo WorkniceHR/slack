@@ -1,6 +1,7 @@
 {
   "name": "@worknice/slack",
   "private": true,
+  "packageManager": "pnpm@8.14.3",
   "license": "MIT",
   "scripts": {
     "activate": "docker compose up --detach",
