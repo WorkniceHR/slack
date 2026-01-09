@@ -29,6 +29,7 @@ const getAccessToken = async (code: string) =>
         client_id: config.slack.clientId,
         client_secret: config.slack.clientSecret,
         code,
+        redirect_uri: config.slack.redirectUri,
       }),
     }
   );
