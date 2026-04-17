@@ -12,8 +12,8 @@ dependencies:
     specifier: ^1.34.0
     version: 1.35.4
   '@worknice/js-sdk':
-    specifier: 0.13.17
-    version: 0.13.17(currency.js@2.0.4)(react-dom@19.1.4)(react@19.1.4)(temporal-polyfill@0.2.5)
+    specifier: ^0.37.2
+    version: 0.37.2(currency.js@2.0.4)(react-dom@19.1.4)(react@19.1.4)(temporal-polyfill@0.2.5)
   '@worknice/whiteboard':
     specifier: ^0.0.2
     version: 0.0.2
@@ -70,19 +70,18 @@ devDependencies:
 
 packages:
 
-  /@axiomhq/js@1.3.1:
-    resolution: {integrity: sha512-Ytf5V3wKz8FKNiqJxnqZmUhjgJ7TItKUoyHVNE/H2V9dN1ozD6NNnsueenOjKdA48cm2sGRyP432nworst18aA==}
-    engines: {node: '>=16'}
+  /@axiomhq/js@1.6.0:
+    resolution: {integrity: sha512-qm0ObduIpI6PJUOYwakH5WV3E7IF0qXE/wh5N1JWGAzxKtCZryk+YwA0aW3lPZSGPQeLHyEzN+9pXsOIjoPiRg==}
+    engines: {node: '>=20'}
     dependencies:
       fetch-retry: 6.0.0
-      uuid: 11.1.0
     dev: false
 
-  /@axiomhq/winston@1.3.1:
-    resolution: {integrity: sha512-Nad/PkMIkFp7VxJHnZQTg6co9QpTPQDRPeC+/G7BfvXjISQ5+AY+BxNV3h8St7Bs9tLLAufx+gtyG+fgS47x0Q==}
-    engines: {node: '>=16'}
+  /@axiomhq/winston@1.6.0:
+    resolution: {integrity: sha512-7f35MXE7yHP9np47bLvVJ2w/qkW6/o/Zu3+QNDzy5MMa+OLawtZ2l353wpAtxWYbxA/5laJDzP81Iq1yhYNZIQ==}
+    engines: {node: '>=20'}
     dependencies:
-      '@axiomhq/js': 1.3.1
+      '@axiomhq/js': 1.6.0
       winston-transport: 4.9.0
     dev: false
 
@@ -611,7 +610,7 @@ packages:
   /@so-ric/colorspace@1.1.6:
     resolution: {integrity: sha512-/KiKkpHNOBgkFJwu9sh48LkHSMYGyuTcSFK/qMBdnOAlrRJzRSXAOFB5qwzaVQuDl8wAvHVMkaASQDReTahxuw==}
     dependencies:
-      color: 5.0.2
+      color: 5.0.3
       text-hex: 1.0.0
     dev: false
 
@@ -1098,12 +1097,12 @@ packages:
       uncrypto: 0.1.3
     dev: false
 
-  /@worknice/instrumentation@1.0.2(react-dom@19.1.4)(react@19.1.4):
-    resolution: {integrity: sha512-sbbyETPmBRRIQi/YEfZddyGm09SqrR9T7WRQyG4ToordXTULoFWXi/n0GjcRotHMjo2OPbO4KmB1ku2LWhO3uw==}
+  /@worknice/instrumentation@1.24.2(react-dom@19.1.4)(react@19.1.4):
+    resolution: {integrity: sha512-tminoK0MdHi2xjlcFvlrx1w31bPhk+NsL5em1IBuZyoflULz3OU4tZQLgV4CPRHzDCxoJzZYw7YZbjKM0hH1Kw==}
     dependencies:
-      '@axiomhq/winston': 1.3.1
+      '@axiomhq/winston': 1.6.0
       next: 15.5.9(react-dom@19.1.4)(react@19.1.4)
-      winston: 3.18.3
+      winston: 3.19.0
     transitivePeerDependencies:
       - '@babel/core'
       - '@opentelemetry/api'
@@ -1115,19 +1114,19 @@ packages:
       - sass
     dev: false
 
-  /@worknice/js-sdk@0.13.17(currency.js@2.0.4)(react-dom@19.1.4)(react@19.1.4)(temporal-polyfill@0.2.5):
-    resolution: {integrity: sha512-0VVCzSSUtoHL6x/LkAE3HZPPJrvev25Quaf40Um/fryJZ6+vQjZauviQBAJEYBqDifp7R9/jS5mwP8dhpyZzuQ==}
+  /@worknice/js-sdk@0.37.2(currency.js@2.0.4)(react-dom@19.1.4)(react@19.1.4)(temporal-polyfill@0.2.5):
+    resolution: {integrity: sha512-CY9oe46wOhnuBPOMvBuIj2eMZGwEBmAb/3QhMlKCTO6qVS82ViXbYd2yaLQwYscjSBU+fU+r4FaU+3uDyCv6qg==}
     peerDependencies:
       currency.js: ^2.0.4
       temporal-polyfill: ^0.2.1
     dependencies:
-      '@worknice/instrumentation': 1.0.2(react-dom@19.1.4)(react@19.1.4)
-      '@worknice/utils': 0.6.53(temporal-polyfill@0.2.5)
+      '@worknice/instrumentation': 1.24.2(react-dom@19.1.4)(react@19.1.4)
+      '@worknice/utils': 0.30.2(temporal-polyfill@0.2.5)
       currency.js: 2.0.4
       dedent: 0.7.0
       temporal-polyfill: 0.2.5
       uuid: 11.1.0
-      zod: 4.1.11
+      zod: 4.3.6
     transitivePeerDependencies:
       - '@babel/core'
       - '@opentelemetry/api'
@@ -1139,8 +1138,8 @@ packages:
       - sass
     dev: false
 
-  /@worknice/utils@0.6.53(temporal-polyfill@0.2.5):
-    resolution: {integrity: sha512-RB3kIHuvNV3rWxt+rBK0s1vwyXW5G4EZJwNlPceQ4gvoVywdq2LREnyS7AJ7E8XQIVmAReCOzHpj8rIqTN2RSw==}
+  /@worknice/utils@0.30.2(temporal-polyfill@0.2.5):
+    resolution: {integrity: sha512-3zyjg8Hcu+DBGenQ1Q0k1pvhXPXnZIbcEYsTDCCU2ahK3aCLtthxevLkP77baTzifo6WdyeWvMXkoyH8mQThjg==}
     peerDependencies:
       temporal-polyfill: ^0.2.1
     dependencies:
@@ -1410,11 +1409,11 @@ packages:
       color-name: 1.1.4
     dev: true
 
-  /color-convert@3.1.2:
-    resolution: {integrity: sha512-UNqkvCDXstVck3kdowtOTWROIJQwafjOfXSmddoDrXo4cewMKmusCeF22Q24zvjR8nwWib/3S/dfyzPItPEiJg==}
+  /color-convert@3.1.3:
+    resolution: {integrity: sha512-fasDH2ont2GqF5HpyO4w0+BcewlhHEZOFn9c1ckZdHpJ56Qb7MHhH/IcJZbBGgvdtwdwNbLvxiBEdg336iA9Sg==}
     engines: {node: '>=14.6'}
     dependencies:
-      color-name: 2.0.2
+      color-name: 2.1.0
     dev: false
 
   /color-name@1.1.4:
@@ -1422,24 +1421,24 @@ packages:
     requiresBuild: true
     dev: true
 
-  /color-name@2.0.2:
-    resolution: {integrity: sha512-9vEt7gE16EW7Eu7pvZnR0abW9z6ufzhXxGXZEVU9IqPdlsUiMwJeJfRtq0zePUmnbHGT9zajca7mX8zgoayo4A==}
+  /color-name@2.1.0:
+    resolution: {integrity: sha512-1bPaDNFm0axzE4MEAzKPuqKWeRaT43U/hyxKPBdqTfmPF+d6n7FSoTFxLVULUJOmiLp01KjhIPPH+HrXZJN4Rg==}
     engines: {node: '>=12.20'}
     dev: false
 
-  /color-string@2.1.2:
-    resolution: {integrity: sha512-RxmjYxbWemV9gKu4zPgiZagUxbH3RQpEIO77XoSSX0ivgABDZ+h8Zuash/EMFLTI4N9QgFPOJ6JQpPZKFxa+dA==}
+  /color-string@2.1.4:
+    resolution: {integrity: sha512-Bb6Cq8oq0IjDOe8wJmi4JeNn763Xs9cfrBcaylK1tPypWzyoy2G3l90v9k64kjphl/ZJjPIShFztenRomi8WTg==}
     engines: {node: '>=18'}
     dependencies:
-      color-name: 2.0.2
+      color-name: 2.1.0
     dev: false
 
-  /color@5.0.2:
-    resolution: {integrity: sha512-e2hz5BzbUPcYlIRHo8ieAhYgoajrJr+hWoceg6E345TPsATMUKqDgzt8fSXZJJbxfpiPzkWyphz8yn8At7q3fA==}
+  /color@5.0.3:
+    resolution: {integrity: sha512-ezmVcLR3xAVp8kYOm4GS45ZLLgIE6SPAFoduLr6hTDajwb3KZ2F46gulK3XpcwRFb5KKGCSezCBAY4Dw4HsyXA==}
     engines: {node: '>=18'}
     dependencies:
-      color-convert: 3.1.2
-      color-string: 2.1.2
+      color-convert: 3.1.3
+      color-string: 2.1.4
     dev: false
 
   /concat-map@0.0.1:
@@ -3685,8 +3684,8 @@ packages:
       triple-beam: 1.4.1
     dev: false
 
-  /winston@3.18.3:
-    resolution: {integrity: sha512-NoBZauFNNWENgsnC9YpgyYwOVrl2m58PpQ8lNHjV3kosGs7KJ7Npk9pCUE+WJlawVSe8mykWDKWFSVfs3QO9ww==}
+  /winston@3.19.0:
+    resolution: {integrity: sha512-LZNJgPzfKR+/J3cHkxcpHKpKKvGfDZVPS4hfJCc4cCG0CgYzvlD6yE/S3CIL/Yt91ak327YCpiF/0MyeZHEHKA==}
     engines: {node: '>= 12.0.0'}
     dependencies:
       '@colors/colors': 1.6.0
@@ -3724,6 +3723,6 @@ packages:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
     dev: false
 
-  /zod@4.1.11:
-    resolution: {integrity: sha512-WPsqwxITS2tzx1bzhIKsEs19ABD5vmCVa4xBo2tq/SrV4RNZtfws1EnCWQXM6yh8bD08a1idvkB5MZSBiZsjwg==}
+  /zod@4.3.6:
+    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
     dev: false
